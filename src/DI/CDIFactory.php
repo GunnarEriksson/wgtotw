@@ -33,9 +33,28 @@ class CDIFactory extends CDIFactoryDefault
             return $controller;
         });
 
-        $this->setShared('logger', function () {
-            $logger = new \Toeswade\Log\Clog();
-            return $logger;
+        $this->set('UserLoginController', function () {
+            $controller = new \Anax\Users\UserLoginController();
+            $controller->setDI($this);
+            return $controller;
+        });
+
+        $this->set('QuestionsController', function () {
+            $controller = new \Anax\Questions\QuestionsController();
+            $controller->setDI($this);
+            return $controller;
+        });
+
+        $this->set('TagsController', function () {
+            $controller = new \Anax\Tags\TagsController();
+            $controller->setDI($this);
+            return $controller;
+        });
+
+        $this->set('QuestionTagController', function () {
+            $controller = new \Anax\QuestionToTag\QuestionTagController();
+            $controller->setDI($this);
+            return $controller;
         });
     }
 }

@@ -12,6 +12,7 @@ class CFormDeleteUser extends \Mos\HTMLForm\CForm
         \Anax\MVC\TRedirectHelpers;
 
     private $id;
+    private $acronym;
 
     /**
      * Constructor
@@ -21,6 +22,7 @@ class CFormDeleteUser extends \Mos\HTMLForm\CForm
     public function __construct($userData)
     {
         $this->id = $userData['id'];
+        $this->acronym = $userData['acronym'];
 
         parent::__construct([], [
             'acronym' => [
@@ -37,6 +39,14 @@ class CFormDeleteUser extends \Mos\HTMLForm\CForm
                 'required'    => false,
                 'validation'  => ['not_empty'],
                 'value'       => $userData['name'],
+                'readonly'    => true,
+            ],
+            'town' => [
+                'type'        => 'text',
+                'label'       => 'Ort',
+                'required'    => true,
+                'validation'  => ['not_empty'],
+                'value'       => $userData['town'],
                 'readonly'    => true,
             ],
             'email' => [

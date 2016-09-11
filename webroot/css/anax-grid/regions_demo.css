@@ -1,0 +1,22 @@
+#flash,
+#featured-1,
+#featured-2,
+#featured-3,
+#main,
+#sidebar,
+#wide,
+#triptych-1,
+#triptych-2,
+#triptych-3,
+#footer-col-1,
+#footer-col-2,
+#footer-col-3,
+#footer-col-4 {
+    background: #eee;
+    margin-bottom: 22px;
+    min-height: 3em;
+}
+
+#wrapper:hover {
+    background: url(../../img/grid/grid_12_60_20.png);
+}

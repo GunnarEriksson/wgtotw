@@ -1,0 +1,116 @@
+/**
+ * User table
+ */
+#users {
+    border-collapse: separate;
+    border-spacing: 1px 0;
+    text-align: center;
+    width: 100%;
+}
+
+#users thead {
+    background: #396a2f;
+    background: linear-gradient(#396a2f, #55a046);
+    color: #fff;
+}
+
+#users td, th {
+    padding: 0.5em;
+}
+
+#users tbody tr:nth-child(odd) {
+    background-color: #eee;
+}
+
+/**
+ * User view
+ */
+#user-profile #left {
+    float: left;
+}
+
+#user-profile #user-info {
+    float: left;
+    margin-left: 10px;
+}
+
+#user-profile #user-info i {
+    padding-right: 5px;
+}
+
+#user-profile #user-button {
+    clear: both;
+    list-style-type: none;
+    padding-top: 30px;
+}
+
+
+#user-profile #user-button #edit-button {
+    list-style-type: none;
+    margin-left: 0;
+    padding: 0;
+}
+
+#user-profile #user-button #edit-button > li {
+    background: #396a2f;
+    background: linear-gradient(#396a2f, #55a046);
+    border-radius: 7px;
+    display: inline-block;
+    margin-bottom: .3em;
+    padding: .1em;
+    text-align: center;
+    width: 5.5em;
+}
+
+#user-profile #user-button #edit-button > li:nth-child(2) {
+    background: #990000;
+    background: linear-gradient(#990000, #cc0000);
+}
+
+#user-profile #user-button #edit-button > li > a {
+    color: #fff;
+    text-decoration: none;
+}
+
+#user-profile #user-button #edit-button > li > a:hover {
+    color: #f5a06e;
+}
+
+/**
+ * User administration
+ */
+ #user-admin h1 {
+     color: #fff;
+ }
+
+#user-admin a {
+    color: #396a2f;
+}
+
+#user-admin #user-inactive a {
+    color: #8c8c8c;
+}
+
+#user-admin #user-discarded a {
+    color: #000;
+}
+
+#user-admin #reset-database a {
+    color: #cc0000;
+}
+
+/**
+ * Users form for create, update and delete
+ */
+#user-form #cform fieldset {
+    border: 0;
+}
+
+#user-form #cform input[type="text"],
+#user-form #cform input[type="password"]  {
+    width: 100%;
+}
+
+#user-title h1 {
+    color: #fff;
+}

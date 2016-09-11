@@ -11,6 +11,12 @@ class CFormAddUser extends \Mos\HTMLForm\CForm
     use \Anax\DI\TInjectionAware,
         \Anax\MVC\TRedirectHelpers;
 
+    const SQLSTATE = '23000';
+    const ERROR_DUPLICATE_KEY = '1062';
+
+    private $acronym = null;
+    private $exception = null;
+
 
 
     /**
@@ -32,16 +38,23 @@ class CFormAddUser extends \Mos\HTMLForm\CForm
                 'required'    => true,
                 'validation'  => ['not_empty'],
             ],
+            'town' => [
+                'type'        => 'text',
+                'label'       => 'Ort',
+                'required'    => true,
+                'validation'  => ['not_empty'],
+            ],
             'email' => [
                 'type'        => 'text',
                 'label'       => 'E-post',
                 'required'    => true,
                 'validation'  => ['not_empty', 'email_adress'],
             ],
-            'active' => [
-                'type'        => 'checkbox',
-                'label'       => 'Aktivera',
-                'checked'     => false,
+            'password' => [
+                'type'        => 'password',
+                'label'       => 'Lösenord',
+                'required'    => true,
+                'validation'  => ['not_empty'],
             ],
             'submit' => [
                 'type'      => 'submit',
@@ -73,21 +86,27 @@ class CFormAddUser extends \Mos\HTMLForm\CForm
      */
     public function callbackSubmit()
     {
+        $this->exception = null;
+
+        $this->acronym = $this->Value('acronym');
         $now = gmdate('Y-m-d H:i:s');
-        $active = !empty($_POST['active']) ? $now : null;
 
         $this->newUser = new \Anax\Users\User();
         $this->newUser->setDI($this->di);
-        $isSaved = $this->newUser->save(array(
-            'acronym' => $this->Value('acronym'),
-            'email' => $this->Value('email'),
-            'name' => $this->Value('name'),
-            'password' => password_hash($this->Value('acronym'), PASSWORD_DEFAULT),
-            'created' => $now,
-            'updated' => $now,
-            'deleted' => null,
-            'active' => $active
-        ));
+        try {
+            $isSaved = $this->newUser->save(array(
+                'acronym' => $this->Value('acronym'),
+                'name' => $this->Value('name'),
+                'town' => $this->Value('town'),
+                'email' => $this->Value('email'),
+                'gravatar'  => 'http://www.gravatar.com/avatar/' . md5(strtolower(trim($this->Value('email')))) . '.jpg',
+                'password' => password_hash($this->Value('password'), PASSWORD_DEFAULT),
+                'created' => $now
+            ));
+        } catch (\Exception $e) {
+            $this->exception = $e;
+            $isSaved = false;
+        }
 
         return $isSaved;
     }
@@ -100,7 +119,8 @@ class CFormAddUser extends \Mos\HTMLForm\CForm
      */
     public function callbackSuccess()
     {
-        $this->redirectTo('users');
+        $this->AddOutput("<p><i>Välkommen till Allt Om Landskapsfotografering! Ditt användare id är: " . $this->acronym . " </i></p>");
+        $this->redirectTo();
     }
 
 
@@ -111,7 +131,15 @@ class CFormAddUser extends \Mos\HTMLForm\CForm
      */
     public function callbackFail()
     {
-        $this->AddOutput("<p><i>Användare kunde inte sparas i databasen!</i></p>");
+        $errorMessage = "<p><i>Fel har uppstått i databasen, försök igen!</i></p>";
+
+        if (isset($this->exception)) {
+            if (strpos($this->exception, CFormAddUser::SQLSTATE) !== false && strpos($this->exception, CFormAddUser::ERROR_DUPLICATE_KEY) !== false) {
+                $errorMessage = "<p><i>Akronym är redan upptaget, välj ny akronym!</i></p>";
+            }
+        }
+
+        $this->AddOutput($errorMessage);
         $this->redirectTo();
     }
 }

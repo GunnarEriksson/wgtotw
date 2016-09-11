@@ -24,16 +24,14 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
     public function __construct($userData)
     {
         $this->id = $userData['id'];
+        $this->gravatar = $userData['gravatar'];
         $this->password = $userData['password'];
         $this->created = $userData['created'];
-        $this->activeDate = $userData['active'];
-
-        $isChecked = isset($this->activeDate) ? true : false;
 
         parent::__construct([], [
             'acronym' => [
                 'type'        => 'text',
-                'label'       => 'Akronym',
+                'label'       => 'Akronym (kan ej ändras)',
                 'required'    => true,
                 'validation'  => ['not_empty'],
                 'value'       => $userData['acronym'],
@@ -46,6 +44,13 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
                 'validation'  => ['not_empty'],
                 'value'       => $userData['name'],
             ],
+            'town' => [
+                'type'        => 'text',
+                'label'       => 'Ort',
+                'required'    => true,
+                'validation'  => ['not_empty'],
+                'value'       => $userData['town'],
+            ],
             'email' => [
                 'type'        => 'text',
                 'label'       => 'E-post',
@@ -53,10 +58,9 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
                 'validation'  => ['not_empty', 'email_adress'],
                 'value'       => $userData['email'],
             ],
-            'active' => [
-                'type'        => 'checkbox',
-                'label'       => 'Aktivera',
-                'checked'     => $isChecked,
+            'password' => [
+                'type'        => 'password',
+                'label'       => 'Lösenord (fyll endast i om du vill ändra)',
             ],
             'submit' => [
                 'type'      => 'submit',
@@ -88,30 +92,19 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
      */
     public function callbackSubmit()
     {
-        $now = gmdate('Y-m-d H:i:s');
-
-        $active = $this->activeDate;
-
-        if (isset($active) && empty($_POST['active'])) {
-            $active = null;
-        }
-
-        if (!isset($active) && !empty($_POST['active'])) {
-            $active = $now;
-        }
+        $password = empty($this->Value('password')) ? $this->password : $this->Value('password');
 
         $this->updateUser = new \Anax\Users\User();
         $this->updateUser->setDI($this->di);
         $isSaved = $this->updateUser->save(array(
             'id'        => $this->id,
             'acronym'   => $this->Value('acronym'),
-            'email'     => $this->Value('email'),
             'name'      => $this->Value('name'),
-            'password'  => $this->password,
+            'town'      => $this->Value('town'),
+            'email'     => $this->Value('email'),
+            'gravatar'  => $this->gravatar,
+            'password'  => $password,
             'created'   => $this->created,
-            'updated'   => $now,
-            'deleted'   => null,
-            'active'    => $active
         ));
 
         return $isSaved;
@@ -125,7 +118,7 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
      */
     public function callbackSuccess()
     {
-        $this->redirectTo('users');
+        $this->redirectTo('users/id/' . $this->id);
     }
 
 

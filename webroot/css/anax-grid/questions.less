@@ -1,0 +1,235 @@
+/**
+ * Question list
+ */
+#questions-heading {
+    background: #396a2f;
+    background: linear-gradient(#396a2f, #55a046);
+    margin-bottom: 10px;
+    overflow: auto;
+}
+
+#questions-heading h3 {
+    color: #fff;
+    display: inline-block;
+    margin: 0 0 0 10px;
+    padding: 4px 0;
+}
+
+#create-question {
+    float: right;
+    margin-right: 10px;
+    margin-top: 2px;
+}
+
+#create-question a {
+    color: #fff;
+    font-size: @fontSizeSmall;
+}
+
+#questions #question-wrapper {
+    border: 1px solid #eee;
+    margin-bottom: 10px;
+    overflow: auto;
+}
+
+#question-wrapper p {
+    margin-bottom: @magicNumber / 4;
+}
+
+#question-wrapper #statistics {
+    float: left;
+    text-align: center;
+    width: 7%;
+}
+
+#question-wrapper #statistics p {
+    margin: @magicNumber 0;
+}
+
+#question-wrapper #question {
+    float: left;
+    width: 92%;
+}
+
+#question-wrapper #author-wrapper {
+    border-top: 1px dashed #ddd;
+    padding: .4em;
+}
+
+#question #heading,
+#question #content {
+    padding: .4em;
+}
+
+#question #heading h4 {
+    margin-bottom: @magicNumber / 4;
+}
+
+#question #heading a {
+    color: #396a2f;
+    text-decoration: none;
+}
+
+#author-wrapper #author {
+    color: #396a2f;
+    font-size: @fontSizeSmall;
+}
+
+#author-wrapper #time {
+    color: #999;
+    font-size: @fontSizeSmall;
+}
+
+/**
+ * Question
+ */
+#question table {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    width: 100%
+}
+
+#question .vote-cell {
+    padding-right: 15px;
+    vertical-align: top;
+    width: 2%;
+}
+
+.vote-cell #vote {
+    min-width: 46px;
+    text-align: center;
+}
+
+#vote i,
+#vote #score {
+    color: #6a737c;
+}
+
+.vote-cell #vote #score {
+    margin: 8px 0;
+}
+
+#question #content-cell {
+    vertical-align: top;
+}
+
+#content-cell #content-text {
+    margin-bottom: 5px;
+}
+
+#content-cell #question-tags {
+    clear: both;
+    margin-bottom: 10px;
+}
+
+#question-tags #post-tag {
+    background-color: #396a2f;
+    color: #fff;
+    font-size: @fontSizeSmall;
+    display: inline-block;
+    margin: 2px 2px 2px 0;
+    padding: 0.3em 0.4em;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+}
+
+#content-cell #question-requester {
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+#question-requester #post-menu {
+    vertical-align: top;
+}
+
+#question-requester #post-signature {
+    text-align: left;
+    vertical-align: top;
+    width: 200px;
+}
+
+#user-info #user-details {
+    float: left;
+    margin-left: 8px;
+}
+
+#post-menu #menu {
+    padding-top: 2px;
+}
+
+#post-signature #user-info {
+    clear: both;
+}
+
+#user-info #request-time {
+    margin-bottom: 4px;
+    margin-top: 1px;
+    white-space: nowrap;
+}
+
+#request-time #time {
+    color: #396a2f;
+    font-size: @fontSizeSmall;
+}
+
+#user-info #user-gravatar {
+    border-radius: 1px;
+    float: left;
+}
+
+#user-details #author {
+    color: #396a2f;
+    font-size: @fontSizeSmall;
+}
+
+#question #comment-cell {
+    padding-right: 15px;
+    vertical-align: top;
+}
+
+#question #comment,
+#menu #answer,
+#menu #edit {
+    color: #848d95;
+    font-size: @fontSizeSmall;
+    text-decoration: none;
+}
+
+#question #comment:hover,
+#menu #answer:hover,
+#menu #edit:hover {
+    color: #f5a06e;
+}
+
+/**
+ * Question form
+ */
+ #cform fieldset {
+     border: 0;
+ }
+ #cform fieldset div {
+     -webkit-column-count: 3;
+     -moz-column-count: 3;
+     column-count: 3;
+ }
+
+ #cform fieldset div p {
+     margin-bottom: 2px;
+ }
+
+ #cform .cf-desc a {
+     color: #396a2f;
+     text-decoration: none;
+ }
+
+ #cform .buttonbar {
+     margin-top: @magicNumber;
+ }
+
+ #cform .buttonbar input {
+     background: #396a2f;
+     background: linear-gradient(#396a2f, #55a046);
+     color: #fff;
+ }

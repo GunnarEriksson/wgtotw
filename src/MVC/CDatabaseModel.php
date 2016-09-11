@@ -35,6 +35,23 @@ class CDatabaseModel implements \Anax\DI\IInjectionAware
     }
 
     /**
+     * Find and return specific order by.
+     *
+     * @return this
+     */
+    public function findAllOrderBy($orderBy)
+    {
+        $this->db->select()
+            ->from($this->getSource())
+            ->orderBy($orderBy);
+
+        $this->db->execute();
+        $this->db->setFetchModeClass(__CLASS__);
+
+        return $this->db->fetchAll();
+    }
+
+    /**
      * Get object properties.
      *
      * @return array with object properties.
@@ -63,6 +80,7 @@ class CDatabaseModel implements \Anax\DI\IInjectionAware
         return $this->db->fetchInto($this);
     }
 
+
     /**
      * Save current object/row.
      *
@@ -78,7 +96,14 @@ class CDatabaseModel implements \Anax\DI\IInjectionAware
         if (isset($values['id'])) {
             return $this->update($values);
         } else {
-            return $this->create($values);
+            $res = false;
+            try {
+                $res = $this->create($values);
+            } catch (\Exception $e) {
+                throw $e;
+            }
+
+            return $res;
         }
     }
 
@@ -104,6 +129,8 @@ class CDatabaseModel implements \Anax\DI\IInjectionAware
      *
      * @param array $values key/values to save.
      *
+     * @throws Exception when failing to execute a create question.
+     *
      * @return boolean true or false if saving went okey.
      */
     public function create($values)
@@ -116,9 +143,13 @@ class CDatabaseModel implements \Anax\DI\IInjectionAware
             $keys
         );
 
-        $res = $this->db->execute($values);
-
-        $this->id = $this->db->lastInsertId();
+        $res = false;
+        try {
+            $res = $this->db->execute($values);
+            $this->id = $this->db->lastInsertId();
+        } catch (\Exception $e) {
+            throw $e;
+        }
 
         return $res;
     }
@@ -218,6 +249,41 @@ class CDatabaseModel implements \Anax\DI\IInjectionAware
     public function andWhere($condition)
     {
         $this->db->andWhere($condition);
+
+        return $this;
+    }
+
+    /**
+    * Build the order by part.
+    *
+    * @param string $condition for building the where part of the query.
+    *
+    * @return $this
+    */
+    public function orderBy($condition)
+    {
+      $this->db->orderby($condition);
+
+      return $this;
+    }
+
+    /**
+     * Build the LIMIT by part.
+     *
+     * @param string $condition for building the LIMIT part of the query.
+     *
+     * @return $this
+     */
+    public function limit($condition)
+    {
+        $this->db->limit($condition);
+
+        return $this;
+    }
+
+    public function join($table, $condition)
+    {
+        $this->db->join($table, $condition);
 
         return $this;
     }

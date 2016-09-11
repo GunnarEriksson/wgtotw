@@ -5,8 +5,8 @@
  */
 
 // Get environment & autoloader.
-require __DIR__.'/config.php'; 
+require __DIR__.'/config.php';
 
-// Create services and inject into the app. 
-$di  = new \Anax\DI\CDIFactoryDefault();
+// Create services and inject into the app.
+$di  = new \Anax\DI\CDIFactory();
 $app = new \Anax\Kernel\CAnax($di);
