@@ -22,22 +22,20 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
 
         $this->tag = new \Anax\Tags\Tag();
         $this->tag->setDI($this->di);
+
+        $this->tagIDs = $this->createTagToIdArray();
     }
 
     public function addAction($questionId, $checkedTags, $pointer = null)
     {
-        $this->tagIDs = $this->createTagToIdArray();
-
         if ($checkedTags === false) {
             $isAdded = $this->addDefaultTagToQuestion($questionId);
         } else {
             $isAdded = $this->addTagsToQuestion($questionId, $checkedTags);
         }
 
-        if ($isAdded) {
-            $pointer->AddOutput("<p><i>Frågan har sparas i databasen!</i></p>");
-        } else {
-            $pointer->AddOutput("<p><i>Varning! Frågan har sparats i databasen men problem med hantering av taggar</i></p>");
+        if ($isAdded === false) {
+            $pointer->AddOutput("<p><i>Varning! Taggar kunde inte läggas till frågan i databasen!</i></p>");
         }
     }
 
@@ -91,6 +89,53 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
         $this->dispatcher->forward([
             'controller' => 'tags',
             'action'     => 'increaseCounter',
+            'params'     => [$tagId]
+        ]);
+    }
+
+    public function updateAction($questionId, $newTags, $oldTags, $pointer = null)
+    {
+        $tagsToRemove = array_diff($oldTags, $newTags);
+        $isRemoved = $this->removeTagsFromQuestion($questionId, $tagsToRemove);
+
+        $tagsToAdd = array_diff($newTags, $oldTags);
+        $isAdded = $this->addTagsToQuestion($questionId, $tagsToAdd);
+
+        if ($isRemoved === false) {
+            $pointer->AddOutput("<p><i>Varning! Alla gamla taggar kunde inte tas bort</i></p>");
+        }
+
+        if ($isAdded === false) {
+            $pointer->AddOutput("<p><i>Varning! Alla nya taggar kunde inte läggas till</i></p>");
+        }
+    }
+
+    private function removeTagsFromQuestion($questionId, $tagsToRemove)
+    {
+        $isAllTagsRemoved = true;
+        foreach ($tagsToRemove as $tag) {
+            $tagId = $this->tagIDs[$tag];
+            $result = $this->removeTagFromQuestion($questionId, $tagId);
+            if ($result === false) {
+                $isAllTagsRemoved = $result;
+            } else {
+                $this->decreaseQuestionConnectionCounter($tagId);
+            }
+        }
+
+        return $isAllTagsRemoved;
+    }
+
+    private function removeTagFromQuestion($questionId, $tagId)
+    {
+        return $this->questionToTag->deleteCombined($questionId, $tagId);
+    }
+
+    private function decreaseQuestionConnectionCounter($tagId)
+    {
+        $this->dispatcher->forward([
+            'controller' => 'tags',
+            'action'     => 'decreaseCounter',
             'params'     => [$tagId]
         ]);
     }

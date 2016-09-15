@@ -71,4 +71,19 @@ class TagsController implements \Anax\DI\IInjectionAware
 
         return $isSaved;
     }
+
+    /**
+     * Decrease counter
+     *
+     * Decreases the number of connected questions counter
+     */
+    public function decreaseCounterAction($tagId)
+    {
+        $numberOfQuestions = $this->getNumberOfQuestionConnections($tagId);
+
+        if (!empty($numberOfQuestions)) {
+            $numQuestions = $numberOfQuestions[0]->numQuestions;
+            $this->saveNumOfQuestionConnections($tagId, --$numQuestions);
+        }
+    }
 }

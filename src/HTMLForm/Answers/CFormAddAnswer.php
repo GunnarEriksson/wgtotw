@@ -1,28 +1,24 @@
 <?php
 
-namespace Anax\HTMLForm\Questions;
+namespace Anax\HTMLForm\Answers;
 
-class CFormAddQuestion extends \Mos\HTMLForm\CForm
+class CFormAddAnswer extends \Mos\HTMLForm\CForm
 {
     use \Anax\DI\TInjectionAware,
         \Anax\MVC\TRedirectHelpers;
 
     private $user;
+    private $questionId;
 
     /**
      * Constructor
      */
-    public function __construct($user, $tagNames)
+    public function __construct($questionId, $user)
     {
         $this->user = $user;
+        $this->questionId = $questionId;
 
         parent::__construct([], [
-            'title' => [
-                'type'        => 'text',
-                'label'       => 'Rubrik',
-                'required'    => true,
-                'validation'  => ['not_empty'],
-            ],
             'content' => [
                 'type'        => 'textarea',
                 'label'       => 'Kommentar',
@@ -30,14 +26,10 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
                 'validation'  => ['not_empty'],
                 'description' => 'Du kan använda <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a> för att formatera texten'
             ],
-            "tags" => [
-                'type'        => 'checkbox-multiple',
-                'values'      => $tagNames,
-            ],
             'submit' => [
                 'type'      => 'submit',
                 'callback'  => [$this, 'callbackSubmit'],
-                'value'     => 'Posta',
+                'value'     => 'Svara',
             ],
         ]);
     }
@@ -60,44 +52,39 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
      */
     public function callbackSubmit()
     {
-        $this->newQuestion = new \Anax\Questions\Question();
-        $this->newQuestion->setDI($this->di);
+        $this->newAnswer = new \Anax\Answers\Answer();
+        $this->newAnswer->setDI($this->di);
 
-        $isSaved = $this->newQuestion->save(array(
-            'title'     => $this->Value('title'),
-            'content'   => $this->Value('content'),
-            'score'     => 0,
-            'answers'   => 0,
-            'created'   => gmdate('Y-m-d H:i:s')
+        $isSaved = $this->newAnswer->save(array(
+            'content'       => $this->Value('content'),
+            'score'         => 0,
+            'created'       => gmdate('Y-m-d H:i:s')
         ));
 
         if ($isSaved) {
-            $this->addTagsToQuestion();
-            $this->addQuestionToUser();
+            $lastInsertedId = $this->newAnswer->id;
+            $this->addAnwserToQuestion($lastInsertedId);
+            $this->addAnwserToUser($lastInsertedId);
         }
 
         return $isSaved;
     }
 
-    private function addTagsToQuestion()
+    private function addAnwserToQuestion($answerId)
     {
-        $lastInsertedId = $this->newQuestion->id;
-
         $this->di->dispatcher->forward([
-            'controller' => 'question-tag',
+            'controller' => 'question-answer',
             'action'     => 'add',
-            'params'     => [$lastInsertedId, $this->Value('tags'), $this]
+            'params'     => [$this->questionId, $answerId, $this]
         ]);
     }
 
-    private function addQuestionToUser()
+    private function addAnwserToUser($answerId)
     {
-        $lastInsertedId = $this->newQuestion->id;
-
         $this->di->dispatcher->forward([
-            'controller' => 'user-question',
+            'controller' => 'user-answer',
             'action'     => 'add',
-            'params'     => [$this->user['id'], $lastInsertedId, $this]
+            'params'     => [$this->user['id'], $answerId, $this]
         ]);
     }
 
@@ -107,7 +94,7 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
      */
     public function callbackSuccess()
     {
-        $this->AddOutput("<p><i>Frågan har sparats i databasen!</i></p>");
+        $this->AddOutput("<p><i>Svaret har sparats i databasen!</i></p>");
         $this->redirectTo();
     }
 
@@ -119,7 +106,7 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
      */
     public function callbackFail()
     {
-        $this->AddOutput("<p><i>Frågan kunde inte sparas i databasen!</i></p>");
+        $this->AddOutput("<p><i>Svaret kunde inte sparas i databasen!</i></p>");
         $this->redirectTo();
     }
 }

@@ -56,5 +56,29 @@ class CDIFactory extends CDIFactoryDefault
             $controller->setDI($this);
             return $controller;
         });
+
+        $this->set('AnswersController', function () {
+            $controller = new \Anax\Answers\AnswersController();
+            $controller->setDI($this);
+            return $controller;
+        });
+
+        $this->set('UserQuestionController', function () {
+            $controller = new \Anax\UserToQuestion\UserQuestionController();
+            $controller->setDI($this);
+            return $controller;
+        });
+
+        $this->set('UserAnswerController', function () {
+            $controller = new \Anax\UserToAnswer\UserAnswerController();
+            $controller->setDI($this);
+            return $controller;
+        });
+
+        $this->set('QuestionAnswerController', function () {
+            $controller = new \Anax\QuestionToAnswer\QuestionAnswerController();
+            $controller->setDI($this);
+            return $controller;
+        });
     }
 }

@@ -26,8 +26,8 @@
                                 <tr>
                                     <td id="post-menu">
                                         <div id="menu">
-                                            <a id="answer" href='#'>Svara</a>
-                                            <a id="edit" href='#'>Uppdatera</a>
+                                            <a id="answer" href='<?=$this->url->create('answers/add/' . $question->id)?>'>Svara</a>
+                                            <a id="edit" href='<?=$this->url->create('questions/update/' . $question->id)?>'>Uppdatera</a>
                                         </div>
                                     </td>
                                     <td id="post-signature">
@@ -36,10 +36,10 @@
                                                 <span id='time'><?= $question->created ?></span>
                                             </div>
                                             <div id="user-gravatar">
-                                                <img src='<?= isset($user) ? $user->gravatar : null ?>?s=20' alt='Gravatar'>
+                                                <img src='<?= $question->gravatar ?>?s=20' alt='Gravatar'>
                                             </div>
                                             <div id="user-details">
-                                                <span id='author'><?= $question->author ?></span>
+                                                <span id='author'><?= $question->acronym ?></span>
                                             </div>
                                         </div>
                                     </td>

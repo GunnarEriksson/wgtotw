@@ -262,9 +262,9 @@ class CDatabaseModel implements \Anax\DI\IInjectionAware
     */
     public function orderBy($condition)
     {
-      $this->db->orderby($condition);
+        $this->db->orderby($condition);
 
-      return $this;
+        return $this;
     }
 
     /**

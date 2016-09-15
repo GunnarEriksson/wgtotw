@@ -181,7 +181,8 @@ class UsersController implements \Anax\DI\IInjectionAware
      *
      * @return void
      */
-    private function pageNotFound() {
+    private function pageNotFound()
+    {
         $this->theme->setTitle("Sidan saknas");
         $this->views->add('error/404', [
             'title' => 'Sidan saknas',
