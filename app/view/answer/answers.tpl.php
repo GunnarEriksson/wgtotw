@@ -47,7 +47,7 @@
             <tr>
                 <td class="vote-cell"></td>
                 <td class="comment-cell">
-                    <a class="comment" href='#'>Lägg till en kommentar</a>
+                    <a class="comment" href='<?=$this->url->create('answers/add-comment/' . $answer->id)?>'>Lägg till en kommentar</a>
                 </td>
             </tr>
         </tbody>

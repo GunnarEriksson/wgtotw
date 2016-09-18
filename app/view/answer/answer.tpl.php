@@ -1,45 +1,39 @@
-<h1><?= $title ?></h1>
-<h3><?= $question->title ?></h3>
-<div id="question">
+<div class="answer">
     <table>
         <tbody>
             <tr>
                 <td class="vote-cell">
-                    <div id="vote">
-                        <p><a href='<?=$this->url->create('questions/up-vote/' . $question->id)?>'><i class="fa fa-caret-up fa-2x" aria-hidden="true"></i></a></p>
-                        <p><span id='score'><?= $question->score ?></span></p>
-                        <p><a href='<?=$this->url->create('questions/down-vote/' . $question->id)?>'><i class="fa fa-caret-down fa-2x" aria-hidden="true"></i></a></p>
+                    <div class="vote">
+                        <p><a href='<?=$this->url->create('answers/up-vote/' . $answer->id)?>'><i class="fa fa-caret-up fa-2x" aria-hidden="true"></i></a></p>
+                        <p><span class='score'><?= $answer->score ?></span></p>
+                        <p><a href='<?=$this->url->create('answers/down-vote/' . $answer->id)?>'><i class="fa fa-caret-down fa-2x" aria-hidden="true"></i></a></p>
+                        <?= $accepted = ($answer->accepted === 1) ? '<p><i class="fa fa-check fa-2x" aria-hidden="true"></i></p>' : null ?>
                     </div>
                 </td>
-                <td id=content-cell>
+                <td class=content-cell>
                     <div>
-                        <div id="content-text">
-                            <?= $this->di->textFilter->doFilter($question->content, 'shortcode, markdown') ?>
+                        <div class="content-text">
+                            <?= $this->di->textFilter->doFilter($answer->content, 'shortcode, markdown') ?>
                         </div>
-                        <div id="question-tags">
-                            <?php foreach ($tags as $tag) : ?>
-                                <a id="post-tag" href='<?=$this->url->create('questions/tag-id/' . $tag->id)?>'><?= $tag->label ?></a>
-                            <?php endforeach; ?>
-                        </div>
-                        <table id="question-requester">
+                        <table class="answer-requester">
                             <tbody>
                                 <tr>
-                                    <td id="post-menu">
-                                        <div id="menu">
-                                            <a id="answer" href='<?=$this->url->create('answers/add/' . $question->id)?>'>Svara</a>
-                                            <a id="edit" href='<?=$this->url->create('questions/update/' . $question->id)?>'>Uppdatera</a>
+                                    <td class="post-menu">
+                                        <div class="menu">
+                                            <a class="accept" href='<?=$this->url->create('answers/accept/' . $answer->id)?>'>Acceptera</a>
+                                            <a class="edit" href='<?=$this->url->create('answers/update/' . $answer->id)?>'>Uppdatera</a>
                                         </div>
                                     </td>
-                                    <td id="post-signature">
-                                        <div id="user-info">
-                                            <div id="request-time">
-                                                <span id='time'><?= $question->created ?></span>
+                                    <td class="post-signature">
+                                        <div class="user-info">
+                                            <div class="request-time">
+                                                <span class='time'><?= $answer->created ?></span>
                                             </div>
-                                            <div id="user-gravatar">
-                                                <img src='<?= $question->gravatar ?>?s=20' alt='Gravatar'>
+                                            <div class="user-gravatar">
+                                                <img src='<?= $answer->gravatar ?>?s=20' alt='Gravatar'>
                                             </div>
-                                            <div id="user-details">
-                                                <span id='author'><?= $question->acronym ?></span>
+                                            <div class="user-details">
+                                                <span class='author'><?= $answer->acronym ?></span>
                                             </div>
                                         </div>
                                     </td>
@@ -77,7 +71,7 @@
                         </table>
                     </div>
                     <div id="comment-add">
-                        <a href='<?=$this->url->create('questions/add-comment/' . $question->id)?>'>Lägg till en kommentar</a>
+                        <a href='<?=$this->url->create('answers/add-comment/' . $answer->id)?>'>Lägg till en kommentar</a>
                     </div>
                 </td>
             </tr>

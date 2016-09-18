@@ -32,9 +32,15 @@ class CFormAddUser extends \Mos\HTMLForm\CForm
                 'required'    => true,
                 'validation'  => ['not_empty'],
             ],
-            'name' => [
+            'firstName' => [
                 'type'        => 'text',
-                'label'       => 'Namn',
+                'label'       => 'Förnamn',
+                'required'    => true,
+                'validation'  => ['not_empty'],
+            ],
+            'lastName' => [
+                'type'        => 'text',
+                'label'       => 'Efternamn',
                 'required'    => true,
                 'validation'  => ['not_empty'],
             ],
@@ -95,13 +101,15 @@ class CFormAddUser extends \Mos\HTMLForm\CForm
         $this->newUser->setDI($this->di);
         try {
             $isSaved = $this->newUser->save(array(
-                'acronym' => $this->Value('acronym'),
-                'name' => $this->Value('name'),
-                'town' => $this->Value('town'),
-                'email' => $this->Value('email'),
-                'gravatar'  => 'http://www.gravatar.com/avatar/' . md5(strtolower(trim($this->Value('email')))) . '.jpg',
-                'password' => password_hash($this->Value('password'), PASSWORD_DEFAULT),
-                'created' => $now
+                'acronym'       => $this->Value('acronym'),
+                'firstName'     => $this->Value('firstName'),
+                'lastName'      => $this->Value('lastName'),
+                'town'          => $this->Value('town'),
+                'email'         => $this->Value('email'),
+                'gravatar'      => 'http://www.gravatar.com/avatar/' . md5(strtolower(trim($this->Value('email')))) . '.jpg',
+                'password'      => password_hash($this->Value('password'), PASSWORD_DEFAULT),
+                'activityScore' => 0,
+                'created'       => $now
             ));
         } catch (\Exception $e) {
             $this->exception = $e;

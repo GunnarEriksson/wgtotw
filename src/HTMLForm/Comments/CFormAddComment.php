@@ -11,7 +11,11 @@ class CFormAddComment extends \Mos\HTMLForm\CForm
     use \Anax\DI\TInjectionAware,
         \Anax\MVC\TRedirectHelpers;
 
-    private $pageKey;
+    const ACTIVITY_SCORE_COMMENT = 2;
+
+    private $id;
+    private $user;
+    private $controller;
 
 
     /**
@@ -19,9 +23,11 @@ class CFormAddComment extends \Mos\HTMLForm\CForm
      *
      * @param string $pageKey the page name for the comment.
      */
-    public function __construct($pageKey)
+    public function __construct($id, $user, $controller)
     {
-        $this->pageKey = $pageKey;
+        $this->id = $id;
+        $this->user = $user;
+        $this->controller = $controller;
 
         parent::__construct([], [
             'content' => [
@@ -29,35 +35,15 @@ class CFormAddComment extends \Mos\HTMLForm\CForm
                 'label'       => 'Kommentar',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-            ],
-            'name' => [
-                'type'        => 'text',
-                'label'       => 'Namn',
-                'required'    => true,
-                'validation'  => ['not_empty'],
-            ],
-            'web' => [
-                'type'        => 'text',
-                'label'       => 'Hemsida',
-                'required'    => false,
-                'validation'  => ['not_empty'],
-                'value'       => 'http://',
-            ],
-            'mail' => [
-                'type'        => 'text',
-                'label'       => 'E-post',
-                'required'    => true,
-                'validation'  => ['not_empty', 'email_adress'],
+                'description' => 'Du kan använda <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a> för att formatera texten'
             ],
             'submit' => [
                 'type'      => 'submit',
                 'callback'  => [$this, 'callbackSubmit'],
-                'value'     => 'Spara',
+                'value'     => 'Kommentera',
             ],
         ]);
     }
-
-
 
     /**
      * Customise the check() method.
@@ -70,8 +56,6 @@ class CFormAddComment extends \Mos\HTMLForm\CForm
         return parent::check([$this, 'callbackSuccess'], [$this, 'callbackFail']);
     }
 
-
-
     /**
      * Callback for submit-button.
      *
@@ -79,42 +63,54 @@ class CFormAddComment extends \Mos\HTMLForm\CForm
      */
     public function callbackSubmit()
     {
-        $this->newComment = $this->getModelObject($this->pageKey);
+        $this->newComment = new \Anax\Comments\Comment();
+        $this->newComment->setDI($this->di);
+
+        date_default_timezone_set('Europe/Stockholm');
+        $now = date('Y-m-d H:i:s');
+
         $isSaved = $this->newComment->save(array(
-            'content'   => $this->Value('content'),
-            'name'      => $this->Value('name'),
-            'web'       => $this->Value('web'),
-            'mail'      => $this->Value('mail'),
-            'timestamp' => gmdate('Y-m-d H:i:s'),
-            'gravatar'  => 'http://www.gravatar.com/avatar/' . md5(strtolower(trim($this->Value('mail')))) . '.jpg',
+            'content'       => $this->Value('content'),
+            'score'         => 0,
+            'created'       => $now
         ));
+
+        if ($isSaved) {
+            $lastInsertedId = $this->newComment->id;
+            $this->mapComment($lastInsertedId);
+            $this->addCommentToUser($lastInsertedId);
+            $this->addActivityScoreToUser();
+        }
 
         return $isSaved;
     }
 
-
-
-    /**
-     * Gets the model object for the table in the database.
-     *
-     * @param  string $tableName the name of the table.
-     *
-     * @return object the model object for the table in database.
-     */
-    private function getModelObject($tableName)
+    private function mapComment($commentId)
     {
-        if (strcmp($tableName, "comments1") === 0) {
-            $model = new \Anax\Comment\Comments1();
-        } else {
-            $model = new \Anax\Comment\Comments2();
-        }
-
-        $model->setDI($this->di);
-
-        return $model;
+        $this->di->dispatcher->forward([
+            'controller' => $this->controller,
+            'action'     => 'add',
+            'params'     => [$this->id, $commentId, $this]
+        ]);
     }
 
+    private function addCommentToUser($commentId)
+    {
+        $this->di->dispatcher->forward([
+            'controller' => 'user-comment',
+            'action'     => 'add',
+            'params'     => [$this->user['id'], $commentId, $this]
+        ]);
+    }
 
+    private function addActivityScoreToUser()
+    {
+        $this->di->dispatcher->forward([
+            'controller' => 'users',
+            'action'     => 'add-score',
+            'params'     => [CFormAddComment::ACTIVITY_SCORE_COMMENT]
+        ]);
+    }
 
     /**
      * Callback What to do if the form was submitted?
@@ -122,10 +118,9 @@ class CFormAddComment extends \Mos\HTMLForm\CForm
      */
     public function callbackSuccess()
     {
-        $this->redirectTo($this->pageKey);
+        $this->AddOutput("<p><i>Kommentaren har sparats i databasen!</i></p>");
+        $this->redirectTo();
     }
-
-
 
     /**
      * Callback What to do when form could not be processed?

@@ -7,6 +7,8 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
     use \Anax\DI\TInjectionAware,
         \Anax\MVC\TRedirectHelpers;
 
+    const ACTIVITY_SCORE_QUESTION = 5;
+
     private $user;
 
     /**
@@ -63,41 +65,51 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
         $this->newQuestion = new \Anax\Questions\Question();
         $this->newQuestion->setDI($this->di);
 
+        date_default_timezone_set('Europe/Stockholm');
+        $now = date('Y-m-d H:i:s');
+
         $isSaved = $this->newQuestion->save(array(
             'title'     => $this->Value('title'),
             'content'   => $this->Value('content'),
             'score'     => 0,
             'answers'   => 0,
-            'created'   => gmdate('Y-m-d H:i:s')
+            'created'   => $now
         ));
 
         if ($isSaved) {
-            $this->addTagsToQuestion();
-            $this->addQuestionToUser();
+            $lastInsertedId = $this->newQuestion->id;
+            $this->addTagsToQuestion($lastInsertedId);
+            $this->addQuestionToUser($lastInsertedId);
+            $this->addActivityScoreToUser();
         }
 
         return $isSaved;
     }
 
-    private function addTagsToQuestion()
+    private function addTagsToQuestion($questionId)
     {
-        $lastInsertedId = $this->newQuestion->id;
-
         $this->di->dispatcher->forward([
             'controller' => 'question-tag',
             'action'     => 'add',
-            'params'     => [$lastInsertedId, $this->Value('tags'), $this]
+            'params'     => [$questionId, $this->Value('tags'), $this]
         ]);
     }
 
-    private function addQuestionToUser()
+    private function addQuestionToUser($questionId)
     {
-        $lastInsertedId = $this->newQuestion->id;
-
         $this->di->dispatcher->forward([
             'controller' => 'user-question',
             'action'     => 'add',
-            'params'     => [$this->user['id'], $lastInsertedId, $this]
+            'params'     => [$this->user['id'], $questionId, $this]
+        ]);
+    }
+
+    private function addActivityScoreToUser()
+    {
+        $this->di->dispatcher->forward([
+            'controller' => 'users',
+            'action'     => 'add-score',
+            'params'     => [CFormAddQuestion::ACTIVITY_SCORE_QUESTION]
         ]);
     }
 

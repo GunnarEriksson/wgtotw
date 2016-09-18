@@ -50,18 +50,20 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      *
      * @return void
      */
-    public function idAction($id = null)
+    public function idAction($id, $orderBy = null)
     {
         $question = $this->findQuestionFromId($id);
 
         if ($question) {
             $tags = $this->getTagIdAndLabelFromQuestionId($id);
+            $comments = $this->getAllCommentsForSpecificQuestion($id);
 
             $this->theme->setTitle("Fråga");
             $this->views->add('question/question', [
                 'title' => 'Fråga',
                 'question' => $question[0],
                 'tags' => $tags,
+                'comments' => $comments,
             ], 'main-wide');
         } else {
             $content = [
@@ -72,10 +74,12 @@ class QuestionsController implements \Anax\DI\IInjectionAware
             $this->showNoSuchUserMessage($content);
         }
 
+        $orderBy = isset($orderBy) ? 'created desc' : 'score desc' ;
+
         $this->di->dispatcher->forward([
             'controller' => 'answers',
             'action'     => 'list',
-            'params'     => [$id, 'created asc']
+            'params'     => [$id, $orderBy]
         ]);
     }
 
@@ -100,6 +104,20 @@ class QuestionsController implements \Anax\DI\IInjectionAware
             ->execute([$questionId]);
 
         return $tagIdAndLabels;
+    }
+
+    private function getAllCommentsForSpecificQuestion($questionId)
+    {
+        $comments = $this->questions->query('C.*, U.acronym')
+            ->join('Question2Comment AS Q2C', 'Q2C.idQuestion = Lf_Question.id')
+            ->join('Comment AS C', 'Q2C.idComment = C.id')
+            ->join('User2Comment AS U2C', 'C.id = U2C.idComment')
+            ->join('User AS U', 'U2C.idUser = U.id')
+            ->where('Lf_Question.id = ?')
+            ->orderBy('C.created asc')
+            ->execute([$questionId]);
+
+        return $comments;
     }
 
     /**
@@ -296,5 +314,43 @@ class QuestionsController implements \Anax\DI\IInjectionAware
         ));
 
         return $isSaved;
+    }
+
+    public function addCommentAction($questionId)
+    {
+        $title = $this->getTitleFromId($questionId);
+
+        $this->dispatcher->forward([
+            'controller' => 'comments',
+            'action'     => 'add',
+            'params'     => [$questionId, $title, 'question-comment']
+        ]);
+    }
+
+    private function getTitleFromId($questionId)
+    {
+        $title = $this->questions->query('title')
+            ->where('id = ?')
+            ->execute([$questionId]);
+
+        return $title === false ? "" : $title[0]->title;
+    }
+
+    public function upVoteAction($questionId)
+    {
+        $this->dispatcher->forward([
+            'controller' => 'question-votes',
+            'action'     => 'increase',
+            'params'     => [$questionId]
+        ]);
+    }
+
+    public function downVoteAction($questionId)
+    {
+        $this->dispatcher->forward([
+            'controller' => 'question-votes',
+            'action'     => 'decrease',
+            'params'     => [$questionId]
+        ]);
     }
 }

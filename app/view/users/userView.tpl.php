@@ -11,7 +11,7 @@
                     <i class="fa fa-user" aria-hidden="true"></i>
                 </td>
                 <td>
-                    <?= $user->name ?>
+                    <?= $user->firstName ?> <?= $user->lastName ?>
                 </td>
             </tr>
             <tr>

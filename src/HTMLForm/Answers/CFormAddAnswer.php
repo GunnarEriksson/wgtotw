@@ -7,6 +7,8 @@ class CFormAddAnswer extends \Mos\HTMLForm\CForm
     use \Anax\DI\TInjectionAware,
         \Anax\MVC\TRedirectHelpers;
 
+    const ACTIVITY_SCORE_ANSWER = 3;
+
     private $user;
     private $questionId;
 
@@ -55,22 +57,27 @@ class CFormAddAnswer extends \Mos\HTMLForm\CForm
         $this->newAnswer = new \Anax\Answers\Answer();
         $this->newAnswer->setDI($this->di);
 
+        date_default_timezone_set('Europe/Stockholm');
+        $now = date('Y-m-d H:i:s');
+
         $isSaved = $this->newAnswer->save(array(
             'content'       => $this->Value('content'),
             'score'         => 0,
-            'created'       => gmdate('Y-m-d H:i:s')
+            'accepted'      => 0,
+            'created'       => $now
         ));
 
         if ($isSaved) {
             $lastInsertedId = $this->newAnswer->id;
-            $this->addAnwserToQuestion($lastInsertedId);
-            $this->addAnwserToUser($lastInsertedId);
+            $this->addAnswerToQuestion($lastInsertedId);
+            $this->addAnswerToUser($lastInsertedId);
+            $this->addActivityScoreToUser();
         }
 
         return $isSaved;
     }
 
-    private function addAnwserToQuestion($answerId)
+    private function addAnswerToQuestion($answerId)
     {
         $this->di->dispatcher->forward([
             'controller' => 'question-answer',
@@ -79,12 +86,21 @@ class CFormAddAnswer extends \Mos\HTMLForm\CForm
         ]);
     }
 
-    private function addAnwserToUser($answerId)
+    private function addAnswerToUser($answerId)
     {
         $this->di->dispatcher->forward([
             'controller' => 'user-answer',
             'action'     => 'add',
             'params'     => [$this->user['id'], $answerId, $this]
+        ]);
+    }
+
+    private function addActivityScoreToUser()
+    {
+        $this->di->dispatcher->forward([
+            'controller' => 'users',
+            'action'     => 'add-score',
+            'params'     => [CFormAddAnswer::ACTIVITY_SCORE_ANSWER]
         ]);
     }
 

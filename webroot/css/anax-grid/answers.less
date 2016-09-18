@@ -1,68 +1,113 @@
 /**
- * Answer
+ * Answer header
  */
-#answers {
+#answers-header {
     margin-top: @magicNumber;
 }
 
-#answers #answer-counter {
-    border-bottom: 1px solid #e4e6e8;
-    display: block;
+#answers-header .clear {
+    clear: both;
 }
 
-#answers .answer {
+#answers-header #answers-subheader {
+    clear: both;
+    margin-bottom: 10px;
+    height: 40px;
+    border-bottom: 1px solid #e4e6e8;
+}
+
+#answers-header h3 {
+    float: left;
+    display: block;
+    margin-bottom: 0;
+}
+
+#answers-header #tabs {
+    float: right;
+}
+
+#answers-header #tabs a {
+    position: relative;
+    padding: 13px 10px;
+    background-color: #FFF;
+    border: 1px solid transparent;
+    font-size: 12px;
+    float: left;
+    margin-right: 8px;
+    color: #848d95;
+    line-height: 1;
+    text-decoration: none;
+
+}
+
+#answers-header #tabs a.selected {
+    padding-bottom: 14px;
+    border-color: #e4e6e8;
+    border-bottom-color: transparent;
+    color: #242729;
+}
+
+
+/**
+ * Answer
+ */
+.answer {
     margin-top: @magicNumber;
     border-bottom: 1px solid #e4e6e8;
     padding-bottom: @magicNumber;
 }
 
-#answers table {
+.answer table {
     border: 0;
     margin: 0;
     padding: 0;
     width: 100%
 }
 
-#answers .vote-cell {
+.answer .vote-cell {
     padding-right: 15px;
     vertical-align: top;
     width: 2%;
 }
 
-#answers .vote {
+.answer .vote {
     min-width: 46px;
     text-align: center;
 }
 
-#answers .vote > p {
+.answer .vote > p {
     margin-bottom: @magicNumber/2;
 }
 
-#answers i,
-#answers .score {
+.answer i,
+.answer .score {
     color: #6a737c;
 }
 
-#answers .score {
+.answer .score {
     margin: 8px 0;
 }
 
-#answers .content-cell {
+.answer .fa-check {
+    color: #55a046;
+}
+
+.answer .content-cell {
     border-bottom: 1px solid #e4e6e8;
     padding-bottom: @magicNumber/2;
     vertical-align: top;
 }
 
-#answers .content-text {
+.answer .content-text {
     margin-bottom: 5px;
 }
 
-#answers .answer-tags {
+.answer .answer-tags {
     clear: both;
     margin-bottom: 10px;
 }
 
-#answers .post-tag {
+.answer .post-tag {
     background-color: #396a2f;
     color: #fff;
     font-size: @fontSizeSmall;
@@ -74,69 +119,63 @@
     text-decoration: none;
 }
 
-#answers .answer-requester {
+.answer .answer-requester {
     margin-bottom: 5px;
     width: 100%;
 }
 
-#answers .post-menu {
+.answer .post-menu {
     vertical-align: top;
 }
 
-#answers .post-signature {
+.answer .post-signature {
     text-align: left;
     vertical-align: top;
     width: 200px;
 }
 
-#answers .user-details {
+.answer .user-details {
     float: left;
     margin-left: 8px;
 }
 
-#answers .menu {
+.answer .menu {
     padding-top: 2px;
 }
 
-#answers .user-info {
+.answer .user-info {
     clear: both;
 }
 
-#answers .request-time {
+.answer .request-time {
     margin-bottom: 4px;
     margin-top: 1px;
     white-space: nowrap;
 }
 
-#answers .time {
+.answer .time {
     color: #396a2f;
     font-size: @fontSizeSmall;
 }
 
-#answers .user-gravatar {
+.answer .user-gravatar {
     border-radius: 1px;
     float: left;
 }
 
-#answers .author {
+.answer .author {
     color: #396a2f;
     font-size: @fontSizeSmall;
 }
 
-#answers .comment-cell {
-    padding-top: @magicNumber/2;
-    padding-left: 15px;
-    vertical-align: top;
-}
-
-#answers .comment,
-#answers .edit {
+.answer .accept,
+.answer .edit {
     color: #848d95;
     font-size: @fontSizeSmall;
     text-decoration: none;
 }
 
-#answers .comment:hover,
-#answers .edit:hover {
+.answer .accept:hover,
+.answer .edit:hover {
     color: #f5a06e;
 }

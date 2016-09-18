@@ -14,8 +14,8 @@ class CDIFactory extends CDIFactoryDefault
 
         $this->set('form', '\Mos\HTMLForm\CForm');
 
-        $this->set('CommentController', function () {
-            $controller = new \Anax\Comment\CommentController();
+        $this->set('CommentsController', function () {
+            $controller = new \Anax\Comments\CommentsController();
             $controller->setDI($this);
             return $controller;
         });
@@ -75,8 +75,44 @@ class CDIFactory extends CDIFactoryDefault
             return $controller;
         });
 
+        $this->set('UserCommentController', function () {
+            $controller = new \Anax\UserToComment\UserCommentController();
+            $controller->setDI($this);
+            return $controller;
+        });
+
         $this->set('QuestionAnswerController', function () {
             $controller = new \Anax\QuestionToAnswer\QuestionAnswerController();
+            $controller->setDI($this);
+            return $controller;
+        });
+
+        $this->set('QuestionCommentController', function () {
+            $controller = new \Anax\QuestionToComment\QuestionCommentController();
+            $controller->setDI($this);
+            return $controller;
+        });
+
+        $this->set('AnswerCommentController', function () {
+            $controller = new \Anax\AnswerToComment\AnswerCommentController();
+            $controller->setDI($this);
+            return $controller;
+        });
+
+        $this->set('QuestionVotesController', function () {
+            $controller = new \Anax\Votes\QuestionVotesController();
+            $controller->setDI($this);
+            return $controller;
+        });
+
+        $this->set('AnswerVotesController', function () {
+            $controller = new \Anax\Votes\AnswerVotesController();
+            $controller->setDI($this);
+            return $controller;
+        });
+
+        $this->set('CommentVotesController', function () {
+            $controller = new \Anax\Votes\CommentVotesController();
             $controller->setDI($this);
             return $controller;
         });

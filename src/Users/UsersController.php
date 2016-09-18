@@ -89,12 +89,7 @@ class UsersController implements \Anax\DI\IInjectionAware
 
                     if ($this->di->session->has('user')) {
                         $acronym = $this->di->session->get('user')['acronym'];
-                        if (strcmp($acronym, "admin") === 0) {
-                            $edit = '<a href="users/update/' . $user->id . '"><i class="fa fa-pencil-square-o" style="color:green" aria-hidden="true"></i></a>';
-                            if (strcmp($user->acronym, "admin") !== 0) {
-                                $delete = '<a href="users/delete/' . $user->id . '"><i class="fa fa-trash-o" style="color:red" aria-hidden="true"></i></a>';
-                            }
-                        } else if (strcmp($acronym, $user->acronym) === 0) {
+                        if (strcmp($acronym, "admin") === 0 || strcmp($acronym, $user->acronym) === 0) {
                             $edit = '<a href="users/update/' . $user->id . '"><i class="fa fa-pencil-square-o" style="color:green" aria-hidden="true"></i></a>';
                         }
                     }
@@ -296,234 +291,41 @@ class UsersController implements \Anax\DI\IInjectionAware
     }
 
     /**
-     * Delete user.
+     * Update user
      *
      * @param integer $id of user to delete.
      *
      * @return void
      */
-    public function deleteAction($id = null)
+    public function addScoreAction($activityScore)
     {
-        if ($this->isDeleteUserAllowed($id)) {
-            $this->deleteUser($id);
-        } else {
+        $user = $this->di->session->get('user', []);
+        if (empty($user)) {
             $this->pageNotFound();
-        }
-    }
-
-    /**
-     * Helper method to check if it is allowed to delete a user.
-     *
-     * Checks if the user is admin and is not trying to delete the admin account.
-     * It is only admin who has the rights to delete other users than admin.
-     *
-     * @return boolean true if the user could be deleted, false otherwise.
-     */
-    private function isDeleteUserAllowed($id)
-    {
-        $isAdmin = false;
-
-        if ($this->di->session->has('user') && isset($id)) {
-            $user = $this->di->session->get('user', []);
-            if (strcmp($user['acronym'], "admin") === 0 && $user['id'] != $id) {
-                $isAdmin = true;
-            }
-        }
-
-        return $isAdmin;
-    }
-
-
-    /**
-     * Helper function to delete a user.
-     *
-     * Deletes a user if the user id is found in the database. If not an error
-     * message is shown.
-     *
-     * @param  integer $id the id of the user to be deleted.
-     *
-     * @return void.
-     */
-    private function deleteUser($id)
-    {
-        $user = $this->users->find($id);
-
-        if ($user) {
-            $form = new \Anax\HTMLForm\Users\CFormDeleteUser($user->getProperties());
-            $form->setDI($this->di);
-            $status = $form->check();
-
-            $this->di->theme->setTitle("Radera användare");
-            $this->di->views->add('users/userForm', [
-                'title' => "Användare",
-                'subtitle' => "Radera användare",
-                'content' => $form->getHTML(),
-               ], 'main');
         } else {
-            $content = [
-                'subtitle' => 'Hittar ej användare',
-                'message' =>  'Hittar ej användare med id: ' . $id
-            ];
-
-            $this->showNoSuchUserMessage($content);
+            $this->updateActivityScore($user['id'], $activityScore);
         }
     }
 
-    /**
-     * Delete (soft) user.
-     *
-     * @param integer $id of user to delete.
-     *
-     * @return void
-     */
-    public function softDeleteAction($id = null)
+    private function updateActivityScore($userId, $activityScore)
     {
-        $user = $this->users->find($id);
+        $activityScoreInDb = $this->getActivityScoreFromDb($userId);
+        $activityScore = $activityScoreInDb + $activityScore;
+        
+        $isSaved = $this->users->save(array(
+            'id'            => $userId,
+            'activityScore' => $activityScore,
+        ));
 
-        if ($user) {
-
-            $form = new \Anax\HTMLForm\Users\CFormSoftDeleteUser($user->getProperties());
-            $form->setDI($this->di);
-            $status = $form->check();
-
-            $this->di->theme->setTitle("Ta bort användare");
-            $this->di->views->add('users/userForm', [
-                'title' => "Användare",
-                'subtitle' => "Ta bort användare",
-                'content' => $form->getHTML(),
-            ], 'main');
-
-            $info = $this->di->fileContent->get('users/softDeleteUserInfo.md');
-            $info = $this->di->textFilter->doFilter($info, 'shortcode, markdown');
-
-            $this->di->views->add('users/userInfo', [
-                'content' => $info,
-            ], 'sidebar');
-        } else {
-            $content = [
-                'subtitle' => 'Hittar ej användare',
-                'message' =>  'Hittar ej användare med id: ' . $id
-            ];
-
-            $this->showNoSuchUserMessage($content);
-        }
+        return $isSaved;
     }
 
-    /**
-     * List all active and not deleted users.
-     *
-     * @return void
-     */
-    public function activeAction()
+    private function getActivityScoreFromDb($userId)
     {
-        $allActive = $this->users->query()
-            ->where('active IS NOT NULL')
-            ->andWhere('deleted is NULL')
-            ->execute();
+        $activityScore = $this->users->query('activityScore')
+            ->where('id = ?')
+            ->execute([$userId]);
 
-        $this->theme->setTitle("Aktiva användare");
-        $this->views->add('users/index', [
-            'users' => $allActive,
-            'title' => "Användare",
-            'subtitle' => "Visa aktiva användare"
-        ], 'main');
-
-        $this->views->add('users/userAdmin', ['title' => "Användare", 'subtitle' => 'Administration'], 'sidebar');
-    }
-
-    /**
-     * List all inactive users.
-     *
-     * @return void
-     */
-    public function inactiveAction()
-    {
-        $allInactive = $this->users->query()
-            ->where('active is NULL')
-            ->andWhere('deleted is NULL')
-            ->execute();
-
-        $this->theme->setTitle("Inaktiva användare");
-        $this->views->add('users/index', [
-            'users' => $allInactive,
-            'title' => "Användare",
-            'subtitle' => "Visa inaktiva användare"
-        ], 'main');
-
-        $this->views->add('users/userAdmin', ['title' => "Användare", 'subtitle' => 'Administration'], 'sidebar');
-    }
-
-    /**
-     * List all discarded users.
-     *
-     * @return void
-     */
-    public function discardedAction()
-    {
-        $allInactive = $this->users->query()
-            ->where('deleted IS NOT NULL')
-            ->execute();
-
-        $this->theme->setTitle("Användare i papperskorgen");
-        $this->views->add('users/index', [
-            'users' => $allInactive,
-            'title' => "Användare",
-            'subtitle' => "Visa användare i papperskorgen"
-        ], 'main');
-
-        $this->views->add('users/userAdmin', ['title' => "Användare", 'subtitle' => 'Administration'], 'sidebar');
-    }
-
-    /**
-     * Reset database to inital values
-     *
-     *
-     */
-    public function resetDbAction()
-    {
-        $this->db->dropTableIfExists('user')->execute();
-
-        $this->db->createTable(
-            'user',
-            [
-                'id' => ['integer', 'primary key', 'not null', 'auto_increment'],
-                'acronym' => ['varchar(20)', 'unique', 'not null'],
-                'email' => ['varchar(80)'],
-                'name' => ['varchar(80)'],
-                'password' => ['varchar(255)'],
-                'created' => ['datetime'],
-                'updated' => ['datetime'],
-                'deleted' => ['datetime'],
-                'active' => ['datetime'],
-            ]
-        )->execute();
-
-        $this->db->insert(
-            'user',
-            [
-                'acronym',
-                'email',
-                'name',
-                'password',
-                'created',
-                'active'
-            ]
-        );
-
-        $now = gmdate('Y-m-d H:i:s');
-
-        $this->db->execute(
-            [
-                'admin',
-                'admin@dbwebb.se',
-                'Administrator',
-                password_hash('admin', PASSWORD_DEFAULT),
-                $now,
-                $now
-            ]
-        );
-
-        $url = $this->url->create('users');
-        $this->response->redirect($url);
+        return $activityScore === false ? 0 : $activityScore[0]->activityScore;
     }
 }

@@ -14,7 +14,7 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
     private $id;
     private $password;
     private $created;
-    private $activeDate;
+    private $activityScore;
 
     /**
      * Constructor
@@ -27,6 +27,7 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
         $this->gravatar = $userData['gravatar'];
         $this->password = $userData['password'];
         $this->created = $userData['created'];
+        $this->activityScore = $userData['activityScore'];
 
         parent::__construct([], [
             'acronym' => [
@@ -37,12 +38,19 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
                 'value'       => $userData['acronym'],
                 'readonly'    => true,
             ],
-            'name' => [
+            'firstName' => [
                 'type'        => 'text',
-                'label'       => 'Namn',
+                'label'       => 'Förnamn',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => $userData['name'],
+                'value'       => $userData['firstName'],
+            ],
+            'lastName' => [
+                'type'        => 'text',
+                'label'       => 'Efternamn',
+                'required'    => true,
+                'validation'  => ['not_empty'],
+                'value'       => $userData['lastName'],
             ],
             'town' => [
                 'type'        => 'text',
@@ -97,14 +105,16 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
         $this->updateUser = new \Anax\Users\User();
         $this->updateUser->setDI($this->di);
         $isSaved = $this->updateUser->save(array(
-            'id'        => $this->id,
-            'acronym'   => $this->Value('acronym'),
-            'name'      => $this->Value('name'),
-            'town'      => $this->Value('town'),
-            'email'     => $this->Value('email'),
-            'gravatar'  => $this->gravatar,
-            'password'  => $password,
-            'created'   => $this->created,
+            'id'            => $this->id,
+            'acronym'       => $this->Value('acronym'),
+            'firstName'     => $this->Value('firstName'),
+            'lastName'      => $this->Value('lastName'),
+            'town'          => $this->Value('town'),
+            'email'         => $this->Value('email'),
+            'gravatar'      => $this->gravatar,
+            'password'      => $password,
+            'activityScore' => $this->activityScore,
+            'created'       => $this->created,
         ));
 
         return $isSaved;

@@ -1,98 +1,53 @@
-.comment-wrapper {
-    border: 1px solid #eee;
-    margin-bottom: 10px;
-    overflow: auto;
+.comment .comment-vote-cell {
+    padding-right: 4px;
+    vertical-align: top;
+    width: 2%;
 }
 
-.left-aside {
-    float: left;
+.comment .comment-vote {
+    min-width: 36px;
     text-align: center;
-    width: 7%;
 }
 
-.left-aside img {
-    margin-top: 10px;
+.comment .comment-vote > p {
+    margin-bottom: 0;
 }
 
-.main-comment {
-    float: left;
-    width: 92%;
+.comment .comment-row {
+    border-bottom: 1px solid #e4e6e8;
 }
 
-.comment-heading {
-    background: #396a2f;
-    background: linear-gradient(#396a2f, #55a046);
-    margin-bottom: 10px;
-    overflow: auto;
+.comment .comment-cell {
+    padding: @magicNumber/4 0;
+    vertical-align: top;
 }
 
-.comment-heading h3 {
-    color: #fff;
-    display: inline-block;
-    margin: 0 0 0 10px;
-    padding: 4px 0;
-}
-
-.create-comment {
-    float: right;
-    margin-right: 10px;
-    margin-top: 2px;
-}
-
-.create-comment a {
-    color: #fff;
-    font-size: @fontSizeSmall;
-
-}
-
-.heading {
-    overflow: auto;
-    padding: .4em;
-}
-
-.author {
+.comment #comment-author,
+.comment #comment-time {
     color: #396a2f;
     font-size: @fontSizeSmall;
 }
 
-.content {
-    padding: .4em;
-}
-
-.content p {
-    margin: 0;
-    padding: 0;
-}
-
-.time {
-    color: #999;
+.comment .comment-score,
+.comment .comment-text {
     font-size: @fontSizeSmall;
 }
 
-.mail,
-.edit-comment {
-    color: #999;
-    float: right;
+.comment .comment-text > p {
+    margin-bottom: 4px;
 }
 
-.web,
-.delete-comment {
-    color: #999;
-    float: right;
-    margin-left: 10px;
+#comment-add {
+    margin-left: @magicNumber/4;
+    margin-top: @magicNumber/4;
 }
 
-.mail a,
-.web a {
-    color: #999;
+#comment-add a {
+    color: #848d95;
+    font-size: @fontSizeSmall;
+    text-decoration: none;
 }
 
-.mail a:hover,
-.web a:hover {
+#comment-add a:hover {
     color: #f5a06e;
-}
-
-.admin-field {
-    border-top: 1px dashed #ddd;
-    padding: .4em;
 }
