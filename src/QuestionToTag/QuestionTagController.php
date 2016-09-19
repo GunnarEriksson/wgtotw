@@ -26,16 +26,16 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
         $this->tagIDs = $this->createTagToIdArray();
     }
 
-    public function addAction($questionId, $checkedTags, $pointer = null)
+    public function addAction($questionId, $checkedTags)
     {
         if ($checkedTags === false) {
             $isAdded = $this->addDefaultTagToQuestion($questionId);
         } else {
             $isAdded = $this->addTagsToQuestion($questionId, $checkedTags);
         }
-
+        $isAdded = false;
         if ($isAdded === false) {
-            $pointer->AddOutput("<p><i>Varning! Taggar kunde inte läggas till frågan i databasen!</i></p>");
+            $this->showWarningInfo("Varning! Taggar kunde inte läggas till frågan i databasen!");
         }
     }
 
@@ -93,7 +93,22 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
         ]);
     }
 
-    public function updateAction($questionId, $newTags, $oldTags, $pointer = null)
+    private function showWarningInfo($info)
+    {
+        $content = [
+            'title'         => 'Ett fel har uppstått!',
+            'subtitle'      => 'Problem med frågetaggar',
+            'message'       => $info,
+        ];
+
+        $this->dispatcher->forward([
+            'controller' => 'errors',
+            'action'     => 'flash',
+            'params'     => [$content]
+        ]);
+    }
+
+    public function updateAction($questionId, $newTags, $oldTags)
     {
         $tagsToRemove = array_diff($oldTags, $newTags);
         $isRemoved = $this->removeTagsFromQuestion($questionId, $tagsToRemove);
@@ -102,11 +117,11 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
         $isAdded = $this->addTagsToQuestion($questionId, $tagsToAdd);
 
         if ($isRemoved === false) {
-            $pointer->AddOutput("<p><i>Varning! Alla gamla taggar kunde inte tas bort</i></p>");
+            $this->showWarningInfo("Varning! Alla gamla taggar kunde inte tas bort!");
         }
 
         if ($isAdded === false) {
-            $pointer->AddOutput("<p><i>Varning! Alla nya taggar kunde inte läggas till</i></p>");
+            $this->showWarningInfo("Varning! Alla nya taggar kunde inte läggas till!");
         }
     }
 

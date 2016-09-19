@@ -10,6 +10,7 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
     const ACTIVITY_SCORE_QUESTION = 5;
 
     private $user;
+    private $lastInsertedId;
 
     /**
      * Constructor
@@ -17,6 +18,7 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
     public function __construct($user, $tagNames)
     {
         $this->user = $user;
+        $this->lastInsertedId = null;
 
         parent::__construct([], [
             'title' => [
@@ -77,13 +79,35 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
         ));
 
         if ($isSaved) {
-            $lastInsertedId = $this->newQuestion->id;
-            $this->addTagsToQuestion($lastInsertedId);
-            $this->addQuestionToUser($lastInsertedId);
-            $this->addActivityScoreToUser();
+            $this->lastInsertedId = $this->newQuestion->id;
         }
 
         return $isSaved;
+    }
+
+    /**
+     * Callback What to do if the form was submitted?
+     *
+     */
+    public function callbackSuccess()
+    {
+        $this->addTagsToQuestion($this->lastInsertedId);
+        $this->addQuestionToUser($this->lastInsertedId);
+        $this->addActivityScoreToUser();
+
+        $this->di->dispatcher->forward([
+            'controller' => 'questions',
+            'action'     => 'id',
+            'params'     => [$this->lastInsertedId]
+        ]);
+        /*
+        if (isset($this->lastInsertedId)) {
+            $this->redirectTo();
+            //$this->redirectTo('questions/id/' . $this->lastInsertedId);
+        } else {
+            $this->showNoSuchIdMessage("saknas");
+        }
+        */
     }
 
     private function addTagsToQuestion($questionId)
@@ -91,7 +115,7 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
         $this->di->dispatcher->forward([
             'controller' => 'question-tag',
             'action'     => 'add',
-            'params'     => [$questionId, $this->Value('tags'), $this]
+            'params'     => [$questionId, $this->Value('tags')]
         ]);
     }
 
@@ -100,7 +124,7 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
         $this->di->dispatcher->forward([
             'controller' => 'user-question',
             'action'     => 'add',
-            'params'     => [$this->user['id'], $questionId, $this]
+            'params'     => [$this->user['id'], $questionId]
         ]);
     }
 
@@ -113,17 +137,22 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
         ]);
     }
 
-    /**
-     * Callback What to do if the form was submitted?
-     *
-     */
-    public function callbackSuccess()
+    private function showNoSuchIdMessage($questionId)
     {
-        $this->AddOutput("<p><i>Frågan har sparats i databasen!</i></p>");
-        $this->redirectTo();
+        $content = [
+            'title'         => 'Ett fel har uppstått!',
+            'subtitle'      => 'Hittar ej fråga',
+            'message'       => 'Hittar ej fråga med id: ' . $questionId,
+            'url'           => $_SERVER["HTTP_REFERER"],
+            'buttonName'    => 'Tillbaka'
+        ];
+
+        $this->di->dispatcher->forward([
+            'controller' => 'errors',
+            'action'     => 'view',
+            'params'     => [$content]
+        ]);
     }
-
-
 
     /**
      * Callback What to do when form could not be processed?

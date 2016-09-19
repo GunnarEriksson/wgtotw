@@ -2789,6 +2789,28 @@ body {
   float: left;
   margin-right: 1em;
 }
+.button {
+  list-style-type: none;
+  margin-left: 0;
+  padding: 0;
+}
+.button > li {
+  background: #396a2f;
+  background: linear-gradient(#396a2f,#55a046);
+  border-radius: 7px;
+  display: inline-block;
+  margin-bottom: .3em;
+  padding: .1em;
+  text-align: center;
+  width: 5.5em;
+}
+.button >li > a {
+  color: #fff;
+  text-decoration: none;
+}
+.button >li > a:hover {
+  color: #f5a06e;
+}
 .navbar {
   background: #396a2f;
   background: linear-gradient(#396a2f,#55a046);

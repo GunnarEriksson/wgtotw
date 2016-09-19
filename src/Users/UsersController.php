@@ -303,19 +303,26 @@ class UsersController implements \Anax\DI\IInjectionAware
         if (empty($user)) {
             $this->pageNotFound();
         } else {
-            $this->updateActivityScore($user['id'], $activityScore);
+            if ($this->updateActivityScore($user['id'], $activityScore) === false) {
+                $this->showErrorInfo("Aktivtetspoäng kunde inte sparas för användare!");
+            }
+
         }
     }
 
     private function updateActivityScore($userId, $activityScore)
     {
         $activityScoreInDb = $this->getActivityScoreFromDb($userId);
-        $activityScore = $activityScoreInDb + $activityScore;
-        
-        $isSaved = $this->users->save(array(
-            'id'            => $userId,
-            'activityScore' => $activityScore,
-        ));
+        if ($activityScoreInDb === false) {
+            $isSaved = false;
+        } else {
+            $activityScore = $activityScoreInDb + $activityScore;
+
+            $isSaved = $this->users->save(array(
+                'id'            => $userId,
+                'activityScore' => $activityScore,
+            ));
+        }
 
         return $isSaved;
     }
@@ -327,5 +334,21 @@ class UsersController implements \Anax\DI\IInjectionAware
             ->execute([$userId]);
 
         return $activityScore === false ? 0 : $activityScore[0]->activityScore;
+    }
+
+    private function showErrorInfo($info)
+    {
+        $content = [
+            'title'         => 'Ett fel har uppstått!',
+            'subtitle'      => 'Problem med aktivitetspoäng',
+            'message'       => $info,
+            'url'           => $_SERVER["HTTP_REFERER"],
+        ];
+
+        $this->dispatcher->forward([
+            'controller' => 'errors',
+            'action'     => 'view',
+            'params'     => [$content]
+        ]);
     }
 }

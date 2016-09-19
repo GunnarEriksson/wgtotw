@@ -53,7 +53,7 @@ class AnswersController implements \Anax\DI\IInjectionAware
 
     private function createAnswerHeading($questionId, $numOfAnswers, $orderBy)
     {
-        $latest = strcmp( $orderBy, 'created desc') === 0 ? 'latest' : null;
+        $latest = strcmp($orderBy, 'created desc') === 0 ? 'latest' : null;
 
         $this->views->add('answer/heading', [
             'questionId'   => $questionId,
@@ -89,7 +89,7 @@ class AnswersController implements \Anax\DI\IInjectionAware
         if ($this->di->session->has('user')) {
             $this->addAnswer($questionId);
         } else {
-            $this->pageNotFound();
+            $this->goToLoginPage();
         }
     }
 
@@ -117,20 +117,12 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return $title;
     }
 
-    /**
-     * Helper method to show page 404, page not found.
-     *
-     * Shows page 404 with the text that the page could not be found and you
-     * must login to get the page you are looking for.
-     *
-     * @return void
-     */
-    private function pageNotFound()
+    private function goToLoginPage()
     {
-        $this->theme->setTitle("Sidan saknas");
-        $this->views->add('error/404', [
-            'title' => 'Sidan saknas',
-        ], 'main-wide');
+        $this->dispatcher->forward([
+            'controller' => 'user-login',
+            'action'     => 'login',
+        ]);
     }
 
     public function addCommentAction($answerId)
@@ -197,6 +189,78 @@ class AnswersController implements \Anax\DI\IInjectionAware
         }
 
         return $pos;
+    }
+
+    public function updateAction($answerId)
+    {
+        if ($this->isUpdateAllowed($answerId)) {
+            $this->updateAnswer($answerId);
+        } else {
+            $this->redirectToLoginPage();
+        }
+    }
+
+    private function isUpdateAllowed($answerId)
+    {
+        $isUpdateAllowed = false;
+
+        $user = $this->di->session->get('user', []);
+        if (empty($user) === false) {
+            $isUpdateAllowed = $this->isUserAllowedToUpdate($answerId, $user);
+        }
+
+        return $isUpdateAllowed;
+    }
+
+    private function isUserAllowedToUpdate($answerId, $user)
+    {
+        $authorId = $this->getAnswerAuthorId($answerId);
+        if (strcmp($user['acronym'], "admin") === 0) {
+            return true;
+        } else if ($user['id'] === $authorId) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private function getAnswerAuthorId($answerId)
+    {
+        $authorId = $this->answers->query('U.id')
+            ->join('User2Answer AS U2A', 'U2A.idAnswer = Lf_Answer.id')
+            ->join('User AS U', 'U2A.idUser = U.id')
+            ->where('Lf_Answer.id = ?')
+            ->execute([$answerId]);
+
+        $authorId = empty($authorId) ? false : $authorId[0]->id;
+
+        return $authorId;
+    }
+
+    private function updateAnswer($answerId)
+    {
+        $form = new \Anax\HTMLForm\Answers\CFormUpdateAnswer($answerData, $questionId);
+        $form->setDI($this->di);
+        $status = $form->check();
+
+        $this->di->theme->setTitle("Re: " . $questionTitle);
+        $this->di->views->add('answer/answerForm', [
+            'title' => "Re: " . $questionTitle,
+            'content' => $form->getHTML(),
+        ], 'main');
+    }
+
+    private function getQuestionInfoFromAnswerId($answerId)
+    {
+        $questionInfo = $this->answers->query('Q.id, Q.title')
+            ->join('Question2Answer AS Q2A', 'Q2A.idAnswer = Lf_Answer.id')
+            ->join('Question AS Q', 'Q2A.idQuestion = Q.id')
+            ->where('Lf_Answer.id = ?')
+            ->execute([$answerId]);
+
+        $questionInfo = empty($questionInfo) ? false : $questionInfo[0];
+
+        return $questionInfo;
     }
 
     public function upVoteAction($answerId)

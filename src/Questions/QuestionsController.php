@@ -66,12 +66,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
                 'comments' => $comments,
             ], 'main-wide');
         } else {
-            $content = [
-                'subtitle' => 'Hittar ej fråga',
-                'message' =>  'Hittar ej fråga med id: ' . $id
-            ];
-
-            $this->showNoSuchUserMessage($content);
+            $this->showNoSuchIdMessage($id);
         }
 
         $orderBy = isset($orderBy) ? 'created desc' : 'score desc' ;
@@ -130,14 +125,21 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      *
      * @return void
      */
-    private function showNoSuchUserMessage($content)
+    private function showNoSuchIdMessage($questionId)
     {
-        $this->theme->setTitle("View user with id");
-        $this->views->add('error/errorInfo', [
-            'title' => 'Användare',
-            'subtitle' => $content['subtitle'],
-            'message' => $content['message'],
-        ], 'main');
+        $content = [
+            'title'         => 'Ett fel har uppstått!',
+            'subtitle'      => 'Hittar ej fråga',
+            'message'       => 'Hittar ej fråga med id: ' . $questionId,
+            'url'           => $_SERVER["HTTP_REFERER"],
+            'buttonName'    => 'Tillbaka'
+        ];
+
+        $this->dispatcher->forward([
+            'controller' => 'errors',
+            'action'     => 'view',
+            'params'     => [$content]
+        ]);
     }
 
     public function addAction()
@@ -145,7 +147,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
         if ($this->di->session->has('user')) {
             $this->addQuestion();
         } else {
-            $this->pageNotFound();
+            $this->redirectToLoginPage();
         }
     }
 
@@ -183,20 +185,12 @@ class QuestionsController implements \Anax\DI\IInjectionAware
         return $tagLabels;
     }
 
-    /**
-     * Helper method to show page 404, page not found.
-     *
-     * Shows page 404 with the text that the page could not be found and you
-     * must login to get the page you are looking for.
-     *
-     * @return void
-     */
-    private function pageNotFound()
+    private function redirectToLoginPage()
     {
-        $this->theme->setTitle("Sidan saknas");
-        $this->views->add('error/404', [
-            'title' => 'Sidan saknas',
-        ], 'main-wide');
+        $this->dispatcher->forward([
+            'controller' => 'user-login',
+            'action'     => 'login',
+        ]);
     }
 
     public function tagIdAction($tagId = null)
@@ -235,42 +229,80 @@ class QuestionsController implements \Anax\DI\IInjectionAware
 
     public function updateAction($questionId)
     {
-        $question = $this->questions->find($questionId);
-        $userId = $question === false ? null : $question->userId ;
-        if ($this->isUpdateQuestionAllowed($userId)) {
-            $this->updateQuestion($question);
+        if ($this->isUpdateAllowed($questionId)) {
+            $this->updateQuestion($questionId);
         } else {
-            $this->pageNotFound();
+            $this->redirectToLoginPage();
         }
     }
 
-    private function isUpdateQuestionAllowed($id)
+    private function isUpdateAllowed($questionId)
     {
         $isUpdateAllowed = false;
 
-        if ($this->di->session->has('user') && isset($id)) {
-            $user = $this->di->session->get('user', []);
-            if (strcmp($user['acronym'], "admin") === 0) {
-                $isUpdateAllowed = true;
-            } else if ($user['id'] == $id) {
-                $isUpdateAllowed = true;
-            }
+        $user = $this->di->session->get('user', []);
+        if (empty($user) === false) {
+            $isUpdateAllowed = $this->isUserAllowedToUpdate($questionId, $user);
         }
 
         return $isUpdateAllowed;
     }
 
-    private function updateQuestion($question)
+    private function isUserAllowedToUpdate($questionId, $user)
+    {
+        $authorId = $this->getQuestionAuthorId($questionId);
+        if (strcmp($user['acronym'], "admin") === 0) {
+            return true;
+        } else if ($user['id'] == $authorId) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private function getQuestionAuthorId($questionId)
+    {
+        $authorId = $this->questions->query('U.id')
+            ->join('User2Question AS U2Q', 'U2Q.idQuestion = Lf_Question.id')
+            ->join('User AS U', 'U2Q.idUser = U.id')
+            ->where('Lf_Question.id = ?')
+            ->execute([$questionId]);
+
+        $authorId = empty($authorId) ? false : $authorId[0]->id;
+
+        return $authorId;
+    }
+
+    private function updateQuestion($questionId)
+    {
+        $questionInfo = $this->getQuestionInfo($questionId);
+
+        if ($questionInfo === false) {
+            $this->showNoSuchIdMessage($questionId);
+        } else {
+            $this->showUpdateQuestionForm($questionInfo);
+        }
+    }
+
+    private function getQuestionInfo($questionId)
+    {
+        $questionInfo = $this->questions->find($questionId);
+        $questionInfo = $questionInfo === false ? $questionInfo : $questionInfo->getProperties();
+
+        return $questionInfo;
+    }
+
+    private function showUpdateQuestionForm($questionInfo)
     {
         $tagLabels = $this->getAllTagLables();
-        $checkedTags = $this->getCheckedTagsFromQuestionId($question->id);
-        $form = new \Anax\HTMLForm\Questions\CFormUpdateQuestion($question->getProperties(), $tagLabels, $checkedTags);
+        $checkedTags = $this->getCheckedTagsFromQuestionId($questionInfo['id']);
+        $form = new \Anax\HTMLForm\Questions\CFormUpdateQuestion($questionInfo, $tagLabels, $checkedTags);
         $form->setDI($this->di);
         $status = $form->check();
 
-        $this->di->theme->setTitle("Uppdatera fråga");
+        $this->di->theme->setTitle("Uppdatera");
         $this->di->views->add('question/questionForm', [
-            'title' => "Uppdatera Fråga",
+            'title' => $questionInfo['title'],
             'content' => $form->getHTML(),
         ], 'main');
     }

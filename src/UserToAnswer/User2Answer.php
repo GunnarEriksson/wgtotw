@@ -7,5 +7,5 @@ namespace Anax\UserToAnswer;
  */
 class User2Answer extends \Anax\MVC\CDatabaseModel
 {
-    
+
 }

@@ -29,7 +29,7 @@ class CommentsController implements \Anax\DI\IInjectionAware
         if ($this->di->session->has('user')) {
             $this->addComment($id, $title, $controller);
         } else {
-            $this->pageNotFound();
+            $this->redirectToLoginPage();
         }
     }
 
@@ -47,20 +47,12 @@ class CommentsController implements \Anax\DI\IInjectionAware
         ], 'main');
     }
 
-    /**
-     * Helper method to show page 404, page not found.
-     *
-     * Shows page 404 with the text that the page could not be found and you
-     * must login to get the page you are looking for.
-     *
-     * @return void
-     */
-    private function pageNotFound()
+    private function redirectToLoginPage()
     {
-        $this->theme->setTitle("Sidan saknas");
-        $this->views->add('error/404', [
-            'title' => 'Sidan saknas',
-        ], 'main-wide');
+        $this->dispatcher->forward([
+            'controller' => 'user-login',
+            'action'     => 'login',
+        ]);
     }
 
     public function upVoteAction($commentId)

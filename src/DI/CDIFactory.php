@@ -116,5 +116,11 @@ class CDIFactory extends CDIFactoryDefault
             $controller->setDI($this);
             return $controller;
         });
+
+        $this->set('ErrorsController', function () {
+            $controller = new \Anax\Errors\ErrorsController();
+            $controller->setDI($this);
+            return $controller;
+        });
     }
 }

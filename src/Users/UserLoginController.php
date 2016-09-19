@@ -27,10 +27,19 @@ class UserLoginController implements \Anax\DI\IInjectionAware
         $form->setDI($this->di);
         $status = $form->check();
 
+        $this->theme->setTitle("Logga in");
         $this->di->views->add('users/userLoginLogoutForm', [
             'title' => "Logga in",
             'content' => $form->getHTML(),
         ], 'main');
+
+        $info = $this->di->fileContent->get('users/noAccountInfo.md');
+        $info = $this->di->textFilter->doFilter($info, 'shortcode, markdown');
+
+        $this->di->views->add('users/userCreateAccountInfo', [
+            'title' => "Skapa konto",
+            'content' => $info,
+        ], 'sidebar');
     }
 
     public function logoutAction()
@@ -39,6 +48,7 @@ class UserLoginController implements \Anax\DI\IInjectionAware
         $form->setDI($this->di);
         $status = $form->check();
 
+        $this->theme->setTitle("Logga ut");
         $this->di->views->add('users/userLoginLogoutForm', [
             'title' => "Logga ut",
             'content' => $form->getHTML(),

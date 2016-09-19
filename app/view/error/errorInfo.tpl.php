@@ -10,6 +10,8 @@
     <p><?= $message ?></p>
 <?php endif; ?>
 
-<ul class="button">
-    <li><a href='<?=$this->url->create($_SERVER['HTTP_REFERER'])?>'>Tillbaka</a></li>
-</ul>
+<?php if (isset($url)) : ?>
+    <ul class="button">
+        <li><a href='<?=$this->url->create($url)?>'><?= $buttonName = isset($buttonName) ? $buttonName : "Ok" ?></a></li>
+    </ul>
+<?php endif; ?>

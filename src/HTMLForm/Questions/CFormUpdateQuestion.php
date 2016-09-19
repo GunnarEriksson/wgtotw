@@ -16,12 +16,12 @@ class CFormUpdateQuestion extends \Mos\HTMLForm\CForm
     /**
      * Constructor
      */
-    public function __construct($QuestionData, $tagNames, $checkedTags)
+    public function __construct($questionData, $tagNames, $checkedTags)
     {
-        $this->id = $QuestionData['id'];
-        $this->score = $QuestionData['score'];
-        $this->answers = $QuestionData['answers'];
-        $this->created = $QuestionData['created'];
+        $this->id = $questionData['id'];
+        $this->score = $questionData['score'];
+        $this->answers = $questionData['answers'];
+        $this->created = $questionData['created'];
         $this->checkedTags = $checkedTags;
 
         parent::__construct([], [
@@ -30,14 +30,14 @@ class CFormUpdateQuestion extends \Mos\HTMLForm\CForm
                 'label'       => 'Rubrik',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => $QuestionData['title']
+                'value'       => $questionData['title']
             ],
             'content' => [
                 'type'        => 'textarea',
                 'label'       => 'Kommentar',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => $QuestionData['content'],
+                'value'       => $questionData['content'],
                 'description' => 'Du kan använda <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a> för att formatera texten'
             ],
             "tags" => [
