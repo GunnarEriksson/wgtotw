@@ -86,4 +86,24 @@ class TagsController implements \Anax\DI\IInjectionAware
             $this->saveNumOfQuestionConnections($tagId, --$numQuestions);
         }
     }
+
+    public function listPopularAction($num)
+    {
+        $tags = $this->getMostPopularTags($num);
+
+        $this->views->add('index/tags', [
+            'title'     => "Populäraste taggarna",
+            'tags' => $tags,
+        ], 'triptych-2');
+    }
+
+    private function getMostPopularTags($num)
+    {
+        $tags = $this->tags->query('Lf_Tag.id, Lf_Tag.label, Lf_Tag.numQuestions')
+            ->orderBy('numQuestions desc')
+            ->limit($num)
+            ->execute();
+
+        return $tags;
+    }
 }

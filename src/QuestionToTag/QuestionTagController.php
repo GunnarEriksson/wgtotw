@@ -28,15 +28,50 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
 
     public function addAction($questionId, $checkedTags)
     {
+        if ($this->isAllowedToHandleTags($questionId)) {
+            if ($this->addTags($questionId, $checkedTags) === false) {
+                $warningMessage = "Frågan kunde kopplas ihop med taggar i DB!";
+                $this->flash->warningMessage($warningMessage);
+            }
+        } else {
+            $this->pageNotFound();
+        }
+    }
+
+    private function isAllowedToHandleTags($id)
+    {
+        $isAllowed = false;
+
+        if ($this->LoggedIn->isLoggedin()) {
+            $isAllowed = $this->isIdLastInserted($id);
+        }
+
+        return $isAllowed;
+    }
+
+    private function isIdLastInserted($id)
+    {
+        $isAllowed = false;
+
+        $lastInsertedId = $this->session->get('lastInsertedId');
+        if (!empty($lastInsertedId)) {
+            if ($lastInsertedId === $id) {
+                $isAllowed = true;
+            }
+        }
+
+        return $isAllowed;
+    }
+
+    private function addTags($questionId, $checkedTags)
+    {
         if ($checkedTags === false) {
             $isAdded = $this->addDefaultTagToQuestion($questionId);
         } else {
             $isAdded = $this->addTagsToQuestion($questionId, $checkedTags);
         }
-        $isAdded = false;
-        if ($isAdded === false) {
-            $this->showWarningInfo("Varning! Taggar kunde inte läggas till frågan i databasen!");
-        }
+
+        return $isAdded;
     }
 
     private function createTagToIdArray()
@@ -61,13 +96,12 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
     private function addTagsToQuestion($questionId, $checkedTags)
     {
         $isAdded = true;
-        foreach ($checkedTags as $key => $tag) {
+        foreach ($checkedTags as $tag) {
             $tagId = $this->tagIDs[$tag];
-            $result = $this->addTagToQuestion($questionId, $tagId);
-            if ($result === false) {
-                $isAdded = $result;
-            } else {
+            if ($this->addTagToQuestion($questionId, $tagId)) {
                 $this->increaseQuestionConnectionCounter($tagId);
+            } else {
+                $isAdded = false;
             }
         }
 
@@ -93,35 +127,47 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
         ]);
     }
 
-    private function showWarningInfo($info)
+    /**
+     * Helper method to show page 404, page not found.
+     *
+     * Shows page 404 with the text that the page could not be found and you
+     * must login to get the page you are looking for.
+     *
+     * @return void
+     */
+    private function pageNotFound()
     {
-        $content = [
-            'title'         => 'Ett fel har uppstått!',
-            'subtitle'      => 'Problem med frågetaggar',
-            'message'       => $info,
-        ];
-
-        $this->dispatcher->forward([
-            'controller' => 'errors',
-            'action'     => 'flash',
-            'params'     => [$content]
-        ]);
+        $this->theme->setTitle("Sidan saknas");
+        $this->views->add('error/404', [
+            'title' => 'Sidan saknas',
+        ], 'main-wide');
     }
 
     public function updateAction($questionId, $newTags, $oldTags)
     {
-        $tagsToRemove = array_diff($oldTags, $newTags);
-        $isRemoved = $this->removeTagsFromQuestion($questionId, $tagsToRemove);
-
-        $tagsToAdd = array_diff($newTags, $oldTags);
-        $isAdded = $this->addTagsToQuestion($questionId, $tagsToAdd);
-
-        if ($isRemoved === false) {
-            $this->showWarningInfo("Varning! Alla gamla taggar kunde inte tas bort!");
+        if ($this->isAllowedToHandleTags($questionId)) {
+            $this->updateTagsForQuestion($questionId, $newTags, $oldTags);
+        } else {
+            $this->pageNotFound();
         }
 
-        if ($isAdded === false) {
-            $this->showWarningInfo("Varning! Alla nya taggar kunde inte läggas till!");
+        if ($this->session->has('lastInsertedId')) {
+            unset($_SESSION["lastInsertedId"]);
+        }
+    }
+
+    private function updateTagsForQuestion($questionId, $newTags, $oldTags)
+    {
+        $tagsToRemove = array_diff($oldTags, $newTags);
+        if ($this->removeTagsFromQuestion($questionId, $tagsToRemove) === false) {
+            $warningMessage = "Gamla taggar för frågan kunde inte tas bort i DB!";
+            $this->di->flash->warningMessage($warningMessage);
+        }
+
+        $tagsToAdd = array_diff($newTags, $oldTags);
+        if ($this->addTagsToQuestion($questionId, $tagsToAdd) === false) {
+            $warningMessage = "Nya taggar kunde inte läggas till frågan i DB!";
+            $this->di->flash->warningMessage($warningMessage);
         }
     }
 

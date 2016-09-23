@@ -9,15 +9,15 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
 
     const ACTIVITY_SCORE_QUESTION = 5;
 
-    private $user;
+    private $userId;
     private $lastInsertedId;
 
     /**
      * Constructor
      */
-    public function __construct($user, $tagNames)
+    public function __construct($userId, $tagNames)
     {
-        $this->user = $user;
+        $this->userId = $userId;
         $this->lastInsertedId = null;
 
         parent::__construct([], [
@@ -91,40 +91,35 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
      */
     public function callbackSuccess()
     {
-        $this->addTagsToQuestion($this->lastInsertedId);
-        $this->addQuestionToUser($this->lastInsertedId);
-        $this->addActivityScoreToUser();
-
-        $this->di->dispatcher->forward([
-            'controller' => 'questions',
-            'action'     => 'id',
-            'params'     => [$this->lastInsertedId]
-        ]);
-        /*
         if (isset($this->lastInsertedId)) {
-            $this->redirectTo();
-            //$this->redirectTo('questions/id/' . $this->lastInsertedId);
+            $this->di->session->set('lastInsertedId', $this->lastInsertedId);
+
+            $this->addTagsToQuestion();
+            $this->addQuestionToUser();
+            $this->addActivityScoreToUser();
+
+            $this->redirectTo('questions/id/' . $this->lastInsertedId);
         } else {
-            $this->showNoSuchIdMessage("saknas");
+            $this->AddOutput("<p><i>Varning! Fel inträffade när frågan sparandes i databasen. Id nummer saknas.</i></p>");
+            $this->redirectTo();
         }
-        */
     }
 
-    private function addTagsToQuestion($questionId)
+    private function addTagsToQuestion()
     {
         $this->di->dispatcher->forward([
             'controller' => 'question-tag',
             'action'     => 'add',
-            'params'     => [$questionId, $this->Value('tags')]
+            'params'     => [$this->lastInsertedId, $this->Value('tags')]
         ]);
     }
 
-    private function addQuestionToUser($questionId)
+    private function addQuestionToUser()
     {
         $this->di->dispatcher->forward([
             'controller' => 'user-question',
             'action'     => 'add',
-            'params'     => [$this->user['id'], $questionId]
+            'params'     => [$this->userId, $this->lastInsertedId]
         ]);
     }
 
@@ -133,24 +128,7 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
         $this->di->dispatcher->forward([
             'controller' => 'users',
             'action'     => 'add-score',
-            'params'     => [CFormAddQuestion::ACTIVITY_SCORE_QUESTION]
-        ]);
-    }
-
-    private function showNoSuchIdMessage($questionId)
-    {
-        $content = [
-            'title'         => 'Ett fel har uppstått!',
-            'subtitle'      => 'Hittar ej fråga',
-            'message'       => 'Hittar ej fråga med id: ' . $questionId,
-            'url'           => $_SERVER["HTTP_REFERER"],
-            'buttonName'    => 'Tillbaka'
-        ];
-
-        $this->di->dispatcher->forward([
-            'controller' => 'errors',
-            'action'     => 'view',
-            'params'     => [$content]
+            'params'     => [CFormAddQuestion::ACTIVITY_SCORE_QUESTION, $this->lastInsertedId]
         ]);
     }
 

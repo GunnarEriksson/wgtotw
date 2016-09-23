@@ -11,18 +11,20 @@ class CFormUpdateQuestion extends \Mos\HTMLForm\CForm
     private $score;
     private $answers;
     private $created;
-    private $checkedTags;
+    private $oldTags;
+    private $newTags;
 
     /**
      * Constructor
      */
-    public function __construct($questionData, $tagNames, $checkedTags)
+    public function __construct($questionData, $tagNames, $oldTags)
     {
         $this->id = $questionData['id'];
         $this->score = $questionData['score'];
         $this->answers = $questionData['answers'];
         $this->created = $questionData['created'];
-        $this->checkedTags = $checkedTags;
+        $this->oldTags = $oldTags;
+        $this->newTags = null;
 
         parent::__construct([], [
             'title' => [
@@ -43,7 +45,7 @@ class CFormUpdateQuestion extends \Mos\HTMLForm\CForm
             "tags" => [
                 'type'        => 'checkbox-multiple',
                 'values'      => $tagNames,
-                "checked"     => $checkedTags,
+                "checked"     => $oldTags,
             ],
             'submit' => [
                 'type'      => 'submit',
@@ -74,6 +76,8 @@ class CFormUpdateQuestion extends \Mos\HTMLForm\CForm
         $this->updateQuestion = new \Anax\Questions\Question();
         $this->updateQuestion->setDI($this->di);
 
+        $this->newTags = $this->Value('tags');
+
         $isSaved = $this->updateQuestion->save(array(
             'id'        => $this->id,
             'title'     => $this->Value('title'),
@@ -83,22 +87,7 @@ class CFormUpdateQuestion extends \Mos\HTMLForm\CForm
             'created'   => $this->created
         ));
 
-        if ($isSaved) {
-            if ($this->Value('tags') != $this->checkedTags) {
-                $this->updateTagsToQuestion();
-            }
-        }
-
         return $isSaved;
-    }
-
-    private function updateTagsToQuestion()
-    {
-        $this->di->dispatcher->forward([
-            'controller' => 'question-tag',
-            'action'     => 'update',
-            'params'     => [$this->id, $this->Value('tags'), $this->checkedTags, $this]
-        ]);
     }
 
     /**
@@ -107,8 +96,26 @@ class CFormUpdateQuestion extends \Mos\HTMLForm\CForm
      */
     public function callbackSuccess()
     {
-        $this->AddOutput("<p><i>Frågan har uppdaterats i databasen!</i></p>");
-        $this->redirectTo();
+        if ($this->newTags != $this->oldTags) {
+            $this->di->session->set('lastInsertedId', $this->id);
+            $this->updateTagsToQuestion();
+        }
+
+        if (isset($this->id)) {
+            $this->redirectTo('questions/id/' . $this->id);
+        } else {
+            $this->AddOutput("<p><i>Varning! Fel inträffade. Fråge id saknas.</i></p>");
+            $this->redirectTo();
+        }
+    }
+
+    private function updateTagsToQuestion()
+    {
+        $this->di->dispatcher->forward([
+            'controller' => 'question-tag',
+            'action'     => 'update',
+            'params'     => [$this->id, $this->newTags, $this->oldTags]
+        ]);
     }
 
 

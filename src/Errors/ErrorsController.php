@@ -26,14 +26,21 @@ class ErrorsController implements \Anax\DI\IInjectionAware
             'url'           => isset($errorInfo['url']) ? $errorInfo['url'] : null,
             'buttonName'    => isset($errorInfo['buttonName']) ? $errorInfo['buttonName'] : null
         ], 'main');
+
+        if ($this->session->has('lastInsertedId')) {
+            unset($_SESSION["lastInsertedId"]);
+        }
     }
 
-    public function flashAction($errorInfo)
+    public function pageNotFoundAction()
     {
-        $this->views->add('error/warningInfo', [
-            'title'         => isset($errorInfo['title']) ? $errorInfo['title'] : null,
-            'subtitle'      => isset($errorInfo['subtitle']) ? $errorInfo['subtitle'] : null,
-            'message'       => isset($errorInfo['message']) ? $errorInfo['message'] : null,
-        ], 'flash');
+        $this->theme->setTitle("Sidan saknas");
+        $this->views->add('error/404', [
+            'title' => 'Sidan saknas',
+        ], 'main-wide');
+
+        if ($this->session->has('lastInsertedId')) {
+            unset($_SESSION["lastInsertedId"]);
+        }
     }
 }

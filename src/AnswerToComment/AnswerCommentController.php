@@ -19,16 +19,66 @@ class AnswerCommentController implements \Anax\DI\IInjectionAware
         $this->answerToComment->setDI($this->di);
     }
 
-    public function addAction($answerId, $commentId, $pointer)
+    public function addAction($answerId, $commentId)
     {
-        $isAdded = $this->addCommentToAnswer($answerId, $commentId);
-
-        if ($isAdded === false) {
-            $pointer->AddOutput("<p><i>Varning! Kunde inte knyta kommentar till svaret!</i></p>");
+        if ($this->isMandatoryParametersPresent($answerId, $commentId)) {
+            $this->addCommentToAnswer($answerId, $commentId);
+        } else {
+            $errorMessage = "Kan EJ knyta kommentar till svar. Id parametrar saknas!";
+            $this->flash->errorMessage($errorMessage);
         }
     }
 
+    private function isMandatoryParametersPresent($answerId, $commentId)
+    {
+        $isPresent = false;
+
+        if (isset($answerId) && isset($commentId)) {
+            $isPresent = true;
+        }
+
+        return $isPresent;
+    }
+
     private function addCommentToAnswer($answerId, $commentId)
+    {
+        if ($this->isAllowedToAddCommentToAnswer($commentId)) {
+            if ($this->addCommentToAnswerInDb($answerId, $commentId) === false) {
+                $warningMessage = "Kunde inte knyta kommentar till svar i DB!";
+                $this->flash->warningMessage($warningMessage);
+            }
+        } else {
+            $errorMessage = "Ej behörig att knyta kommentar till svar!";
+            $this->flash->errorMessage($errorMessage);
+        }
+    }
+
+    private function isAllowedToAddCommentToAnswer($commentId)
+    {
+        $isAllowed = false;
+
+        if ($this->LoggedIn->isLoggedin()) {
+            $isAllowed = $this->isIdLastInserted($commentId);
+        }
+
+        return $isAllowed;
+    }
+
+    private function isIdLastInserted($commentId)
+    {
+        $isAllowed = false;
+
+        $lastInsertedId = $this->session->get('lastInsertedId');
+        if (!empty($lastInsertedId)) {
+            if ($lastInsertedId === $commentId) {
+                $isAllowed = true;
+            }
+        }
+
+        return $isAllowed;
+    }
+
+    private function addCommentToAnswerInDb($answerId, $commentId)
     {
         $isSaved = $this->answerToComment->create(array(
             'idAnswer'    => intval($answerId),

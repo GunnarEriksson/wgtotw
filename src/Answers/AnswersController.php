@@ -84,26 +84,44 @@ class AnswersController implements \Anax\DI\IInjectionAware
         ], 'main-wide');
     }
 
-    public function addAction($questionId)
+    public function addAction($questionId = null)
     {
-        if ($this->di->session->has('user')) {
+        if ($this->LoggedIn->isLoggedin()) {
             $this->addAnswer($questionId);
         } else {
-            $this->goToLoginPage();
+            $this->redirectToLoginPage();
         }
     }
 
     private function addAnswer($questionId)
     {
-        $user = $this->di->session->get('user', []);
-        $form = new \Anax\HTMLForm\Answers\CFormAddAnswer($questionId, $user);
+        $userId = $this->LoggedIn->getUserId();
+        if (isset($questionId) && $userId) {
+            $this->createAddAnswerForm($questionId, $userId);
+        } else {
+            if (!isset($questionId)) {
+                $subtitle = "Frågans id-nummer saknas";
+                $message = "Frågans id-nummer saknas. Kan inte skicka vidare till nästa sida!";
+            } else {
+                $subtitle = "Användare-id saknas";
+                $message = "Användare-id saknas. Kan inte koppla svar till användare!";
+            }
+
+            $this->showErrorMessage($subtitle, $message);
+        }
+
+    }
+
+    private function createAddAnswerForm($questionId, $userId)
+    {
+        $form = new \Anax\HTMLForm\Answers\CFormAddAnswer($questionId, $userId);
         $form->setDI($this->di);
         $status = $form->check();
 
         $questionTitle = $this->getQuestionTitleFromId($questionId);
 
-        $this->di->theme->setTitle("Re: " . $questionTitle);
-        $this->di->views->add('answer/answerForm', [
+        $this->theme->setTitle("Re: " . $questionTitle);
+        $this->views->add('answer/answerForm', [
             'title' => "Re: " . $questionTitle,
             'content' => $form->getHTML(),
         ], 'main');
@@ -117,7 +135,37 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return $title;
     }
 
-    private function goToLoginPage()
+    /**
+     * Helper function for initiate no such user view.
+     *
+     * Initiates a view which shows a message the user with the specfic
+     * id is not found. Contains a return button.
+     *
+     * @param  [] $content the subtitle and the message shown at page.
+     *
+     * @return void
+     */
+    private function showErrorMessage($subtitle, $message)
+    {
+        $defaultUrl = $this->url->create('questions/list/');
+        $url = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : $defaultUrl;
+
+        $content = [
+            'title'         => 'Ett fel har uppstått!',
+            'subtitle'      => $subtitle,
+            'message'       => $message,
+            'url'           => $url,
+            'buttonName'    => 'Tillbaka'
+        ];
+
+        $this->dispatcher->forward([
+            'controller' => 'errors',
+            'action'     => 'view',
+            'params'     => [$content]
+        ]);
+    }
+
+    private function redirectToLoginPage()
     {
         $this->dispatcher->forward([
             'controller' => 'user-login',
@@ -129,11 +177,13 @@ class AnswersController implements \Anax\DI\IInjectionAware
     {
         $content = $this->getAnswerContentFromId($answerId);
         $content = $this->getSubstring($content, 30);
+        $questionInfo = $this->getQuestionInfoForAnswer($answerId);
+        $questionId = isset($questionInfo->questionId) ? $questionInfo->questionId : null;
 
         $this->dispatcher->forward([
             'controller' => 'comments',
             'action'     => 'add',
-            'params'     => [$answerId, $content, 'answer-comment']
+            'params'     => [$answerId, $questionId, $content, 'answer-comment']
         ]);
     }
 
@@ -191,12 +241,12 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return $pos;
     }
 
-    public function updateAction($answerId)
+    public function updateAction($answerId = null)
     {
         if ($this->isUpdateAllowed($answerId)) {
             $this->updateAnswer($answerId);
         } else {
-            $this->redirectToLoginPage();
+            $this->handleUpdateIsNotAllowed($answerId);
         }
     }
 
@@ -204,24 +254,14 @@ class AnswersController implements \Anax\DI\IInjectionAware
     {
         $isUpdateAllowed = false;
 
-        $user = $this->di->session->get('user', []);
-        if (empty($user) === false) {
-            $isUpdateAllowed = $this->isUserAllowedToUpdate($answerId, $user);
+        if (isset($answerId)) {
+            if ($this->LoggedIn->isLoggedin()) {
+                $authorId = $this->getAnswerAuthorId($answerId);
+                $isUpdateAllowed = $this->LoggedIn->isAllowed($answerId);
+            }
         }
 
         return $isUpdateAllowed;
-    }
-
-    private function isUserAllowedToUpdate($answerId, $user)
-    {
-        $authorId = $this->getAnswerAuthorId($answerId);
-        if (strcmp($user['acronym'], "admin") === 0) {
-            return true;
-        } else if ($user['id'] === $authorId) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     private function getAnswerAuthorId($answerId)
@@ -239,16 +279,62 @@ class AnswersController implements \Anax\DI\IInjectionAware
 
     private function updateAnswer($answerId)
     {
+        $questionInfo = $this->getQuestionInfoFromAnswerId($answerId);
+        $questionId = isset($questionInfo->id) ? $questionInfo->id : false;
+        $questionTitle = isset($questionInfo->title) ? $questionInfo->title : false;
+
+        if ($questionId && $questionTitle) {
+            $answerData = $this->answers->find($answerId);
+            $answerData = $answerData === false ? $answerData : $answerData->getProperties();
+            if ($answerData) {
+                $this->createUpdateAnswerForm($answerData, $questionId, $questionTitle);
+            } else {
+                $subtitle = "Svars data saknas";
+                $message = "Svars data saknas. Kan inte koppla svar till fråga!";
+                $this->showErrorMessage($subtitle, $message);
+            }
+        } else {
+            $subtitle = "Fråge-id saknas";
+            $message = "Fråge-id saknas. Kan inte koppla svar till fråga!";
+            $this->showErrorMessage($subtitle, $message);
+        }
+    }
+
+    private function createUpdateAnswerForm($answerData, $questionId, $questionTitle)
+    {
         $form = new \Anax\HTMLForm\Answers\CFormUpdateAnswer($answerData, $questionId);
         $form->setDI($this->di);
         $status = $form->check();
 
-        $this->di->theme->setTitle("Re: " . $questionTitle);
-        $this->di->views->add('answer/answerForm', [
+        $this->theme->setTitle("Re: " . $questionTitle);
+        $this->views->add('answer/answerForm', [
             'title' => "Re: " . $questionTitle,
             'content' => $form->getHTML(),
         ], 'main');
     }
+
+    private function handleUpdateIsNotAllowed($answerId)
+    {
+        if (!isset($answerId)) {
+            $subtitle = "Svars-id saknas";
+            $message = "Svars-id saknas. Kan inte koppla svar till fråga!";
+            $this->showErrorMessage($subtitle, $message);
+        } else if ($this->LoggedIn->isLoggedin()) {
+            $questionInfo = $this->getQuestionInfoFromAnswerId($answerId);
+            $questionId = isset($questionInfo->id) ? $questionInfo->id : false;
+            $warningMessage = "Endast egna svar kan uppdateras!";
+            $this->flash->warningMessage($warningMessage);
+            if ($questionId) {
+                $this->redirectToQuestion($questionId);
+            } else {
+                $this->redirectToQuestions();
+            }
+        } else {
+            $this->redirectToLoginPage();
+        }
+    }
+
+
 
     private function getQuestionInfoFromAnswerId($answerId)
     {
@@ -261,6 +347,23 @@ class AnswersController implements \Anax\DI\IInjectionAware
         $questionInfo = empty($questionInfo) ? false : $questionInfo[0];
 
         return $questionInfo;
+    }
+
+    private function redirectToQuestion($questionId)
+    {
+        $this->dispatcher->forward([
+            'controller' => 'questions',
+            'action'     => 'id',
+            'params'     => [$questionId]
+        ]);
+    }
+
+    private function redirectToQuestions()
+    {
+        $this->dispatcher->forward([
+            'controller' => 'questions',
+            'action'     => 'list'
+        ]);
     }
 
     public function upVoteAction($answerId)
@@ -284,17 +387,13 @@ class AnswersController implements \Anax\DI\IInjectionAware
     public function acceptAction($answerId)
     {
         $questionInfo = $this->getQuestionInfoForAnswer($answerId);
-        if ($this->di->session->has('user')) {
+        if ($this->LoggedIn->isLoggedin()) {
             if ($this->isUserAllowedToAccept($questionInfo)) {
                 $this->updateAccept($answerId, $questionInfo);
             }
         }
 
-        $this->dispatcher->forward([
-            'controller' => 'questions',
-            'action'     => 'id',
-            'params'     => [$questionInfo->questionId]
-        ]);
+        $this->redirectToQuestion($questionInfo->questionId);
     }
 
     private function getQuestionInfoForAnswer($answerId)
@@ -315,7 +414,7 @@ class AnswersController implements \Anax\DI\IInjectionAware
     private function isUserAllowedToAccept($questionInfo)
     {
         $isAllowedToAccept = false;
-        $userIdInSession = $this->di->session->get('user')['id'];
+        $userIdInSession = $this->LoggedIn->getUserId();
         if ($questionInfo->userId === $userIdInSession) {
             $isAllowedToAccept = true;
         }
@@ -329,13 +428,11 @@ class AnswersController implements \Anax\DI\IInjectionAware
         $answerIdAccept = $this->getAcceptedAnswerIdForQuestion($questionId);
         if ($answerIdAccept === false) {
             if ($this->setAnswerToAccepted($answerId)) {
-                $this->addActivityScoreToUser();
+                $this->addActivityScoreToUser($answerId);
             }
         } else {
             if ($this->unsetAnswerToAccepted($answerIdAccept)) {
-                if ($this->setAnswerToAccepted($answerId)) {
-                    $this->addActivityScoreToUser();
-                }
+                $this->setAnswerToAccepted($answerId);
             }
         }
     }
@@ -364,12 +461,14 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return $isSaved;
     }
 
-    private function addActivityScoreToUser()
+    private function addActivityScoreToUser($answerId)
     {
-        $this->di->dispatcher->forward([
+        $this->session->set('lastInsertedId', $answerId);
+
+        $this->dispatcher->forward([
             'controller' => 'users',
             'action'     => 'add-score',
-            'params'     => [AnswersController::ACTIVITY_SCORE_ACCEPT]
+            'params'     => [AnswersController::ACTIVITY_SCORE_ACCEPT, $answerId]
         ]);
     }
 

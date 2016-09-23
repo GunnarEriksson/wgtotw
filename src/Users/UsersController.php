@@ -297,17 +297,37 @@ class UsersController implements \Anax\DI\IInjectionAware
      *
      * @return void
      */
-    public function addScoreAction($activityScore)
+    public function addScoreAction($activityScore, $lastInsertedId)
     {
-        $user = $this->di->session->get('user', []);
-        if (empty($user)) {
-            $this->pageNotFound();
-        } else {
-            if ($this->updateActivityScore($user['id'], $activityScore) === false) {
-                $this->showErrorInfo("Aktivtetspoäng kunde inte sparas för användare!");
+        if ($this->isAllowedToAddScore($lastInsertedId)) {
+            $userId = $this->LoggedIn->getUserId();
+            if ($this->updateActivityScore($userId, $activityScore) === false) {
+                $warningMessage = "Aktivtetspoäng kunde inte sparas för användare i DB!";
+                $this->di->flash->warningMessage($warningMessage);
             }
-
+        } else {
+            $this->pageNotFound();
         }
+
+        if ($this->session->has('lastInsertedId')) {
+            unset($_SESSION["lastInsertedId"]);
+        }
+    }
+
+    private function isAllowedToAddScore($id)
+    {
+        $isAllowed = false;
+
+        if ($this->LoggedIn->isLoggedin()) {
+            $lastInsertedId = $this->session->get('lastInsertedId');
+            if (!empty($lastInsertedId)) {
+                if ($lastInsertedId === $id) {
+                    $isAllowed = true;
+                }
+            }
+        }
+
+        return $isAllowed;
     }
 
     private function updateActivityScore($userId, $activityScore)
@@ -333,22 +353,26 @@ class UsersController implements \Anax\DI\IInjectionAware
             ->where('id = ?')
             ->execute([$userId]);
 
-        return $activityScore === false ? 0 : $activityScore[0]->activityScore;
+        return empty($activityScore) ? 0 : $activityScore[0]->activityScore;
     }
 
-    private function showErrorInfo($info)
+    public function listActiveAction($num)
     {
-        $content = [
-            'title'         => 'Ett fel har uppstått!',
-            'subtitle'      => 'Problem med aktivitetspoäng',
-            'message'       => $info,
-            'url'           => $_SERVER["HTTP_REFERER"],
-        ];
+        $users = $this->getMostActiveUsers($num);
 
-        $this->dispatcher->forward([
-            'controller' => 'errors',
-            'action'     => 'view',
-            'params'     => [$content]
-        ]);
+        $this->views->add('index/users', [
+            'title'     => "Mest aktiva användare",
+            'users' => $users,
+        ], 'triptych-3');
+    }
+
+    private function getMostActiveUsers($num)
+    {
+        $users = $this->users->query('Lf_User.id, Lf_User.acronym')
+            ->orderBy('activityScore asc')
+            ->limit($num)
+            ->execute();
+
+        return $users;
     }
 }

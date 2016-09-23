@@ -14,8 +14,10 @@ class CFormAddComment extends \Mos\HTMLForm\CForm
     const ACTIVITY_SCORE_COMMENT = 2;
 
     private $id;
-    private $user;
+    private $questionId;
+    private $userId;
     private $controller;
+    private $lastInsertedId;
 
 
     /**
@@ -23,11 +25,13 @@ class CFormAddComment extends \Mos\HTMLForm\CForm
      *
      * @param string $pageKey the page name for the comment.
      */
-    public function __construct($id, $user, $controller)
+    public function __construct($id, $questionId, $userId, $controller)
     {
         $this->id = $id;
-        $this->user = $user;
+        $this->questionId = $questionId;
+        $this->userId = $userId;
         $this->controller = $controller;
+        $this->lastInsertedId = null;
 
         parent::__construct([], [
             'content' => [
@@ -76,30 +80,49 @@ class CFormAddComment extends \Mos\HTMLForm\CForm
         ));
 
         if ($isSaved) {
-            $lastInsertedId = $this->newComment->id;
-            $this->mapComment($lastInsertedId);
-            $this->addCommentToUser($lastInsertedId);
-            $this->addActivityScoreToUser();
+            $this->lastInsertedId = $this->newComment->id;
         }
 
         return $isSaved;
     }
 
-    private function mapComment($commentId)
+
+
+    /**
+     * Callback What to do if the form was submitted?
+     *
+     */
+    public function callbackSuccess()
+    {
+        if (isset($this->lastInsertedId)) {
+            $this->di->session->set('lastInsertedId', $this->lastInsertedId);
+
+            $this->mapComment();
+            $this->addCommentToUser();
+            $this->addActivityScoreToUser();
+
+            $this->redirectTo('questions/id/' . $this->questionId);
+        } else {
+            $this->AddOutput("<p><i>Varning! Fel inträffade när kommentaren sparandes i databasen.</i></p>");
+            $this->redirectTo();
+        }
+    }
+
+    private function mapComment()
     {
         $this->di->dispatcher->forward([
             'controller' => $this->controller,
             'action'     => 'add',
-            'params'     => [$this->id, $commentId, $this]
+            'params'     => [$this->id, $this->lastInsertedId]
         ]);
     }
 
-    private function addCommentToUser($commentId)
+    private function addCommentToUser()
     {
         $this->di->dispatcher->forward([
             'controller' => 'user-comment',
             'action'     => 'add',
-            'params'     => [$this->user['id'], $commentId, $this]
+            'params'     => [$this->userId, $this->lastInsertedId]
         ]);
     }
 
@@ -108,18 +131,8 @@ class CFormAddComment extends \Mos\HTMLForm\CForm
         $this->di->dispatcher->forward([
             'controller' => 'users',
             'action'     => 'add-score',
-            'params'     => [CFormAddComment::ACTIVITY_SCORE_COMMENT]
+            'params'     => [CFormAddComment::ACTIVITY_SCORE_COMMENT, $this->lastInsertedId]
         ]);
-    }
-
-    /**
-     * Callback What to do if the form was submitted?
-     *
-     */
-    public function callbackSuccess()
-    {
-        $this->AddOutput("<p><i>Kommentaren har sparats i databasen!</i></p>");
-        $this->redirectTo();
     }
 
     /**
@@ -128,7 +141,7 @@ class CFormAddComment extends \Mos\HTMLForm\CForm
      */
     public function callbackFail()
     {
-        $this->AddOutput("<p><i>Kommentaren kunde inte sparas i databasen!</i></p>");
+        $this->AddOutput("<p><i>Fel! Kommentaren kunde inte sparas i databasen.</i></p>");
         $this->redirectTo();
     }
 }

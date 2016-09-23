@@ -79,7 +79,12 @@ class CFormUpdateAnswer extends \Mos\HTMLForm\CForm
      */
     public function callbackSuccess()
     {
-        $this->redirectTo('questions/id/' . $this->questionId);
+        if (isset($this->questionId)) {
+            $this->redirectTo('questions/id/' . $this->questionId);
+        } else {
+            $this->AddOutput("<p><i>Varning! Kan ej göra skicka vidare till sidan med frågan. Frågans id saknas.</i></p>");
+            $this->redirectTo();
+        }
     }
 
 

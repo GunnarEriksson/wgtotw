@@ -2,14 +2,8 @@
 
 namespace Anax\Votes;
 
-class CommentVotesController implements \Anax\DI\IInjectionAware
+class CommentVotesController extends Vote
 {
-    use \Anax\DI\TInjectable;
-
-    const ACTIVITY_SCORE_VOTE = 1;
-
-    private $userIdInSession;
-
     /**
      * Initialize the controller.
      *
@@ -17,8 +11,6 @@ class CommentVotesController implements \Anax\DI\IInjectionAware
      */
     public function initialize()
     {
-        $this->di->session();
-
         $this->commentVotes = new \Anax\Votes\CommentVote();
         $this->commentVotes->setDI($this->di);
 
@@ -29,145 +21,69 @@ class CommentVotesController implements \Anax\DI\IInjectionAware
         $this->questions->setDI($this->di);
     }
 
-    public function increaseAction($commentId)
-    {
-        $userId = $this->getUserIdInSession();
-        if ($this->isAllowedToVote($commentId, $userId)) {
-            $isSaved = $this->addUserAsVoter($commentId, $userId);
-            if ($isSaved) {
-                if ($this->increaseScoreCounter($commentId)) {
-                    $this->addActivityScoreToUser();
-                }
-            }
-        }
-
-        $questionId = $this->getQuestionId($commentId);
-
-        $this->dispatcher->forward([
-            'controller' => 'questions',
-            'action'     => 'id',
-            'params'     => [$questionId]
-        ]);
-    }
-
-    private function getUserIdInSession()
-    {
-        $userId = false;
-
-        if ($this->di->session->has('user')) {
-            $userId = $this->di->session->get('user')['id'];
-        }
-
-        return $userId;
-    }
-
-    private function isAllowedToVote($commentId, $userId)
-    {
-        $isAllowedToVote = false;
-
-        if ($userId !== false) {
-            $isAllowedToVote = $this->isUserAllowedToVote($commentId, $userId);
-        }
-
-        return $isAllowedToVote;
-    }
-
-    private function isUserAllowedToVote($commentId, $userId)
-    {
-        $isAllowedToVote = false;
-
-        if ($this->isUserAuthorOfComment($commentId, $userId) === false) {
-            if ($this->hasUserVoted($commentId, $userId) === false) {
-                $isAllowedToVote = true;
-            }
-        }
-
-        return $isAllowedToVote;
-    }
-
-    private function isUserAuthorOfComment($commentId, $userId)
-    {
-        $isUserTheAuthor = false;
-        $authorId = $this->getUserIdOfComment($commentId);
-        if ($userId === $authorId) {
-            $isUserTheAuthor = true;
-        }
-
-        return $isUserTheAuthor;
-    }
-
-    private function getUserIdOfComment($commentId)
+    protected function getUserId($id)
     {
         $userId = $this->comments->query('U.id')
             ->join('User2Comment AS U2C', 'U2C.idComment = Lf_Comment.id')
             ->join('User AS U', 'U2C.idUser = U.id')
             ->where('Lf_Comment.id = ?')
-            ->execute([$commentId]);
+            ->execute([$id]);
 
         $userId = empty($userId) ? false : $userId[0]->id;
 
         return $userId;
     }
 
-    private function hasUserVoted($commentId, $userId)
+    protected function hasUserVoted($id, $userId)
     {
         $id = $this->commentVotes->query('Lf_CommentVote.id')
             ->where('Lf_CommentVote.idComment = ? AND Lf_CommentVote.idUser = ?')
-            ->execute([$commentId, $userId]);
+            ->execute([$id, $userId]);
 
         $hasVoted = empty($id) ? false : true;
 
         return $hasVoted;
     }
 
-    private function addUserAsVoter($commentId, $userId)
+    protected function addUserAsVoter($id, $userId)
     {
         $isSaved = $this->commentVotes->create(array(
-            'idComment'  => $commentId,
+            'idComment'  => $id,
             'idUser'    => $userId,
         ));
 
         return $isSaved;
     }
 
-    private function increaseScoreCounter($commentId)
+    protected function increaseScoreCounter($id)
     {
-        $score = $this->getScoreNumber($commentId);
+        $score = $this->getScoreNumber($id);
         $score = $score === false ? 0 : ++$score;
 
         $isSaved = $this->comments->save(array(
-            'id'        => $commentId,
+            'id'        => $id,
             'score'     => $score,
         ));
 
         return $isSaved;
     }
 
-    private function getScoreNumber($commentId)
+    protected function getScoreNumber($id)
     {
         $score = $this->comments->query('score')
             ->where('id = ?')
-            ->execute([$commentId]);
+            ->execute([$id]);
 
         $score = empty($score) ? false : $score[0]->score;
 
         return $score;
     }
 
-    private function addActivityScoreToUser()
+    protected function getQuestionId($id)
     {
-        $this->di->dispatcher->forward([
-            'controller' => 'users',
-            'action'     => 'add-score',
-            'params'     => [AnswerVotesController::ACTIVITY_SCORE_VOTE]
-        ]);
-    }
-
-    private function getQuestionId($commentId)
-    {
-        $answerId = $this->getAnswerIdFromCommentId($commentId);
+        $answerId = $this->getAnswerIdFromCommentId($id);
         if ($answerId === false) {
-            $questionId = $this->getQuestionIdFromCommentId($commentId);
+            $questionId = $this->getQuestionIdFromCommentId($id);
         } else {
             $questionId = $this->getQuestionIdFromAnswerId($answerId);
         }
@@ -214,34 +130,13 @@ class CommentVotesController implements \Anax\DI\IInjectionAware
         return $questionId;
     }
 
-    public function decreaseAction($commentId)
+    protected function decreaseScoreCounter($id)
     {
-        $userId = $this->getUserIdInSession();
-        if ($this->isAllowedToVote($commentId, $userId)) {
-            $isSaved = $this->addUserAsVoter($commentId, $userId);
-            if ($isSaved) {
-                if ($this->decreaseScoreCounter($commentId)) {
-                    $this->addActivityScoreToUser();
-                }
-            }
-        }
-
-        $questionId = $this->getQuestionId($commentId);
-
-        $this->dispatcher->forward([
-            'controller' => 'questions',
-            'action'     => 'id',
-            'params'     => [$questionId]
-        ]);
-    }
-
-    private function decreaseScoreCounter($commentId)
-    {
-        $score = $this->getScoreNumber($commentId);
+        $score = $this->getScoreNumber($id);
         $score = $score === false ? 0 : --$score;
 
         $isSaved = $this->comments->save(array(
-            'id'        => $commentId,
+            'id'        => $id,
             'score'     => $score,
         ));
 

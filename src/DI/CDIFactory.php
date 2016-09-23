@@ -27,6 +27,24 @@ class CDIFactory extends CDIFactoryDefault
             return $db;
         });
 
+        $this->set('LoggedIn', function () {
+            $loggedIn = new \Anax\Users\UserLoggedIn();
+            $loggedIn->setDI($this);
+            return $loggedIn;
+        });
+
+        $this->set('flash', function () {
+            $flash = new \Anax\FlashMessages\CFlashMessages();
+            $flash->setDI($this);
+            return $flash;
+        });
+
+        $this->set('FlashController', function () {
+            $flashController = new \Anax\FlashMessages\FlashController();
+            $flashController->setDI($this);
+            return $flashController;
+        });
+
         $this->set('UsersController', function () {
             $controller = new \Anax\Users\UsersController();
             $controller->setDI($this);

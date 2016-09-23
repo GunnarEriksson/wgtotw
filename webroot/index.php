@@ -14,12 +14,30 @@ $app->theme->configure(ANAX_APP_PATH . 'config/theme_me.php');
 $app->router->add('', function () use ($app) {
     $app->theme->setTitle("Allt om landskapsfotografering");
 
-    $content = $app->fileContent->get('me.md');
+    $content = $app->fileContent->get('index.md');
     $content = $app->textFilter->doFilter($content, 'shortcode, markdown');
 
     $app->views->add('me/page', [
         'content' => $content
     ], 'main-wide');
+
+    $app->dispatcher->forward([
+        'controller' => 'questions',
+        'action'     => 'list-latest',
+        'params'     => [4],
+    ]);
+
+    $app->dispatcher->forward([
+        'controller' => 'tags',
+        'action'     => 'list-popular',
+        'params'     => [4],
+    ]);
+
+    $app->dispatcher->forward([
+        'controller' => 'users',
+        'action'     => 'list-active',
+        'params'     => [4],
+    ]);
 });
 
 $app->router->add('questions', function () use ($app) {

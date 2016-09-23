@@ -23,6 +23,10 @@ class QuestionsController implements \Anax\DI\IInjectionAware
 
     public function listAction()
     {
+        if ($this->di->flash->hasMessage()) {
+            $this->showFlashMessage();
+        }
+
         $allQuestions = $this->getQuestionsWithUserId('Lf_Question.id desc');
 
         $this->di->theme->setTitle("Alla frågor");
@@ -30,6 +34,10 @@ class QuestionsController implements \Anax\DI\IInjectionAware
             'title' => "Alla Frågor",
             'questions'  => $allQuestions,
         ], 'main-wide');
+
+        if ($this->session->has('lastInsertedId')) {
+            unset($_SESSION["lastInsertedId"]);
+        }
     }
 
     private function getQuestionsWithUserId($orderBy)
@@ -55,6 +63,10 @@ class QuestionsController implements \Anax\DI\IInjectionAware
         $question = $this->findQuestionFromId($id);
 
         if ($question) {
+            if ($this->di->flash->hasMessage()) {
+                $this->showFlashMessage();
+            }
+
             $tags = $this->getTagIdAndLabelFromQuestionId($id);
             $comments = $this->getAllCommentsForSpecificQuestion($id);
 
@@ -66,7 +78,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
                 'comments' => $comments,
             ], 'main-wide');
         } else {
-            $this->showNoSuchIdMessage($id);
+            $this->showNoSuchIdMessage($id, 'fråga');
         }
 
         $orderBy = isset($orderBy) ? 'created desc' : 'score desc' ;
@@ -87,6 +99,14 @@ class QuestionsController implements \Anax\DI\IInjectionAware
             ->execute([$questionId]);
 
         return $questionWithUserInfo;
+    }
+
+    private function showFlashMessage()
+    {
+        $this->di->dispatcher->forward([
+            'controller' => 'flash',
+            'action'     => 'flash',
+        ]);
     }
 
     private function getTagIdAndLabelFromQuestionId($questionId)
@@ -125,13 +145,16 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      *
      * @return void
      */
-    private function showNoSuchIdMessage($questionId)
+    private function showNoSuchIdMessage($id, $type)
     {
+        $defaultUrl = $this->url->create('questions/list/');
+        $url = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : $defaultUrl;
+
         $content = [
             'title'         => 'Ett fel har uppstått!',
-            'subtitle'      => 'Hittar ej fråga',
-            'message'       => 'Hittar ej fråga med id: ' . $questionId,
-            'url'           => $_SERVER["HTTP_REFERER"],
+            'subtitle'      => 'Hittar ej ' . $type,
+            'message'       => 'Hittar ej ' . $type . ' med id: ' . $id,
+            'url'           => $url,
             'buttonName'    => 'Tillbaka'
         ];
 
@@ -144,7 +167,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
 
     public function addAction()
     {
-        if ($this->di->session->has('user')) {
+        if ($this->LoggedIn->isLoggedin()) {
             $this->addQuestion();
         } else {
             $this->redirectToLoginPage();
@@ -153,9 +176,19 @@ class QuestionsController implements \Anax\DI\IInjectionAware
 
     private function addQuestion()
     {
-        $user = $this->di->session->get('user', []);
+        $userId = $this->LoggedIn->getUserId();
         $tagLabels = $this->getAllTagLables();
-        $form = new \Anax\HTMLForm\Questions\CFormAddQuestion($user, $tagLabels);
+
+        if ($userId) {
+            $this->createAddForm($userId, $tagLabels);
+        } else {
+            $this->showNoSuchIdMessage($userId, 'användare');
+        }
+    }
+
+    private function createAddForm($userId, $tagLabels)
+    {
+        $form = new \Anax\HTMLForm\Questions\CFormAddQuestion($userId, $tagLabels);
         $form->setDI($this->di);
         $status = $form->check();
 
@@ -232,7 +265,15 @@ class QuestionsController implements \Anax\DI\IInjectionAware
         if ($this->isUpdateAllowed($questionId)) {
             $this->updateQuestion($questionId);
         } else {
-            $this->redirectToLoginPage();
+            $this->handleUpdateIsNotAllowed($questionId);
+            if ($this->LoggedIn->isLoggedin()) {
+                $warningMessage = "Endast egna frågor kan uppdateras!";
+                $this->flash->warningMessage($warningMessage);
+
+                $this->redirectToQuestion($questionId);
+            } else {
+                $this->redirectToLoginPage();
+            }
         }
     }
 
@@ -240,24 +281,14 @@ class QuestionsController implements \Anax\DI\IInjectionAware
     {
         $isUpdateAllowed = false;
 
-        $user = $this->di->session->get('user', []);
-        if (empty($user) === false) {
-            $isUpdateAllowed = $this->isUserAllowedToUpdate($questionId, $user);
+        if (isset($questionId)) {
+            if ($this->LoggedIn->isLoggedin()) {
+                $authorId = $this->getQuestionAuthorId($questionId);
+                $isUpdateAllowed = $this->LoggedIn->isAllowed($authorId);
+            }
         }
 
         return $isUpdateAllowed;
-    }
-
-    private function isUserAllowedToUpdate($questionId, $user)
-    {
-        $authorId = $this->getQuestionAuthorId($questionId);
-        if (strcmp($user['acronym'], "admin") === 0) {
-            return true;
-        } else if ($user['id'] == $authorId) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     private function getQuestionAuthorId($questionId)
@@ -278,7 +309,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
         $questionInfo = $this->getQuestionInfo($questionId);
 
         if ($questionInfo === false) {
-            $this->showNoSuchIdMessage($questionId);
+            $this->showNoSuchIdMessage($questionId, 'fråga');
         } else {
             $this->showUpdateQuestionForm($questionInfo);
         }
@@ -307,11 +338,67 @@ class QuestionsController implements \Anax\DI\IInjectionAware
         ], 'main');
     }
 
+    private function handleUpdateIsNotAllowed($questionId)
+    {
+        if (!isset($questionId)) {
+            $subtitle = "Fråge-id saknas";
+            $message = "Fråge-id saknas. Kan inte uppdatera fråga!";
+
+            $this->showErrorMessage($subtitle, $message);
+        } else if ($this->LoggedIn->isLoggedin()) {
+            $warningMessage = "Endast egna svar kan uppdateras!";
+            $this->flash->warningMessage($warningMessage);
+
+            $this->redirectToQuestion($questionId);
+        } else {
+            $this->redirectToLoginPage();
+        }
+    }
+
+    /**
+     * Helper function for initiate no such user view.
+     *
+     * Initiates a view which shows a message the user with the specfic
+     * id is not found. Contains a return button.
+     *
+     * @param  [] $content the subtitle and the message shown at page.
+     *
+     * @return void
+     */
+    private function showErrorMessage($subtitle, $message)
+    {
+        $defaultUrl = $this->url->create('questions/list/');
+        $url = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : $defaultUrl;
+
+        $content = [
+            'title'         => 'Ett fel har uppstått!',
+            'subtitle'      => $subtitle,
+            'message'       => $message,
+            'url'           => $url,
+            'buttonName'    => 'Tillbaka'
+        ];
+
+        $this->dispatcher->forward([
+            'controller' => 'errors',
+            'action'     => 'view',
+            'params'     => [$content]
+        ]);
+    }
+
     private function getCheckedTagsFromQuestionId($questionId)
     {
         $tags = $this->getTagIdAndLabelFromQuestionId($questionId);
 
         return $this->convertToLabelArray($tags);
+    }
+
+    private function redirectToQuestion($questionId)
+    {
+        $this->dispatcher->forward([
+            'controller' => 'questions',
+            'action'     => 'id',
+            'params'     => [$questionId]
+        ]);
     }
 
     /**
@@ -355,7 +442,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
         $this->dispatcher->forward([
             'controller' => 'comments',
             'action'     => 'add',
-            'params'     => [$questionId, $title, 'question-comment']
+            'params'     => [$questionId, $questionId, $title, 'question-comment']
         ]);
     }
 
@@ -384,5 +471,25 @@ class QuestionsController implements \Anax\DI\IInjectionAware
             'action'     => 'decrease',
             'params'     => [$questionId]
         ]);
+    }
+
+    public function listLatestAction($num)
+    {
+        $questions = $this->getLatestQuestions($num);
+
+        $this->views->add('index/questions', [
+            'title'     => "Senaste frågorna",
+            'questions' => $questions,
+        ], 'triptych-1');
+    }
+
+    private function getLatestQuestions($num)
+    {
+        $questions = $this->questions->query('Lf_Question.id, Lf_Question.title')
+            ->orderBy('created asc')
+            ->limit($num)
+            ->execute();
+
+        return $questions;
     }
 }

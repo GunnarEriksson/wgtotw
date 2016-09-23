@@ -2865,6 +2865,16 @@ body {
 .navbar li li.selected {
   color: #f5a06e;
 }
+.triptych-heading {
+  background: rgba(0,0,0,0) linear-gradient(#396a2f,#55a046) repeat scroll 0 0;
+  margin-bottom: 10px;
+}
+.triptych-heading h3 {
+  color: #fff;
+  display: inline-block;
+  margin: 0 0 0 10px;
+  padding: 4px 0;
+}
 .comment .comment-vote-cell {
   padding-right: 4px;
   vertical-align: top;
@@ -2895,6 +2905,14 @@ body {
 }
 .comment .comment-text > p {
   margin-bottom: 4px;
+}
+.comment #edit {
+  color: #848d95;
+  font-size: 0.875em;
+  text-decoration: none;
+}
+.comment #edit:hover {
+  color: #f5a06e;
 }
 #comment-add {
   margin-left: 5.5px;
@@ -3450,6 +3468,43 @@ th {
 .answer .accept:hover,
 .answer .edit:hover {
   color: #f5a06e;
+}
+.warning,
+.notice,
+.error,
+.success {
+  border-radius: 5px;
+  box-shadow: 0 -3px rgba(0,0,0,0.1) inset;
+  color: #fff;
+  font-size: 0.875em;
+  letter-spacing: 2px;
+  margin-bottom: 0 !important;
+  padding: 16px 21px;
+  position: relative;
+  text-transform: uppercase;
+  text-align: center;
+  -webkit-transition: all 0.1s ease-in-out;
+  -moz-transition: all 0.1s ease-in-out;
+  -o-transition: all 0.1s ease-in-out;
+  transition: all 0.1s ease-in-out;
+}
+.warning:hover,
+.notice:hover,
+.error:hover,
+.success:hover {
+  opacity: 0.8;
+}
+.warning {
+  background-color: #daad25;
+}
+.success {
+  background-color: #008000;
+}
+.error {
+  background-color: #e60000;
+}
+.notice {
+  background-color: #3366ff;
 }
 img {
   height: auto;

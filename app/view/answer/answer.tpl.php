@@ -61,6 +61,7 @@
                                         <td class="comment-cell">
                                             <div class="comment-text">
                                                 <?= $this->di->textFilter->doFilter($comment->content, 'shortcode, markdown') ?>
+                                                <p><a id="edit" href='<?=$this->url->create('comments/update/' . $comment->id)?>'>Uppdatera</a></p>
                                                 <span id='comment-author'> - <?= $comment->acronym ?></span>
                                                 <span id='comment-time'> &#0149; <?= $comment->created ?></span>
                                             </div>

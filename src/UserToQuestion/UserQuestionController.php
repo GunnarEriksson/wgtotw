@@ -21,11 +21,39 @@ class UserQuestionController implements \Anax\DI\IInjectionAware
 
     public function addAction($userId, $questionId)
     {
-        $isAdded = $this->addQuestionToUser($userId, $questionId);
-
-        if ($isAdded === false) {
-            $this->showErrorInfo("Varning! Kunde inte knyta användare till frågan!");
+        if ($this->isAllowedToAddQuestionToUser($userId, $questionId)) {
+            if ($this->addQuestionToUser($userId, $questionId) === false) {
+                $warningMessage = "Kunde inte knyta användare till frågan i DB!";
+                $this->flash->warningMessage($warningMessage);
+            }
+        } else {
+            $this->pageNotFound();
         }
+    }
+
+    private function isAllowedToAddQuestionToUser($userId, $questionId)
+    {
+        $isAllowed = false;
+
+        if ($this->LoggedIn->isAllowed($userId)) {
+            $isAllowed = $this->isIdLastInserted($questionId);
+        }
+
+        return $isAllowed;
+    }
+
+    private function isIdLastInserted($questionId)
+    {
+        $isAllowed = false;
+
+        $lastInsertedId = $this->session->get('lastInsertedId');
+        if (!empty($lastInsertedId)) {
+            if ($lastInsertedId === $questionId) {
+                $isAllowed = true;
+            }
+        }
+
+        return $isAllowed;
     }
 
     private function addQuestionToUser($userId, $questionId)
@@ -38,19 +66,19 @@ class UserQuestionController implements \Anax\DI\IInjectionAware
         return $isSaved;
     }
 
-    private function showErrorInfo($info)
+    /**
+     * Helper method to show page 404, page not found.
+     *
+     * Shows page 404 with the text that the page could not be found and you
+     * must login to get the page you are looking for.
+     *
+     * @return void
+     */
+    private function pageNotFound()
     {
-        $content = [
-            'title'         => 'Ett fel har uppstått!',
-            'subtitle'      => 'Problem med knyta frågeställare till fråga',
-            'message'       => $info,
-            'url'           => $_SERVER["HTTP_REFERER"],
-        ];
-
         $this->dispatcher->forward([
             'controller' => 'errors',
-            'action'     => 'view',
-            'params'     => [$content]
+            'action'     => 'page-not-found'
         ]);
     }
 }

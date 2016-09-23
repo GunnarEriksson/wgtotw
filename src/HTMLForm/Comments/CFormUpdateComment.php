@@ -12,19 +12,21 @@ class CFormUpdateComment extends \Mos\HTMLForm\CForm
         \Anax\MVC\TRedirectHelpers;
 
     private $id;
-    private $pageKey;
-
+    private $score;
+    private $created;
+    private $questionId;
 
     /**
      * Constructor
      *
-     * @param [] $userData the data connected to the user.
      * @param string $pageKey the page name for the comment.
      */
-    public function __construct($userData, $pageKey)
+    public function __construct($commentData, $questionId)
     {
-        $this->id = $userData['id'];
-        $this->pageKey = $pageKey;
+        $this->id = $commentData['id'];
+        $this->score = $commentData['score'];
+        $this->created = $commentData['created'];
+        $this->questionId = $questionId;
 
         parent::__construct([], [
             'content' => [
@@ -32,38 +34,16 @@ class CFormUpdateComment extends \Mos\HTMLForm\CForm
                 'label'       => 'Kommentar',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => $userData['content'],
-            ],
-            'name' => [
-                'type'        => 'text',
-                'label'       => 'Namn',
-                'required'    => true,
-                'validation'  => ['not_empty'],
-                'value'       => $userData['name'],
-            ],
-            'web' => [
-                'type'        => 'text',
-                'label'       => 'Hemsida',
-                'required'    => false,
-                'validation'  => ['not_empty'],
-                'value'       => $userData['web'],
-            ],
-            'mail' => [
-                'type'        => 'text',
-                'label'       => 'E-post',
-                'required'    => true,
-                'validation'  => ['not_empty', 'email_adress'],
-                'value'       => $userData['mail'],
+                'value'       => $commentData['content'],
+                'description' => 'Du kan använda <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a> för att formatera texten'
             ],
             'submit' => [
                 'type'      => 'submit',
                 'callback'  => [$this, 'callbackSubmit'],
-                'value'     => 'Uppdatera',
+                'value'     => 'Kommentera',
             ],
         ]);
     }
-
-
 
     /**
      * Customise the check() method.
@@ -76,8 +56,6 @@ class CFormUpdateComment extends \Mos\HTMLForm\CForm
         return parent::check([$this, 'callbackSuccess'], [$this, 'callbackFail']);
     }
 
-
-
     /**
      * Callback for submit-button.
      *
@@ -85,44 +63,18 @@ class CFormUpdateComment extends \Mos\HTMLForm\CForm
      */
     public function callbackSubmit()
     {
-        $this->newComment = $this->getModelObject($this->pageKey);
-        $isSaved = $this->newComment->save(array(
-            'id'        => $this->id,
-            'content'   => $this->Value('content'),
-            'name'      => $this->Value('name'),
-            'web'       => $this->Value('web'),
-            'mail'      => $this->Value('mail'),
-            'timestamp' => gmdate('Y-m-d H:i:s'),
-            'gravatar'  => 'http://www.gravatar.com/avatar/' . md5(strtolower(trim($this->Value('mail')))) . '.jpg',
+        $this->updateComment = new \Anax\Comments\Comment();
+        $this->updateComment->setDI($this->di);
+
+        $isSaved = $this->updateComment->save(array(
+            'id'            => $this->id,
+            'content'       => $this->Value('content'),
+            'score'         => $this->score,
+            'created'       => $this->created
         ));
 
         return $isSaved;
     }
-
-
-
-    /**
-     * Gets the model object for the table in the database.
-     *
-     * @param  string $tableName the name of the table.
-     *
-     * @return object the model object for the table in database.
-     */
-    private function getModelObject($tableName)
-    {
-        if (strcmp($tableName, "comments1") === 0) {
-            $model = new \Anax\Comment\Comments1();
-        } else {
-            $model = new \Anax\Comment\Comments2();
-        }
-
-        $model->setDI($this->di);
-
-        return $model;
-    }
-
-
-
 
     /**
      * Callback What to do if the form was submitted?
@@ -130,7 +82,12 @@ class CFormUpdateComment extends \Mos\HTMLForm\CForm
      */
     public function callbackSuccess()
     {
-        $this->redirectTo($this->pageKey);
+        if (isset($this->questionId)) {
+            $this->redirectTo('questions/id/' . $this->questionId);
+        } else {
+            $this->AddOutput("<p><i>Varning! Kan ej göra skicka vidare till sidan med frågan. Frågans id saknas.</i></p>");
+            $this->redirectTo();
+        }
     }
 
 
@@ -141,7 +98,7 @@ class CFormUpdateComment extends \Mos\HTMLForm\CForm
      */
     public function callbackFail()
     {
-        $this->AddOutput("<p><i>Kommentaren kunde inte uppdateras i databasen!</i></p>");
+        $this->AddOutput("<p><i>Kommentar kunde inte uppdateras i databasen!</i></p>");
         $this->redirectTo();
     }
 }
