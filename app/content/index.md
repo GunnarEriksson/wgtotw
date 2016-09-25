@@ -5,6 +5,6 @@ Välkommen till allt om landskapsfotografering
 </figure>
 Välkommen till sidan Allt Om landskapsfotografering. Sidan för vi som är
 intresserade av landskapsfotografering. Här delar vi med oss av vår kunskap om
-allt som gäller landskapsfotografering som t ex platser, utrustning och teknik
+allt som gäller landskapsfotografering som t ex platser, utrustning och teknik.
 
 Välkommen!

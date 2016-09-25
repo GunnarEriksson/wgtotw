@@ -48,9 +48,9 @@ return [
 
         // This is a menu item
         'userAdmin'  => [
-            'text'  => ($this->di->session->has('user') ? 'Profil' : 'Login'),
-            'url'   => ($this->di->session->has('user') ? $this->di->get('url')->create('profile') : $this->di->get('url')->create('login')),
-            'title' => ($this->di->session->has('user') ? 'Profil' : 'Login')
+            'text'  => ($this->di->LoggedIn->isLoggedin() ? 'Profil' : 'Login'),
+            'url'   => ($this->di->LoggedIn->isLoggedin() ? $this->di->get('url')->create('profile') : $this->di->get('url')->create('login')),
+            'title' => ($this->di->LoggedIn->isLoggedin() ? 'Profil' : 'Login')
         ],
 
         // This is a menu item

@@ -13,7 +13,7 @@ class UserCommentController implements \Anax\DI\IInjectionAware
      */
     public function initialize()
     {
-        $this->di->session();
+        $this->session();
 
         $this->userToComment = new \Anax\UserToComment\User2Comment();
         $this->userToComment->setDI($this->di);

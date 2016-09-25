@@ -15,7 +15,7 @@ class UserLoginController implements \Anax\DI\IInjectionAware
      */
     public function initialize()
     {
-        $this->di->session();
+        $this->session();
 
         $this->users = new \Anax\Users\User();
         $this->users->setDI($this->di);
@@ -28,15 +28,15 @@ class UserLoginController implements \Anax\DI\IInjectionAware
         $status = $form->check();
 
         $this->theme->setTitle("Logga in");
-        $this->di->views->add('users/userLoginLogoutForm', [
+        $this->views->add('users/userLoginLogoutForm', [
             'title' => "Logga in",
             'content' => $form->getHTML(),
         ], 'main');
 
-        $info = $this->di->fileContent->get('users/noAccountInfo.md');
-        $info = $this->di->textFilter->doFilter($info, 'shortcode, markdown');
+        $info = $this->fileContent->get('users/noAccountInfo.md');
+        $info = $this->textFilter->doFilter($info, 'shortcode, markdown');
 
-        $this->di->views->add('users/userCreateAccountInfo', [
+        $this->views->add('users/userCreateAccountInfo', [
             'title' => "Skapa konto",
             'content' => $info,
         ], 'sidebar');
@@ -49,7 +49,7 @@ class UserLoginController implements \Anax\DI\IInjectionAware
         $status = $form->check();
 
         $this->theme->setTitle("Logga ut");
-        $this->di->views->add('users/userLoginLogoutForm', [
+        $this->views->add('users/userLoginLogoutForm', [
             'title' => "Logga ut",
             'content' => $form->getHTML(),
         ], 'main');

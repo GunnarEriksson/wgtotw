@@ -1,5 +1,4 @@
-<h1><?= $title ?></h1>
-<h2><?= $user->acronym ?></h2>
+<h1><?= $user->acronym  ?></h1>
 <div id="user-profile">
     <div id='left'>
         <img src='<?= $user->gravatar ?>?s=90' alt='Gravatar'>
@@ -41,7 +40,56 @@
         </table>
     </div>
 
-    <?php if ($this->di->session->has('user') && $this->di->session->get('user')['id'] === $user->id) : ?>
+    <div id="user-activity" class="small">
+        <table>
+            <thead>
+                <tr>
+                    <th>Aktivitet</th>
+                    <th>Antal</th>
+                    <th>Poäng</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Frågor</td>
+                    <td><?= $activity['questions'] ?></td>
+                    <td><?= $activity['questionScore'] ?></td>
+                </tr>
+                <tr>
+                    <td>Svar</td>
+                    <td><?= $activity['answers'] ?></td>
+                    <td><?= $activity['answerScore'] ?></td>
+                </tr>
+                <tr>
+                    <td>Kommentarer</td>
+                    <td><?= $activity['comments'] ?></td>
+                    <td><?= $activity['commentScore'] ?></td>
+                </tr>
+                <tr>
+                    <td>Röstningar</td>
+                    <td><?= $user->numVotes ?></td>
+                    <td><?= $user->numVotes ?></td>
+                </tr>
+                <tr>
+                    <td>Accepterande</td>
+                    <td><?= $activity['accepts'] ?></td>
+                    <td><?= $activity['acceptScore'] ?></td>
+                </tr>
+                <tr>
+                    <td>Antal röster</td>
+                    <td></td>
+                    <td><?= $activity['rankPoints'] ?></td>
+                </tr>
+                <tr>
+                    <td>RANKNING</td>
+                    <td></td>
+                    <td><?= $activity['sum'] ?></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <?php if ($this->LoggedIn->getUserId() === $user->id) : ?>
         <div id="user-button">
             <ul id="edit-button">
                 <li><a href='<?=$this->url->create('users/update/' . $user->id)?>'>Uppdatera</a></li>

@@ -9,3 +9,134 @@
     margin: 0 0 0 10px;
     padding: 4px 0;
 }
+
+
+
+/**
+ * Questions
+ */
+#home-questions .question-wrapper {
+    margin: 0 .2em;
+    margin-bottom: 5px;
+}
+
+#home-questions .heading {
+    padding-left: .2em;
+}
+
+#home-questions .heading a {
+    color: #396a2f;
+}
+
+#home-questions .author-wrapper {
+    margin: 0;
+    padding-left: .2em;
+}
+
+#home-questions .author,
+#home-questions .time {
+    color: #848d95;
+    font-size: @fontSizeSmaller;
+}
+
+/**
+ * Tags
+ */
+#home-tags #popular-tags {
+    padding: 0 .4em;
+}
+#home-tags .tag {
+    background: #396a2f;
+    background: linear-gradient(#396a2f, #55a046);
+    display: inline-block;
+    margin-bottom: 5px;
+}
+#home-tags a {
+    color: #fff;
+    font-size: @fontSizeSmall;
+    margin-right: 5px;
+    padding: 2px 6px;
+}
+
+/**
+ * Users
+ */
+#home-users #active-users {
+    padding: 0 .4em;
+}
+
+#home-users table {
+    width: 100%
+}
+
+#home-users table td:first-child {
+    width: 10%;
+}
+
+#home-users table a {
+    color: #000;
+    text-decoration: none;
+}
+
+#home-users table a:hover {
+    color: #f5a06e;
+}
+
+/**
+ * User items at home page
+ * such as questions, answers
+ * and comments.
+ */
+.item-wrapper {
+    border: 1px solid #eee;
+    margin-bottom: 10px;
+    overflow: auto;
+ }
+
+.item-wrapper p {
+    margin-bottom: @magicNumber / 4;
+}
+
+.item-wrapper .item-statistics {
+    float: left;
+    text-align: center;
+    width: 7%;
+}
+
+.item-wrapper .fa-check {
+    color: #55a046;
+}
+
+.item-wrapper .item-statistics p {
+    margin: @magicNumber 0;
+}
+
+.item-wrapper .item {
+    float: left;
+    width: 92%;
+}
+
+.item-wrapper .item-author-wrapper {
+    border-top: 1px dashed #ddd;
+    padding: .4em;
+}
+
+.item-wrapper .item-heading,
+.item-wrapper .item-content {
+    padding: .4em;
+}
+
+.item-wrapper .item-heading h4 {
+    margin-bottom: @magicNumber / 4;
+}
+
+.item-wrapper .item-heading a {
+    color: #396a2f;
+    text-decoration: none;
+}
+
+.item-wrapper .item-author,
+.item-wrapper .item-time {
+    color: #396a2f;
+    font-size: @fontSizeSmall;
+}

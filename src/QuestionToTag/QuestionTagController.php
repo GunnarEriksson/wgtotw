@@ -15,7 +15,7 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
      */
     public function initialize()
     {
-        $this->di->session();
+        $this->session();
 
         $this->questionToTag = new \Anax\QuestionToTag\Question2Tag();
         $this->questionToTag->setDI($this->di);
@@ -161,13 +161,13 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
         $tagsToRemove = array_diff($oldTags, $newTags);
         if ($this->removeTagsFromQuestion($questionId, $tagsToRemove) === false) {
             $warningMessage = "Gamla taggar för frågan kunde inte tas bort i DB!";
-            $this->di->flash->warningMessage($warningMessage);
+            $this->flash->warningMessage($warningMessage);
         }
 
         $tagsToAdd = array_diff($newTags, $oldTags);
         if ($this->addTagsToQuestion($questionId, $tagsToAdd) === false) {
             $warningMessage = "Nya taggar kunde inte läggas till frågan i DB!";
-            $this->di->flash->warningMessage($warningMessage);
+            $this->flash->warningMessage($warningMessage);
         }
     }
 

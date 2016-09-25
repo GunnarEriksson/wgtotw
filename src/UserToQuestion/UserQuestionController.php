@@ -13,7 +13,7 @@ class UserQuestionController implements \Anax\DI\IInjectionAware
      */
     public function initialize()
     {
-        $this->di->session();
+        $this->session();
 
         $this->userToQuestion = new \Anax\UserToQuestion\User2Question();
         $this->userToQuestion->setDI($this->di);

@@ -13,7 +13,7 @@ class AnswerCommentController implements \Anax\DI\IInjectionAware
      */
     public function initialize()
     {
-        $this->di->session();
+        $this->session();
 
         $this->answerToComment = new \Anax\AnswerToComment\Answer2Comment();
         $this->answerToComment->setDI($this->di);

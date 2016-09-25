@@ -1,11 +1,3 @@
-<h1><?= $title ?></h1>
-<div id="questions-heading">
-<h3>Frågor</h3>
-<?php if ($this->di->session->has('user')) : ?>
-<span id='create-question'><a href='<?=$this->url->create('questions/add/')?>'>+Ny fråga</a></span>
-<?php endif; ?>
-</div>
-
 <?php if (is_array($questions)) : ?>
 <div id='questions'>
 <?php foreach ($questions as $question) : ?>
@@ -19,7 +11,7 @@
             <h4><a href='<?=$this->url->create('questions/id/' . $question->id)?>'><?= $question->title ?></a></h4>
         </div>
         <div id="content">
-            <?= $this->di->textFilter->doFilter($question->content, 'shortcode, markdown') ?>
+            <?= $this->textFilter->doFilter($question->content, 'shortcode, markdown') ?>
         </div>
         <div id="author-wrapper">
             <span id='author'><?= $question->author ?></span>

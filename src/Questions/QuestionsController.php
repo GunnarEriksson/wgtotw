@@ -12,7 +12,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      */
     public function initialize()
     {
-        $this->di->session();
+        $this->session();
 
         $this->questions = new \Anax\Questions\Question();
         $this->questions->setDI($this->di);
@@ -23,15 +23,19 @@ class QuestionsController implements \Anax\DI\IInjectionAware
 
     public function listAction()
     {
-        if ($this->di->flash->hasMessage()) {
+        if ($this->flash->hasMessage()) {
             $this->showFlashMessage();
         }
 
         $allQuestions = $this->getQuestionsWithUserId('Lf_Question.id desc');
 
-        $this->di->theme->setTitle("Alla frågor");
-        $this->views->add('question/questions', [
+        $this->theme->setTitle("Alla frågor");
+
+        $this->views->add('question/questionsHeading', [
             'title' => "Alla Frågor",
+        ], 'main-wide');
+
+        $this->views->add('question/questions', [
             'questions'  => $allQuestions,
         ], 'main-wide');
 
@@ -63,7 +67,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
         $question = $this->findQuestionFromId($id);
 
         if ($question) {
-            if ($this->di->flash->hasMessage()) {
+            if ($this->flash->hasMessage()) {
                 $this->showFlashMessage();
             }
 
@@ -83,7 +87,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
 
         $orderBy = isset($orderBy) ? 'created desc' : 'score desc' ;
 
-        $this->di->dispatcher->forward([
+        $this->dispatcher->forward([
             'controller' => 'answers',
             'action'     => 'list',
             'params'     => [$id, $orderBy]
@@ -92,7 +96,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
 
     private function findQuestionFromId($questionId)
     {
-        $questionWithUserInfo = $this->questions->query('Lf_Question.*, Lf_User.acronym, Lf_User.gravatar')
+        $questionWithUserInfo = $this->questions->query('Lf_Question.*, Lf_User.id AS userId, Lf_User.acronym, Lf_User.gravatar')
             ->join('User2Question', 'Lf_Question.id = Lf_User2Question.idQuestion')
             ->join('User', 'Lf_User2Question.idUser = Lf_User.id')
             ->where('Lf_Question.id = ?')
@@ -103,7 +107,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
 
     private function showFlashMessage()
     {
-        $this->di->dispatcher->forward([
+        $this->dispatcher->forward([
             'controller' => 'flash',
             'action'     => 'flash',
         ]);
@@ -123,7 +127,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
 
     private function getAllCommentsForSpecificQuestion($questionId)
     {
-        $comments = $this->questions->query('C.*, U.acronym')
+        $comments = $this->questions->query('C.*, U.id AS userId, U.acronym')
             ->join('Question2Comment AS Q2C', 'Q2C.idQuestion = Lf_Question.id')
             ->join('Comment AS C', 'Q2C.idComment = C.id')
             ->join('User2Comment AS U2C', 'C.id = U2C.idComment')
@@ -192,8 +196,8 @@ class QuestionsController implements \Anax\DI\IInjectionAware
         $form->setDI($this->di);
         $status = $form->check();
 
-        $this->di->theme->setTitle("Skapa fråga");
-        $this->di->views->add('question/questionForm', [
+        $this->theme->setTitle("Skapa fråga");
+        $this->views->add('question/questionForm', [
             'title' => "Skapa Fråga",
             'content' => $form->getHTML(),
         ], 'main');
@@ -240,10 +244,14 @@ class QuestionsController implements \Anax\DI\IInjectionAware
         $label = $this->getTagLabelFromTagId($tagId);
         $title = empty($label) ? "Frågor" : "Frågor om " . $label;
 
-        $this->di->theme->setTitle($title);
+        $this->theme->setTitle($title);
+
+        $this->views->add('question/questionsHeading', [
+            'title' => "Alla Frågor",
+        ], 'main-wide');
+
         $this->views->add('question/questions', [
-            'title' => $title,
-            'questions'  => $questions,
+            'questions' => $questions,
         ], 'main-wide');
     }
 
@@ -266,14 +274,6 @@ class QuestionsController implements \Anax\DI\IInjectionAware
             $this->updateQuestion($questionId);
         } else {
             $this->handleUpdateIsNotAllowed($questionId);
-            if ($this->LoggedIn->isLoggedin()) {
-                $warningMessage = "Endast egna frågor kan uppdateras!";
-                $this->flash->warningMessage($warningMessage);
-
-                $this->redirectToQuestion($questionId);
-            } else {
-                $this->redirectToLoginPage();
-            }
         }
     }
 
@@ -331,8 +331,8 @@ class QuestionsController implements \Anax\DI\IInjectionAware
         $form->setDI($this->di);
         $status = $form->check();
 
-        $this->di->theme->setTitle("Uppdatera");
-        $this->di->views->add('question/questionForm', [
+        $this->theme->setTitle("Uppdatera");
+        $this->views->add('question/questionForm', [
             'title' => $questionInfo['title'],
             'content' => $form->getHTML(),
         ], 'main');
@@ -346,8 +346,8 @@ class QuestionsController implements \Anax\DI\IInjectionAware
 
             $this->showErrorMessage($subtitle, $message);
         } else if ($this->LoggedIn->isLoggedin()) {
-            $warningMessage = "Endast egna svar kan uppdateras!";
-            $this->flash->warningMessage($warningMessage);
+            $noticeMessage = "Endast egna frågor kan uppdateras!";
+            $this->flash->noticeMessage($noticeMessage);
 
             $this->redirectToQuestion($questionId);
         } else {
@@ -485,11 +485,52 @@ class QuestionsController implements \Anax\DI\IInjectionAware
 
     private function getLatestQuestions($num)
     {
-        $questions = $this->questions->query('Lf_Question.id, Lf_Question.title')
-            ->orderBy('created asc')
+        $questionsAndUserIds = $this->questions->query('Lf_Question.id, Lf_Question.title,
+                                                        Lf_Question.created, Lf_User.acronym AS author')
+            ->join('User2Question', 'Lf_Question.id = Lf_User2Question.idQuestion')
+            ->join('User', 'Lf_User2Question.idUser = Lf_User.id')
+            ->orderBy('Lf_Question.created desc')
             ->limit($num)
             ->execute();
 
-        return $questions;
+        return $questionsAndUserIds;
+    }
+
+    public function listUserQuestionsAction($userId = null)
+    {
+        if (isset($userId)) {
+            $this->lisUserQuestions($userId);
+        } else {
+            $errorMessage = "Användare id saknas. Kan ej lista frågor!";
+            $this->flash->errorMessage($errorMessage);
+        }
+    }
+
+    private function lisUserQuestions($userId)
+    {
+        $allQuestions = $this->getAllQuestionsForUser($userId);
+
+        $this->views->add('users/itemHeading', [
+            'numOfAnswers'  => count($allQuestions),
+            'item'          => "Frågor",
+            'type'          => "question",
+            'userId'        => $userId,
+        ], 'main-wide');
+
+        $this->views->add('question/questions', [
+            'questions'  => $allQuestions,
+        ], 'main-wide');
+    }
+
+    private function getAllQuestionsForUser($userId)
+    {
+        $questionsAndUserId = $this->questions->query('Lf_Question.*, U.acronym AS author')
+            ->join('User2Question AS U2C', 'Lf_Question.id = U2C.idQuestion')
+            ->join('User AS U', 'U2C.idUser = U.id')
+            ->where('U.id = ?')
+            ->orderBy('created desc')
+            ->execute([$userId]);
+
+        return $questionsAndUserId;
     }
 }

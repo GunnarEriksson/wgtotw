@@ -16,7 +16,7 @@ class TagsController implements \Anax\DI\IInjectionAware
      */
     public function initialize()
     {
-        $this->di->session();
+        $this->session();
 
         $this->tags = new \Anax\Tags\Tag();
         $this->tags->setDI($this->di);
@@ -31,7 +31,7 @@ class TagsController implements \Anax\DI\IInjectionAware
     {
         $allTags = $this->tags->findAll();
 
-        $this->di->theme->setTitle("Alla taggar");
+        $this->theme->setTitle("Alla taggar");
         $this->views->add('tag/tags', [
             'title' => "Alla Taggar",
             'tags'  => $allTags,
@@ -101,6 +101,7 @@ class TagsController implements \Anax\DI\IInjectionAware
     {
         $tags = $this->tags->query('Lf_Tag.id, Lf_Tag.label, Lf_Tag.numQuestions')
             ->orderBy('numQuestions desc')
+            ->where('numQuestions > 0')
             ->limit($num)
             ->execute();
 

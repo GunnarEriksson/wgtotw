@@ -13,7 +13,7 @@ class ErrorsController implements \Anax\DI\IInjectionAware
      */
     public function initialize()
     {
-        $this->di->session();
+        $this->session();
     }
 
     public function viewAction($errorInfo)

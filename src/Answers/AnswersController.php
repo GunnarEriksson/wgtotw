@@ -15,7 +15,7 @@ class AnswersController implements \Anax\DI\IInjectionAware
      */
     public function initialize()
     {
-        $this->di->session();
+        $this->session();
 
         $this->answers = new \Anax\Answers\Answer();
         $this->answers->setDI($this->di);
@@ -28,18 +28,20 @@ class AnswersController implements \Anax\DI\IInjectionAware
     {
         $allAnswers = $this->listAllAnswersForOneQuestion($questionId, $orderBy);
         if (!empty($allAnswers)) {
+
             $this->createAnswerHeading($questionId, count($allAnswers), $orderBy);
 
             foreach ($allAnswers as $answer) {
+                $questionUserId = $this->getUserIdForParentQuestion($answer->id);
                 $comments = $this->getAllCommentsForSpecificAnswer($answer->id);
-                $this->createAnswerView($answer, $comments);
+                $this->createAnswerView($answer, $comments, $questionUserId);
             }
         }
     }
 
     private function listAllAnswersForOneQuestion($questionId, $orderBy)
     {
-        $answers = $this->answers->query('Lf_Answer.*, U.acronym, U.gravatar')
+        $answers = $this->answers->query('Lf_Answer.*, U.id AS answerUserId, U.acronym, U.gravatar')
             ->join('Question2Answer AS Q2A', 'Q2A.idAnswer = Lf_Answer.id')
             ->join('Question AS Q', 'Q2A.idQuestion = Q.id')
             ->join('User2Answer AS U2A', 'Lf_Answer.id = U2A.idAnswer')
@@ -51,20 +53,33 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return $answers;
     }
 
+    private function getUserIdForParentQuestion($answerId)
+    {
+        $questionUserId = $this->answers->query('U.id')
+            ->join('Question2Answer AS Q2A', 'Q2A.idAnswer = Lf_Answer.id')
+            ->join('Question AS Q', 'Q2A.idQuestion = Q.id')
+            ->join('User2Question AS U2Q', 'U2Q.idQuestion = Q.id')
+            ->join('User AS U', 'U2Q.idUser = U.id')
+            ->where('Lf_Answer.id = ?')
+            ->execute([$answerId]);
+
+        return isset($questionUserId->id) ? $questionUserId->id : false;
+    }
+
     private function createAnswerHeading($questionId, $numOfAnswers, $orderBy)
     {
         $latest = strcmp($orderBy, 'created desc') === 0 ? 'latest' : null;
 
         $this->views->add('answer/heading', [
-            'questionId'   => $questionId,
+            'questionId'    => $questionId,
             'numOfAnswers'  => $numOfAnswers,
-            'latest'  => $latest,
+            'latest'        => $latest,
         ], 'main-wide');
     }
 
     private function getAllCommentsForSpecificAnswer($answerId)
     {
-        $comments = $this->answers->query('C.*, U.acronym')
+        $comments = $this->answers->query('C.*, U.id AS userId, U.acronym')
             ->join('Answer2Comment AS A2C', 'A2C.idAnswer = Lf_Answer.id')
             ->join('Comment AS C', 'A2C.idComment = C.id')
             ->join('User2Comment AS U2C', 'C.id = U2C.idComment')
@@ -76,11 +91,12 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return $comments;
     }
 
-    private function createAnswerView($answer, $comments)
+    private function createAnswerView($answer, $comments, $questionUserId)
     {
         $this->views->add('answer/answer', [
-            'answer'    => $answer,
-            'comments'  => $comments
+            'answer'            => $answer,
+            'comments'          => $comments,
+            'questionUserId'    => $questionUserId
         ], 'main-wide');
     }
 
@@ -257,7 +273,7 @@ class AnswersController implements \Anax\DI\IInjectionAware
         if (isset($answerId)) {
             if ($this->LoggedIn->isLoggedin()) {
                 $authorId = $this->getAnswerAuthorId($answerId);
-                $isUpdateAllowed = $this->LoggedIn->isAllowed($answerId);
+                $isUpdateAllowed = $this->LoggedIn->isAllowed($authorId);
             }
         }
 
@@ -322,8 +338,8 @@ class AnswersController implements \Anax\DI\IInjectionAware
         } else if ($this->LoggedIn->isLoggedin()) {
             $questionInfo = $this->getQuestionInfoFromAnswerId($answerId);
             $questionId = isset($questionInfo->id) ? $questionInfo->id : false;
-            $warningMessage = "Endast egna svar kan uppdateras!";
-            $this->flash->warningMessage($warningMessage);
+            $noticeMessage = "Endast egna svar kan uppdateras!";
+            $this->flash->noticeMessage($noticeMessage);
             if ($questionId) {
                 $this->redirectToQuestion($questionId);
             } else {
@@ -390,7 +406,13 @@ class AnswersController implements \Anax\DI\IInjectionAware
         if ($this->LoggedIn->isLoggedin()) {
             if ($this->isUserAllowedToAccept($questionInfo)) {
                 $this->updateAccept($answerId, $questionInfo);
+            } else {
+                $noticeMessage = "Svar kan endast accepteras för egna frågor!";
+                $this->flash->noticeMessage($noticeMessage);
             }
+        } else {
+            $noticeMessage = "Du måste vara inloggad för att kunna acceptera svar på egna frågor!";
+            $this->flash->noticeMessage($noticeMessage);
         }
 
         $this->redirectToQuestion($questionInfo->questionId);
@@ -428,7 +450,13 @@ class AnswersController implements \Anax\DI\IInjectionAware
         $answerIdAccept = $this->getAcceptedAnswerIdForQuestion($questionId);
         if ($answerIdAccept === false) {
             if ($this->setAnswerToAccepted($answerId)) {
+                $this->session->set('lastInsertedId', $answerId);
                 $this->addActivityScoreToUser($answerId);
+                $this->increaseAcceptsCounter($answerId);
+
+                if ($this->session->has('lastInsertedId')) {
+                    unset($_SESSION["lastInsertedId"]);
+                }
             }
         } else {
             if ($this->unsetAnswerToAccepted($answerIdAccept)) {
@@ -472,6 +500,15 @@ class AnswersController implements \Anax\DI\IInjectionAware
         ]);
     }
 
+    private function increaseAcceptsCounter($id)
+    {
+        $this->dispatcher->forward([
+            'controller' => 'users',
+            'action'     => 'increase-accepts-counter',
+            'params'     => [$id]
+        ]);
+    }
+
     private function unsetAnswerToAccepted($answerIdAccept)
     {
         $isSaved = $this->answers->save(array(
@@ -480,5 +517,44 @@ class AnswersController implements \Anax\DI\IInjectionAware
         ));
 
         return $isSaved;
+    }
+
+    public function listUserAnswersAction($userId = null)
+    {
+        if (isset($userId)) {
+            $this->listUserAnswers($userId);
+        } else {
+            $errorMessage = "Användare id saknas. Kan ej lista svar!";
+            $this->flash->errorMessage($errorMessage);
+        }
+    }
+
+    private function listUserAnswers($userId)
+    {
+        $allAnswers = $this->getAllAnswersForUser($userId);
+
+        $this->views->add('users/itemHeading', [
+            'numOfAnswers'  => count($allAnswers),
+            'item'          => "Svar",
+            'type'          => "answer",
+            'userId'        => $userId,
+        ], 'main-wide');
+
+        $this->views->add('answer/userAnswers', [
+            'answers'  => $allAnswers,
+        ], 'main-wide');
+    }
+
+    private function getAllAnswersForUser($userId)
+    {
+        $answerData = $this->answers->query('Lf_Answer.*, Q.id AS questionId, Q.title AS questionTitle, U.id AS userId, U.acronym')
+            ->join('User2Answer AS U2A', 'U2A.idAnswer = Lf_Answer.id')
+            ->join('User AS U', 'U2A.idUser = U.id')
+            ->join('Question2Answer AS Q2A', 'Q2A.idAnswer = Lf_Answer.id')
+            ->join('Question AS Q', 'Q2A.idQuestion = Q.id')
+            ->where('U.id = ?')
+            ->execute([$userId]);
+
+        return $answerData;
     }
 }

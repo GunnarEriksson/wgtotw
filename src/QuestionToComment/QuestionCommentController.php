@@ -13,7 +13,7 @@ class QuestionCommentController implements \Anax\DI\IInjectionAware
      */
     public function initialize()
     {
-        $this->di->session();
+        $this->session();
 
         $this->questionToComment = new \Anax\QuestionToComment\Question2Comment();
         $this->questionToComment->setDI($this->di);

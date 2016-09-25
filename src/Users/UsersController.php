@@ -16,7 +16,7 @@ class UsersController implements \Anax\DI\IInjectionAware
      */
     public function initialize()
     {
-        $this->di->session();
+        $this->session();
 
         $this->users = new \Anax\Users\User();
         $this->users->setDI($this->di);
@@ -58,7 +58,7 @@ class UsersController implements \Anax\DI\IInjectionAware
             'object1' => [
                 'title'    => 'Gravatar',
                 'function'    => function ($user) {
-                    if ($this->di->session->has('user')) {
+                    if ($this->LoggedIn->isLoggedin()) {
                         return '<a href="users/id/'. $user->id . '"><img src="' . $user->gravatar .'?s=40" alt="Gravatar"></a>';
                     } else {
                         return '<img src="' . $user->gravatar .'?s=40" alt="Gravatar">';
@@ -68,7 +68,7 @@ class UsersController implements \Anax\DI\IInjectionAware
             'object2' => [
                 'title'    => 'Akronym',
                 'function'    => function ($user) {
-                    if ($this->di->session->has('user')) {
+                    if ($this->LoggedIn->isLoggedin()) {
                         return '<a href="users/id/'. $user->id . '">' . $user->acronym . '</a>';
                     } else {
                         return $user->acronym;
@@ -87,8 +87,8 @@ class UsersController implements \Anax\DI\IInjectionAware
                     $edit = null;
                     $delete = null;
 
-                    if ($this->di->session->has('user')) {
-                        $acronym = $this->di->session->get('user')['acronym'];
+                    $acronym = $this->LoggedIn->getAcronym();
+                    if ($acronym) {
                         if (strcmp($acronym, "admin") === 0 || strcmp($acronym, $user->acronym) === 0) {
                             $edit = '<a href="users/update/' . $user->id . '"><i class="fa fa-pencil-square-o" style="color:green" aria-hidden="true"></i></a>';
                         }
@@ -109,10 +109,26 @@ class UsersController implements \Anax\DI\IInjectionAware
      *
      * @return void
      */
-    public function idAction($id = null)
+    public function idAction($id = null, $type = "question")
     {
-        if ($this->di->session->has('user')) {
-            $this->showUserProfile($id);
+        if ($this->LoggedIn->isLoggedin()) {
+            if (isset($id)) {
+                $this->showUserProfile($id);
+                if (strcmp($type, "comment") === 0) {
+                    $this->showUserComments($id);
+                } else if (strcmp($type, "answer") === 0) {
+                    $this->showUserAnswers($id);
+                } else {
+                    $this->showUserQuestions($id);
+                }
+            } else {
+                $content = [
+                    'subtitle' => 'Användare id saknas',
+                    'message' =>  'Användare id saknas, kan EJ visa användareprofil.'
+                ];
+
+                $this->showNoSuchUserMessage($content);
+            }
         } else {
             $this->pageNotFound();
         }
@@ -131,13 +147,20 @@ class UsersController implements \Anax\DI\IInjectionAware
     private function showUserProfile($id)
     {
         $user = $this->users->find($id);
+        $activityInfo = $this->createDefaultUserActivityInfo();
+        $activityInfo = $this->getQuestionScores($id, $activityInfo);
+        $activityInfo = $this->getAnswerScores($id, $activityInfo);
+        $activityInfo = $this->getCommentScores($id, $activityInfo);
+        $activityInfo = $this->getNumberOfAccepts($id, $activityInfo);
+        $activityInfo = $this->getRankPoints($activityInfo);
+        $activityInfo = $this->calculateSum($activityInfo, $user->getProperties());
 
         if ($user) {
             $this->theme->setTitle("Användareprofil");
             $this->views->add('users/userView', [
-                'title' => 'Profil',
-                'user' => $user,
-            ]);
+                'activity'      => $activityInfo,
+                'user'          => $user,
+            ], 'main-wide');
         } else {
             $content = [
                 'subtitle' => 'Hittar ej användare',
@@ -146,6 +169,125 @@ class UsersController implements \Anax\DI\IInjectionAware
 
             $this->showNoSuchUserMessage($content);
         }
+    }
+
+    private function createDefaultUserActivityInfo()
+    {
+        $userInfoScores = [
+            'questions'     => 0,
+            'questionScore' => 0,
+            'questionRank'  => 0,
+            'answers'       => 0,
+            'answerScore'   => 0,
+            'answerRank'    => 0,
+            'comments'      => 0,
+            'commentScore'  => 0,
+            'commentRank'   => 0,
+            'accepts'       => 0,
+            'acceptScore'   => 0,
+            'rankPoints'    => 0,
+            'sum'           => 0,
+        ];
+
+        return $userInfoScores;
+    }
+
+    private function getQuestionScores($userId, $activityInfo)
+    {
+        $questionScores = $this->users->query('Q.score')
+            ->join('User2Question AS U2Q', 'U2Q.idUser = Lf_User.id')
+            ->join('Question AS Q', 'U2Q.idQuestion = Q.id')
+            ->where('Lf_User.id = ?')
+            ->execute([$userId]);
+
+        $scores = 0;
+        foreach ($questionScores as $questionScore) {
+            $scores += $questionScore->score;
+        }
+
+        $activityInfo['questions'] = count($questionScores);
+        $activityInfo['questionScore'] = $activityInfo['questions'] * 5;
+        $activityInfo['questionRank'] = $scores;
+
+        return $activityInfo;
+    }
+
+    private function getAnswerScores($userId, $activityInfo)
+    {
+        $answerScores = $this->users->query('A.score')
+            ->join('User2Answer AS U2A', 'U2A.idUser = Lf_User.id')
+            ->join('Answer AS A', 'U2A.idAnswer = A.id')
+            ->where('Lf_User.id = ?')
+            ->execute([$userId]);
+
+        $scores = 0;
+        foreach ($answerScores as $answerScore) {
+            $scores += $answerScore->score;
+        }
+
+        $activityInfo['answers'] = count($answerScores);
+        $activityInfo['answerScore'] = $activityInfo['answers'] * 3;
+        $activityInfo['answerRank'] = $scores;
+
+        return $activityInfo;
+    }
+
+    private function getCommentScores($userId, $activityInfo)
+    {
+        $commentScores = $this->users->query('C.score')
+            ->join('User2Comment AS U2C', 'U2C.idUser = Lf_User.id')
+            ->join('Comment AS C', 'U2C.idComment = C.id')
+            ->where('Lf_User.id = ?')
+            ->execute([$userId]);
+
+        $scores = 0;
+        foreach ($commentScores as $commentScore) {
+            $scores += $commentScore->score;
+        }
+
+        $activityInfo['comments'] = count($commentScores);
+        $activityInfo['commentScore'] = $activityInfo['comments'] * 2;
+        $activityInfo['commentRank'] = $scores;
+
+        return $activityInfo;
+    }
+
+    private function getNumberOfAccepts($userId, $activityInfo)
+    {
+        $acceptedAnswers = $this->users->query('A.id')
+            ->join('User2Question AS U2Q', 'U2Q.idUser = Lf_User.id')
+            ->join('Question AS Q', 'U2Q.idQuestion = Q.id')
+            ->join('Question2Answer AS Q2A', 'Q2A.idQuestion = Q.id')
+            ->join('Answer AS A', 'Q2A.idAnswer = A.id')
+            ->where('Lf_User.id = ?')
+            ->andWhere('A.accepted=1')
+            ->execute([$userId]);
+
+        $activityInfo['accepts'] = count($acceptedAnswers);
+        $activityInfo['acceptScore'] = $activityInfo['accepts'] * 3;
+
+        return $activityInfo;
+    }
+
+    private function getRankPoints($activityInfo)
+    {
+        $rankPoints = $activityInfo['questionRank'] + $activityInfo['answerRank'] + $activityInfo['commentRank'];
+        $activityInfo['rankPoints'] = $rankPoints;
+
+        return $activityInfo;
+    }
+
+    private function calculateSum($activityInfo, $user)
+    {
+        $votesScore = isset($user['numVotes']) ? $user['numVotes'] : 0;
+
+        $sum = $activityInfo['questionScore'] + $activityInfo['answerScore'] +
+            $activityInfo['commentScore'] + $activityInfo['acceptScore'] +
+            $votesScore + $activityInfo['rankPoints'];
+
+        $activityInfo['sum'] = $sum;
+
+        return $activityInfo;
     }
 
     /**
@@ -160,12 +302,39 @@ class UsersController implements \Anax\DI\IInjectionAware
      */
     private function showNoSuchUserMessage($content)
     {
-        $this->theme->setTitle("View user with id");
+        $this->theme->setTitle("Hittar ej användare");
         $this->views->add('error/errorInfo', [
             'title' => 'Användare',
             'subtitle' => $content['subtitle'],
             'message' => $content['message'],
         ], 'main');
+    }
+
+    private function showUserComments($id)
+    {
+        $this->dispatcher->forward([
+            'controller' => 'comments',
+            'action'     => 'list-user-comments',
+            'params'     => [$id]
+        ]);
+    }
+
+    private function showUserAnswers($id)
+    {
+        $this->dispatcher->forward([
+            'controller' => 'answers',
+            'action'     => 'list-user-answers',
+            'params'     => [$id]
+        ]);
+    }
+
+    private function showUserQuestions($id)
+    {
+        $this->dispatcher->forward([
+            'controller' => 'questions',
+            'action'     => 'list-user-questions',
+            'params'     => [$id]
+        ]);
     }
 
     /**
@@ -197,14 +366,14 @@ class UsersController implements \Anax\DI\IInjectionAware
         $form->setDI($this->di);
         $status = $form->check();
 
-        $this->di->theme->setTitle("Skapa konto");
-        $info = $this->di->fileContent->get('users/registerUserInfo.md');
-        $info = $this->di->textFilter->doFilter($info, 'shortcode, markdown');
-        $this->di->views->add('users/userInfo', [
+        $this->theme->setTitle("Skapa konto");
+        $info = $this->fileContent->get('users/registerUserInfo.md');
+        $info = $this->textFilter->doFilter($info, 'shortcode, markdown');
+        $this->views->add('users/userInfo', [
             'content' => $info,
         ], 'main');
 
-        $this->di->views->add('users/userForm', [
+        $this->views->add('users/userForm', [
             'title' => "Skapa Konto",
             'subtitle' => "Formulär",
             'content' => $form->getHTML(),
@@ -242,9 +411,9 @@ class UsersController implements \Anax\DI\IInjectionAware
     private function isUpdateProfileAllowed($id)
     {
         $isUpdateAllowed = false;
+        $user = $this->LoggedIn->getUserIdAndAcronym();
 
-        if ($this->di->session->has('user') && isset($id)) {
-            $user = $this->di->session->get('user', []);
+        if ($user && isset($id)) {
             if (strcmp($user['acronym'], "admin") === 0) {
                 $isUpdateAllowed = true;
             } else if ($user['id'] == $id) {
@@ -274,8 +443,8 @@ class UsersController implements \Anax\DI\IInjectionAware
             $form->setDI($this->di);
             $status = $form->check();
 
-            $this->di->theme->setTitle("Uppdatera profil");
-            $this->di->views->add('users/userForm', [
+            $this->theme->setTitle("Uppdatera profil");
+            $this->views->add('users/userForm', [
                 'title' => "Användare",
                 'subtitle' => "Uppdatera profil",
                 'content' => $form->getHTML(),
@@ -303,14 +472,14 @@ class UsersController implements \Anax\DI\IInjectionAware
             $userId = $this->LoggedIn->getUserId();
             if ($this->updateActivityScore($userId, $activityScore) === false) {
                 $warningMessage = "Aktivtetspoäng kunde inte sparas för användare i DB!";
-                $this->di->flash->warningMessage($warningMessage);
+                $this->flash->warningMessage($warningMessage);
+
+                if ($this->session->has('lastInsertedId')) {
+                    unset($_SESSION["lastInsertedId"]);
+                }
             }
         } else {
             $this->pageNotFound();
-        }
-
-        if ($this->session->has('lastInsertedId')) {
-            unset($_SESSION["lastInsertedId"]);
         }
     }
 
@@ -356,6 +525,241 @@ class UsersController implements \Anax\DI\IInjectionAware
         return empty($activityScore) ? 0 : $activityScore[0]->activityScore;
     }
 
+    /**
+     * Update user
+     *
+     * @param integer $id of user to delete.
+     *
+     * @return void
+     */
+    public function increaseQuestionsCounterAction($lastInsertedId)
+    {
+        if ($this->isAllowedToAddScore($lastInsertedId)) {
+            $userId = $this->LoggedIn->getUserId();
+            if ($this->increaseQuestionsCounter($userId) === false) {
+                $warningMessage = "Antal frågor kunde EJ sparas i DB!";
+                $this->flash->warningMessage($warningMessage);
+            }
+        } else {
+            $errorMessage = "Kan EJ stega räknaren för antal frågor!";
+            $this->flash->errorMessage($errorMessage);
+        }
+    }
+
+    private function increaseQuestionsCounter($userId)
+    {
+        $numOfQuestions = $this->getNumOfQuestionsFromDb($userId);
+        if ($numOfQuestions === false) {
+            $isSaved = false;
+        } else {
+            $numOfQuestions++;
+
+            $isSaved = $this->users->save(array(
+                'id'            => $userId,
+                'numQuestions'  => $numOfQuestions,
+            ));
+        }
+
+        return $isSaved;
+    }
+
+    private function getNumOfQuestionsFromDb($userId)
+    {
+        $numOfQuestions = $this->users->query('numQuestions')
+            ->where('id = ?')
+            ->execute([$userId]);
+
+        return empty($numOfQuestions) ? 0 : $numOfQuestions[0]->numQuestions;
+    }
+
+    /**
+     * Update user
+     *
+     * @param integer $id of user to delete.
+     *
+     * @return void
+     */
+    public function increaseAnswersCounterAction($lastInsertedId)
+    {
+        if ($this->isAllowedToAddScore($lastInsertedId)) {
+            $userId = $this->LoggedIn->getUserId();
+            if ($this->increaseAnswersCounter($userId) === false) {
+                $warningMessage = "Antal svar kunde EJ sparas i DB!";
+                $this->flash->warningMessage($warningMessage);
+            }
+        } else {
+            $errorMessage = "Kan EJ stega räknaren för antal svar!";
+            $this->flash->errorMessage($errorMessage);
+        }
+    }
+
+    private function increaseAnswersCounter($userId)
+    {
+        $numOfAnswers = $this->getNumOfAnswersFromDb($userId);
+        if ($numOfAnswers === false) {
+            $isSaved = false;
+        } else {
+            $numOfAnswers++;
+
+            $isSaved = $this->users->save(array(
+                'id'            => $userId,
+                'numAnswers'  => $numOfAnswers,
+            ));
+        }
+
+        return $isSaved;
+    }
+
+    private function getNumOfAnswersFromDb($userId)
+    {
+        $numOfAnswers = $this->users->query('numAnswers')
+            ->where('id = ?')
+            ->execute([$userId]);
+
+        return empty($numOfAnswers) ? 0 : $numOfAnswers[0]->numAnswers;
+    }
+
+    /**
+     * Update user
+     *
+     * @param integer $id of user to delete.
+     *
+     * @return void
+     */
+    public function increaseCommentsCounterAction($lastInsertedId)
+    {
+        if ($this->isAllowedToAddScore($lastInsertedId)) {
+            $userId = $this->LoggedIn->getUserId();
+            if ($this->increaseCommentsCounter($userId) === false) {
+                $warningMessage = "Antal kommentarer kunde EJ sparas i DB!";
+                $this->flash->warningMessage($warningMessage);
+            }
+        } else {
+            $errorMessage = "Kan EJ stega räknaren för antal kommentarer!";
+            $this->flash->errorMessage($errorMessage);
+        }
+    }
+
+    private function increaseCommentsCounter($userId)
+    {
+        $numOfComments = $this->getNumOfCommentsFromDb($userId);
+        if ($numOfComments === false) {
+            $isSaved = false;
+        } else {
+            $numOfComments++;
+
+            $isSaved = $this->users->save(array(
+                'id'            => $userId,
+                'numComments'  => $numOfComments,
+            ));
+        }
+
+        return $isSaved;
+    }
+
+    private function getNumOfCommentsFromDb($userId)
+    {
+        $numOfComments = $this->users->query('numComments')
+            ->where('id = ?')
+            ->execute([$userId]);
+
+        return empty($numOfComments) ? 0 : $numOfComments[0]->numComments;
+    }
+
+    /**
+     * Update user
+     *
+     * @param integer $id of user to delete.
+     *
+     * @return void
+     */
+    public function increaseVotesCounterAction($lastInsertedId)
+    {
+        if ($this->isAllowedToAddScore($lastInsertedId)) {
+            $userId = $this->LoggedIn->getUserId();
+            if ($this->increaseVotesCounter($userId) === false) {
+                $warningMessage = "Antal röster kunde EJ sparas i DB!";
+                $this->flash->warningMessage($warningMessage);
+            }
+        } else {
+            $errorMessage = "Kan EJ stega räknaren för antal röster!";
+            $this->flash->errorMessage($errorMessage);
+        }
+    }
+
+    private function increaseVotesCounter($userId)
+    {
+        $numOfVotes = $this->getNumOfVotesFromDb($userId);
+        if ($numOfVotes === false) {
+            $isSaved = false;
+        } else {
+            $numOfVotes++;
+
+            $isSaved = $this->users->save(array(
+                'id'            => $userId,
+                'numVotes'  => $numOfVotes,
+            ));
+        }
+
+        return $isSaved;
+    }
+
+    private function getNumOfVotesFromDb($userId)
+    {
+        $numOfVotes = $this->users->query('numVotes')
+            ->where('id = ?')
+            ->execute([$userId]);
+
+        return empty($numOfVotes) ? 0 : $numOfVotes[0]->numVotes;
+    }
+
+    /**
+     * Update user
+     *
+     * @param integer $id of user to delete.
+     *
+     * @return void
+     */
+    public function increaseAcceptsCounterAction($lastInsertedId)
+    {
+        if ($this->isAllowedToAddScore($lastInsertedId)) {
+            $userId = $this->LoggedIn->getUserId();
+            if ($this->increaseAcceptsCounter($userId) === false) {
+                $warningMessage = "Antal accepterande av svar kunde EJ sparas i DB!";
+                $this->flash->warningMessage($warningMessage);
+            }
+        } else {
+            $errorMessage = "Kan EJ stega räknaren för antal accepterande av svar!";
+            $this->flash->errorMessage($errorMessage);
+        }
+    }
+
+    private function increaseAcceptsCounter($userId)
+    {
+        $numOfAccepts = $this->getNumOfAcceptsFromDb($userId);
+        if ($numOfAccepts === false) {
+            $isSaved = false;
+        } else {
+            $numOfAccepts++;
+
+            $isSaved = $this->users->save(array(
+                'id'            => $userId,
+                'numAccepts'  => $numOfAccepts,
+            ));
+        }
+
+        return $isSaved;
+    }
+
+    private function getNumOfAcceptsFromDb($userId)
+    {
+        $numOfAccepts = $this->users->query('numAccepts')
+            ->where('id = ?')
+            ->execute([$userId]);
+
+        return empty($numOfAccepts) ? 0 : $numOfAccepts[0]->numAccepts;
+    }
+
     public function listActiveAction($num)
     {
         $users = $this->getMostActiveUsers($num);
@@ -368,7 +772,7 @@ class UsersController implements \Anax\DI\IInjectionAware
 
     private function getMostActiveUsers($num)
     {
-        $users = $this->users->query('Lf_User.id, Lf_User.acronym')
+        $users = $this->users->query('Lf_User.gravatar, Lf_User.id, Lf_User.acronym')
             ->orderBy('activityScore asc')
             ->limit($num)
             ->execute();

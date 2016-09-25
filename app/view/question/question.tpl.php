@@ -14,7 +14,7 @@
                 <td id=content-cell>
                     <div>
                         <div id="content-text">
-                            <?= $this->di->textFilter->doFilter($question->content, 'shortcode, markdown') ?>
+                            <?= $this->textFilter->doFilter($question->content, 'shortcode, markdown') ?>
                         </div>
                         <div id="question-tags">
                             <?php foreach ($tags as $tag) : ?>
@@ -26,8 +26,12 @@
                                 <tr>
                                     <td id="post-menu">
                                         <div id="menu">
-                                            <a id="answer" href='<?=$this->url->create('answers/add/' . $question->id)?>'>Svara</a>
-                                            <a id="edit" href='<?=$this->url->create('questions/update/' . $question->id)?>'>Uppdatera</a>
+                                            <?php if ($this->LoggedIn->isLoggedin()) : ?>
+                                                <a id="answer" href='<?=$this->url->create('answers/add/' . $question->id)?>'>Svara</a>
+                                            <?php endif; ?>
+                                            <?php if ($this->LoggedIn->isAllowed($question->userId)) : ?>
+                                                <a id="edit" href='<?=$this->url->create('questions/update/' . $question->id)?>'>Uppdatera</a>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                     <td id="post-signature">
@@ -66,8 +70,10 @@
                                         </td>
                                         <td class="comment-cell">
                                             <div class="comment-text">
-                                                <?= $this->di->textFilter->doFilter($comment->content, 'shortcode, markdown') ?>
-                                                <p><a id="edit" href='<?=$this->url->create('comments/update/' . $comment->id)?>'>Uppdatera</a></p>
+                                                <?= $this->textFilter->doFilter($comment->content, 'shortcode, markdown') ?>
+                                                <?php if ($this->LoggedIn->isAllowed($comment->userId)) : ?>
+                                                    <p><a id="edit" href='<?=$this->url->create('comments/update/' . $comment->id)?>'>Uppdatera</a></p>
+                                                <?php endif; ?>
                                                 <span id='comment-author'> - <?= $comment->acronym ?></span>
                                                 <span id='comment-time'> &#0149; <?= $comment->created ?></span>
                                             </div>

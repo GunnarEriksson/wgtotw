@@ -13,7 +13,7 @@ class UserLoggedIn
      */
     public function initialize()
     {
-        $this->di->session();
+        $this->session();
     }
 
     public function isLoggedin()

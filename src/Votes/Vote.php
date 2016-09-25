@@ -15,7 +15,7 @@ abstract class Vote implements \Anax\DI\IInjectionAware
      */
     public function initialize()
     {
-        $this->di->session();
+        $this->session();
     }
 
     public function increaseAction($id)
@@ -25,7 +25,13 @@ abstract class Vote implements \Anax\DI\IInjectionAware
             $isSaved = $this->addUserAsVoter($id, $userId);
             if ($isSaved) {
                 if ($this->increaseScoreCounter($id)) {
+                    $this->session->set('lastInsertedId', $id);
                     $this->addActivityScoreToUser($id);
+                    $this->increaseVotesCounter($id);
+
+                    if ($this->session->has('lastInsertedId')) {
+                        unset($_SESSION["lastInsertedId"]);
+                    }
                 } else {
                     $this->flash->errorMessage("Röst kunde inte sparas i DB.");
                 }
@@ -96,12 +102,19 @@ abstract class Vote implements \Anax\DI\IInjectionAware
 
     private function addActivityScoreToUser($id)
     {
-        $this->session->set('lastInsertedId', $id);
-
-        $this->di->dispatcher->forward([
+        $this->dispatcher->forward([
             'controller' => 'users',
             'action'     => 'add-score',
             'params'     => [QuestionVotesController::ACTIVITY_SCORE_VOTE, $id]
+        ]);
+    }
+
+    private function increaseVotesCounter($id)
+    {
+        $this->dispatcher->forward([
+            'controller' => 'users',
+            'action'     => 'increase-votes-counter',
+            'params'     => [$id]
         ]);
     }
 
@@ -114,7 +127,13 @@ abstract class Vote implements \Anax\DI\IInjectionAware
             $isSaved = $this->addUserAsVoter($id, $userId);
             if ($isSaved) {
                 if ($this->decreaseScoreCounter($id)) {
-                    $this->addActivityScoreToUser();
+                    $this->session->set('lastInsertedId', $id);
+                    $this->addActivityScoreToUser($id);
+                    $this->increaseVotesCounter($id);
+
+                    if ($this->session->has('lastInsertedId')) {
+                        unset($_SESSION["lastInsertedId"]);
+                    }
                 }
             }
         }

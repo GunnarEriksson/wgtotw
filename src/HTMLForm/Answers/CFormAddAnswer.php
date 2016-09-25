@@ -88,6 +88,11 @@ class CFormAddAnswer extends \Mos\HTMLForm\CForm
             $this->addAnswerToQuestion();
             $this->addAnswerToUser();
             $this->addActivityScoreToUser();
+            $this->increaseAnswersCounter();
+
+            if ($this->di->session->has('lastInsertedId')) {
+                unset($_SESSION["lastInsertedId"]);
+            }
 
             $this->redirectTo('questions/id/' . $this->questionId);
         } else {
@@ -120,6 +125,15 @@ class CFormAddAnswer extends \Mos\HTMLForm\CForm
             'controller' => 'users',
             'action'     => 'add-score',
             'params'     => [CFormAddAnswer::ACTIVITY_SCORE_ANSWER, $this->lastInsertedId]
+        ]);
+    }
+
+    private function increaseAnswersCounter()
+    {
+        $this->di->dispatcher->forward([
+            'controller' => 'users',
+            'action'     => 'increase-answers-counter',
+            'params'     => [$this->lastInsertedId]
         ]);
     }
 

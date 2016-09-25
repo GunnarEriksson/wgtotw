@@ -30,7 +30,7 @@ $app->router->add('', function () use ($app) {
     $app->dispatcher->forward([
         'controller' => 'tags',
         'action'     => 'list-popular',
-        'params'     => [4],
+        'params'     => [6],
     ]);
 
     $app->dispatcher->forward([
@@ -70,6 +70,14 @@ $app->router->add('about', function () use ($app) {
     $app->views->add('me/page', [
         'content' => $content
     ], 'main-wide');
+
+    $bylineContent = $app->fileContent->get('about/byline.md');
+    $bylineContent = $app->textFilter->doFilter($bylineContent, 'shortcode, markdown');
+
+    $app->views->add('me/byline', [
+        'content' => $bylineContent
+    ], 'main-wide');
+
 });
 
 $app->router->add('login', function () use ($app) {
@@ -83,13 +91,14 @@ $app->router->add('login', function () use ($app) {
 
 $app->router->add('profile', function () use ($app) {
 
-    $user = $app->session->get('user', []);
+    $userId = $app->LoggedIn->getUserId();
+    $userId = $userId ? $userId : null;
 
     $app->theme->setTitle("Profil");
     $app->dispatcher->forward([
         'controller' => 'users',
         'action'     => 'id',
-        'params'     => [$user['id']],
+        'params'     => [$userId],
     ]);
 });
 

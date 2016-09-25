@@ -13,7 +13,7 @@ class QuestionAnswerController implements \Anax\DI\IInjectionAware
      */
     public function initialize()
     {
-        $this->di->session();
+        $this->session();
 
         $this->questionToAnswer = new \Anax\QuestionToAnswer\Question2Answer();
         $this->questionToAnswer->setDI($this->di);

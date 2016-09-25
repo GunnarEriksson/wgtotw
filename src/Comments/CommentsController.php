@@ -18,7 +18,7 @@ class CommentsController implements \Anax\DI\IInjectionAware
      */
     public function initialize()
     {
-        $this->di->session();
+        $this->session();
 
         $this->comments = new \Anax\Comments\Comment();
         $this->comments->setDI($this->di);
@@ -61,8 +61,8 @@ class CommentsController implements \Anax\DI\IInjectionAware
         $form->setDI($this->di);
         $status = $form->check();
 
-        $this->di->theme->setTitle("Kommentar: " . $title);
-        $this->di->views->add('comment/commentForm', [
+        $this->theme->setTitle("Kommentar: " . $title);
+        $this->views->add('comment/commentForm', [
             'title' => "Kommentar: " . $title,
             'content' => $form->getHTML(),
         ], 'main');
@@ -270,8 +270,8 @@ class CommentsController implements \Anax\DI\IInjectionAware
         $form->setDI($this->di);
         $status = $form->check();
 
-        $this->di->theme->setTitle("Kommentar: " . $title);
-        $this->di->views->add('comment/commentForm', [
+        $this->theme->setTitle("Kommentar: " . $title);
+        $this->views->add('comment/commentForm', [
             'title' => "Kommentar: " . $title,
             'content' => $form->getHTML(),
         ], 'main');
@@ -284,10 +284,10 @@ class CommentsController implements \Anax\DI\IInjectionAware
             $message = "Id nummer för kommentar saknas. Kan inte koppla kommentar!";
             $this->showErrorMessage($subtitle, $message);
         } else if ($this->LoggedIn->isLoggedin()) {
-            $questionInfo = $this->getQuestionInfo($commentId);
-            $questionId = isset($questionInfo->id) ? $questionInfo->id : false;
-            $warningMessage = "Endast egna svar kan uppdateras!";
-            $this->flash->warningMessage($warningMessage);
+            $commentParentInfo = $this->getCommentParentInfo($commentId);
+            $questionId = $this->getQuestionId($commentParentInfo);
+            $noticeMessage = "Endast egna kommentarer kan uppdateras!";
+            $this->flash->noticeMessage($noticeMessage);
             if ($questionId) {
                 $this->redirectToQuestion($questionId);
             } else {
@@ -313,6 +313,75 @@ class CommentsController implements \Anax\DI\IInjectionAware
             'controller' => 'questions',
             'action'     => 'list'
         ]);
+    }
+
+    public function listUserCommentsAction($userId = null)
+    {
+        if (isset($userId)) {
+            $this->listUserComments($userId);
+        } else {
+            $errorMessage = "Användare id saknas. Kan ej lista kommentarer!";
+            $this->flash->errorMessage($errorMessage);
+        }
+    }
+
+    private function listUserComments($userId)
+    {
+        $allComments = $this->getAllCommentsForUser($userId);
+
+        $this->createItemNavigationBar($userId, $allComments);
+
+        foreach ($allComments as $comment) {
+            $commentParentInfo = $this->getCommentParentInfo($comment->id);
+            $title = $this->getCommentTitle($commentParentInfo);
+            $questionId = $this->getQuestionId($commentParentInfo);
+            $this->createCommentView($title, $questionId, $comment);
+        }
+    }
+
+    private function getAllCommentsForUser($userId)
+    {
+        $commentData = $this->comments->query('Lf_Comment.*, U.id AS userId, U.acronym')
+            ->join('User2Comment AS U2C', 'U2C.idComment = Lf_Comment.id')
+            ->join('User AS U', 'U2C.idUser = U.id')
+            ->where('U.id = ?')
+            ->execute([$userId]);
+
+        return $commentData;
+    }
+
+    private function createItemNavigationBar($userId, $allComments)
+    {
+        $this->views->add('users/itemHeading', [
+            'numOfAnswers'  => count($allComments),
+            'item'          => "Kommentarer",
+            'type'          => "comment",
+            'userId'        => $userId,
+        ], 'main-wide');
+    }
+
+    private function getCommentTitle($commentParentInfo)
+    {
+        $title = isset($commentParentInfo['questionTitle']) ? "Fråga: " . $commentParentInfo['questionTitle'] : null;
+        if (!isset($title)) {
+            $title = isset($commentParentInfo['answerContent']) ? "Svar: " . $commentParentInfo['answerContent'] : "";
+        }
+
+        return $title;
+    }
+
+    private function getQuestionId($commentParentInfo)
+    {
+        return isset($commentParentInfo['questionId']) ? $commentParentInfo['questionId'] : null;
+    }
+
+    private function createCommentView($title, $questionId, $comment)
+    {
+        $this->views->add('comment/comment', [
+            'title'         => $title,
+            'questionId'    => $questionId,
+            'comment'       => $comment,
+        ], 'main-wide');
     }
 
     public function upVoteAction($commentId)

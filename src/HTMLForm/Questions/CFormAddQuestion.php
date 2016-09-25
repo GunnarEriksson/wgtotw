@@ -97,6 +97,11 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
             $this->addTagsToQuestion();
             $this->addQuestionToUser();
             $this->addActivityScoreToUser();
+            $this->increaseQuestionsCounter();
+
+            if ($this->di->session->has('lastInsertedId')) {
+                unset($_SESSION["lastInsertedId"]);
+            }
 
             $this->redirectTo('questions/id/' . $this->lastInsertedId);
         } else {
@@ -129,6 +134,15 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
             'controller' => 'users',
             'action'     => 'add-score',
             'params'     => [CFormAddQuestion::ACTIVITY_SCORE_QUESTION, $this->lastInsertedId]
+        ]);
+    }
+
+    private function increaseQuestionsCounter()
+    {
+        $this->di->dispatcher->forward([
+            'controller' => 'users',
+            'action'     => 'increase-questions-counter',
+            'params'     => [$this->lastInsertedId]
         ]);
     }
 

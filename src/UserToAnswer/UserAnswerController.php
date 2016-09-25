@@ -13,7 +13,7 @@ class UserAnswerController implements \Anax\DI\IInjectionAware
      */
     public function initialize()
     {
-        $this->di->session();
+        $this->session();
 
         $this->userToAnswer = new \Anax\UserToAnswer\User2Answer();
         $this->userToAnswer->setDI($this->di);

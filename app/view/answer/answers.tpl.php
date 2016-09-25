@@ -15,7 +15,7 @@
                 <td class=content-cell>
                     <div>
                         <div class="content-text">
-                            <?= $this->di->textFilter->doFilter($answer->content, 'shortcode, markdown') ?>
+                            <?= $this->textFilter->doFilter($answer->content, 'shortcode, markdown') ?>
                         </div>
                         <table class="answer-requester">
                             <tbody>
