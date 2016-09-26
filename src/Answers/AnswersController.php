@@ -2,6 +2,12 @@
 
 namespace Anax\Answers;
 
+/**
+ * Answer controller
+ *
+ * Communicates with the answer and question table in the database.
+ * Handles all answer releated tasks and present the results to views.
+ */
 class AnswersController implements \Anax\DI\IInjectionAware
 {
     use \Anax\DI\TInjectable;
@@ -10,6 +16,9 @@ class AnswersController implements \Anax\DI\IInjectionAware
 
     /**
      * Initialize the controller.
+     *
+     * Initializes the session, the answer and
+     * question models.
      *
      * @return void
      */
@@ -24,6 +33,18 @@ class AnswersController implements \Anax\DI\IInjectionAware
         $this->questions->setDI($this->di);
     }
 
+    /**
+     * Lists all anwers connected to one question.
+     *
+     * Lists all answers, with included comments, for one question.
+     * Creates a heading to be able to sort the order of the questions
+     * according to number of votes or time when the answer was created.
+     *
+     * @param  int $questionId  the question id, which the answers are releated to.
+     * @param  string $orderBy  the order the answer should be sorted.
+     *
+     * @return void
+     */
     public function listAction($questionId, $orderBy)
     {
         $allAnswers = $this->listAllAnswersForOneQuestion($questionId, $orderBy);
@@ -39,6 +60,17 @@ class AnswersController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to list all answers for one question.
+     *
+     * Contacts the DB to get all answers related to the question. The information
+     * about the user id, the users acronym and gravatar are included from DB.
+     *
+     * @param  int $questionId  the question id, which the answers are related to.
+     * @param  string $orderBy  the order the answer should be sorted.
+     * @return [object]         all answers with user id, user acronym and user
+     *                          gravatar connected to the author of the answer.
+     */
     private function listAllAnswersForOneQuestion($questionId, $orderBy)
     {
         $answers = $this->answers->query('Lf_Answer.*, U.id AS answerUserId, U.acronym, U.gravatar')
@@ -53,6 +85,16 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return $answers;
     }
 
+    /**
+     * Helper method to get user id of the author of the question.
+     *
+     * Contacts DB to get the questions author's user id. Uses the answer id to
+     * get the relationship between the answer and question.
+     *
+     * @param  int $answerId    the id of the answer, which are releated to a question.
+     *
+     * @return int              the user id for the author of the question.
+     */
     private function getUserIdForParentQuestion($answerId)
     {
         $questionUserId = $this->answers->query('U.id')
@@ -66,6 +108,19 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return isset($questionUserId->id) ? $questionUserId->id : false;
     }
 
+    /**
+     * Helper method to create an answer heading.
+     *
+     * Creates a heading which contains the number of the answers and a tabs, which
+     * can be used to sort the answers according to number of votes or the time
+     * the answers where created.
+     *
+     * @param  int $questionId      the id number of the question
+     * @param  int $numOfAnswers    the number of the answers for the question.
+     * @param  string $orderBy      the order the answers should be sorted.
+     *
+     * @return void
+     */
     private function createAnswerHeading($questionId, $numOfAnswers, $orderBy)
     {
         $latest = strcmp($orderBy, 'created desc') === 0 ? 'latest' : null;
@@ -77,6 +132,17 @@ class AnswersController implements \Anax\DI\IInjectionAware
         ], 'main-wide');
     }
 
+    /**
+     * Helper method to get all comments for a specific answer.
+     *
+     * Gets all comments from DB for a specific answer.
+     * Includes the user id, and acronym of the author who wrote the comment.
+     *
+     * @param  int $answerId    the answer id, which the comments are related to.
+     *
+     * @return [object]         all comments releated to an anwser. User id and
+     *                          acronym of the comment author are included.
+     */
     private function getAllCommentsForSpecificAnswer($answerId)
     {
         $comments = $this->answers->query('C.*, U.id AS userId, U.acronym')
@@ -91,6 +157,17 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return $comments;
     }
 
+    /**
+     * Helper method to create the view with all anwers releated to a question.
+     *
+     * Creates an answer view with all answers and included answer comments.
+     *
+     * @param  [object] $answer     Answer releated to a question.
+     * @param  [object] $comments   All comments releated to an anwser.
+     * @param  int $questionUserId  the id of the question, which the answer is
+     *                              related to.
+     * @return void
+     */
     private function createAnswerView($answer, $comments, $questionUserId)
     {
         $this->views->add('answer/answer', [
@@ -100,6 +177,16 @@ class AnswersController implements \Anax\DI\IInjectionAware
         ], 'main-wide');
     }
 
+    /**
+     * Adds an answer to a question.
+     *
+     * Checks if the user has logged in to be able to add an answer. If not, the
+     * user is redirected to the log in page.
+     *
+     * @param int $questionId the id of the question to add an answer to.
+     *
+     * @return void
+     */
     public function addAction($questionId = null)
     {
         if ($this->LoggedIn->isLoggedin()) {
@@ -109,6 +196,16 @@ class AnswersController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to add answer to a question.
+     *
+     * Creates an form to add an answer to a question, if question id and user id
+     * could be found. If not, it redirects to an error message.
+     *
+     * @param int $questionId the question id to add an answer to.
+     *
+     * @return void
+     */
     private function addAnswer($questionId)
     {
         $userId = $this->LoggedIn->getUserId();
@@ -128,6 +225,17 @@ class AnswersController implements \Anax\DI\IInjectionAware
 
     }
 
+    /**
+     * Helper method to create an answer form.
+     *
+     * Creates an answer form and its view. Uses the title of the question for
+     * the heading of the form.
+     *
+     * @param  int $questionId  the id of the question to add an answer to.
+     * @param  id $userId       the use id of user who has logged in.
+     *
+     * @return void
+     */
     private function createAddAnswerForm($questionId, $userId)
     {
         $form = new \Anax\HTMLForm\Answers\CFormAddAnswer($questionId, $userId);
@@ -143,6 +251,15 @@ class AnswersController implements \Anax\DI\IInjectionAware
         ], 'main');
     }
 
+    /**
+     * Helper method to get the question title of question.
+     *
+     * Gets the title of the question from the question id.
+     *
+     * @param  int $questionId  the id of the question.
+     *
+     * @return string | false   if found the title of the question, false otherwise.
+     */
     private function getQuestionTitleFromId($questionId)
     {
         $question = $this->questions->find($questionId);
@@ -181,6 +298,13 @@ class AnswersController implements \Anax\DI\IInjectionAware
         ]);
     }
 
+    /**
+     * Helper method to redirect to the log in page.
+     *
+     * Redirects to the log in page.
+     *
+     * @return void
+     */
     private function redirectToLoginPage()
     {
         $this->dispatcher->forward([
@@ -189,6 +313,17 @@ class AnswersController implements \Anax\DI\IInjectionAware
         ]);
     }
 
+    /**
+     * Adds a comment to an answer.
+     *
+     * Redirects answer id, question id, the first 30 letters of the answer and
+     * a flag that the comment is releated to an anwser to the comment controller.
+     * The comment controller will create an form to add a comment.
+     *
+     * @param int $answerId     the id of the answer to create a comment to.
+     *
+     * @return void
+     */
     public function addCommentAction($answerId)
     {
         $content = $this->getAnswerContentFromId($answerId);
@@ -203,6 +338,15 @@ class AnswersController implements \Anax\DI\IInjectionAware
         ]);
     }
 
+    /**
+     * Helper method to get the answer content.
+     *
+     * Gets the answer content for a specific answer.
+     *
+     * @param  int $answerId the id of the answer.
+     *
+     * @return string | false   the answer content if found, false otherwise.
+     */
     private function getAnswerContentFromId($answerId)
     {
         $content = $this->answers->query('content')
@@ -257,6 +401,16 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return $pos;
     }
 
+    /**
+     * Updates an answer.
+     *
+     * Updates the answer if the user is allowed to update. To be able to update,
+     * the user must be admin or the author of the answer.
+     *
+     * @param  int $answerId    the id of the answer. Default null.
+     *
+     * @return void
+     */
     public function updateAction($answerId = null)
     {
         if ($this->isUpdateAllowed($answerId)) {
@@ -266,6 +420,16 @@ class AnswersController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to check if the user is allowed to update the answer.
+     *
+     * Checks if the user has logged in and the user is admin or the author of
+     * the answer.
+     *
+     * @param  int  $answerId   the id of the answer.
+     *
+     * @return boolean          true if allowed to update, false otherwise.
+     */
     private function isUpdateAllowed($answerId)
     {
         $isUpdateAllowed = false;
@@ -280,6 +444,15 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return $isUpdateAllowed;
     }
 
+    /**
+     * Helper method to get the id of the user who wrote the answer.
+     *
+     * Gets the user id of the user who wrote the answer from DB.
+     *
+     * @param  int $answerId    the id of the answer.
+     *
+     * @return int  the id of the user who wrote the answer.
+     */
     private function getAnswerAuthorId($answerId)
     {
         $authorId = $this->answers->query('U.id')
@@ -293,6 +466,15 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return $authorId;
     }
 
+    /**
+     * Helper method to update the answer.
+     * Gets the question and anwer info from DB to create and form for updating
+     * the question. If information is missing, an error message is shown.
+     *
+     * @param  int $answerId    the id of the answer.
+     *
+     * @return void
+     */
     private function updateAnswer($answerId)
     {
         $questionInfo = $this->getQuestionInfoFromAnswerId($answerId);
@@ -316,6 +498,18 @@ class AnswersController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to create an update answer form and send it to a view.
+     *
+     * Creates an update answer form and sends it to a view.
+     *
+     * @param  [mixed] $answerData      All answer information.
+     * @param  int $questionId          the question id the answer is related to.
+     * @param  string $questionTitle    the title of the question the answer is
+     *                                  related to.
+     *
+     * @return void
+     */
     private function createUpdateAnswerForm($answerData, $questionId, $questionTitle)
     {
         $form = new \Anax\HTMLForm\Answers\CFormUpdateAnswer($answerData, $questionId);
@@ -329,6 +523,16 @@ class AnswersController implements \Anax\DI\IInjectionAware
         ], 'main');
     }
 
+    /**
+     * Helper method to handle update is not allowed.
+     *
+     * Handles the action when an update is not allowed. Creates an error message
+     * and redirects the user.
+     *
+     * @param  int $answerId    the id of the answer.
+     *
+     * @return void
+     */
     private function handleUpdateIsNotAllowed($answerId)
     {
         if (!isset($answerId)) {
@@ -350,8 +554,16 @@ class AnswersController implements \Anax\DI\IInjectionAware
         }
     }
 
-
-
+    /**
+     * Helper method to get question information.
+     *
+     * Gets question information from DB for the question, which is related to
+     * an answer.
+     *
+     * @param  int $answerId    the id of the related question.
+     *
+     * @return [object] | false the question id and title if found, false otherwise.
+     */
     private function getQuestionInfoFromAnswerId($answerId)
     {
         $questionInfo = $this->answers->query('Q.id, Q.title')
@@ -365,6 +577,17 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return $questionInfo;
     }
 
+    /**
+     * Helper method to redirect to question controller to show a specific
+     * question.
+     *
+     * Redirects to the question controller to show the question with all the
+     * answers and comments.
+     *
+     * @param  int $questionId  the id of the question to show.
+     *
+     * @return void
+     */
     private function redirectToQuestion($questionId)
     {
         $this->dispatcher->forward([
@@ -374,6 +597,13 @@ class AnswersController implements \Anax\DI\IInjectionAware
         ]);
     }
 
+    /**
+     * Helper method to redirect to question controller to show all questions.
+     *
+     * Redirects to the question controller to show all questions.
+     *
+     * @return void
+     */
     private function redirectToQuestions()
     {
         $this->dispatcher->forward([
@@ -382,6 +612,17 @@ class AnswersController implements \Anax\DI\IInjectionAware
         ]);
     }
 
+    /**
+     * Increases the vote counter with one.
+     *
+     * Redirects to the Vote controller to increase the vote counter, for the
+     * answer, with one.
+     *
+     * @param  int $answerId the answer id, which vote counter should be increased
+     *                       with one.
+     *
+     * @return void.
+     */
     public function upVoteAction($answerId)
     {
         $this->dispatcher->forward([
@@ -391,6 +632,17 @@ class AnswersController implements \Anax\DI\IInjectionAware
         ]);
     }
 
+    /**
+     * Decreases the vote counter with one.
+     *
+     * Redirects to the Vote controller to decrease the vote counter, for the
+     * answer, with one.
+     *
+     * @param  int $answerId the answer id, which vote counter should be decreased
+     *                       with one.
+     *
+     * @return void.
+     */
     public function downVoteAction($answerId)
     {
         $this->dispatcher->forward([
@@ -400,11 +652,27 @@ class AnswersController implements \Anax\DI\IInjectionAware
         ]);
     }
 
+    /**
+     * Sets the accepted sign for an answer.
+     *
+     * Sets an accepted sign for an answer if the user is allowed to set the
+     * sign. To be allowed to set the sign, the user must be logged in and be
+     * either the admin or the author of the related question.
+     *
+     * If not allowed a flash message is set.
+     *
+     * Redirects to the question controller to show the question and the
+     * related answers and comments.
+     *
+     * @param  int $answerId the id of the answer.
+     *
+     * @return void
+     */
     public function acceptAction($answerId)
     {
         $questionInfo = $this->getQuestionInfoForAnswer($answerId);
         if ($this->LoggedIn->isLoggedin()) {
-            if ($this->isUserAllowedToAccept($questionInfo)) {
+            if ($this->isUserAllowedToAccept($questionInfo->userId)) {
                 $this->updateAccept($answerId, $questionInfo);
             } else {
                 $noticeMessage = "Svar kan endast accepteras för egna frågor!";
@@ -418,6 +686,16 @@ class AnswersController implements \Anax\DI\IInjectionAware
         $this->redirectToQuestion($questionInfo->questionId);
     }
 
+    /**
+     * Helper method to get question info releated to the answer.
+     *
+     * Gets the related question info from DB.
+     *
+     * @param  int $answerId    the ansewer id of the related answer.
+     *
+     * @return [object]         the question id and the id of the question author
+     *                          for the related question.
+     */
     private function getQuestionInfoForAnswer($answerId)
     {
         $questionInfo = $this->answers->query('Q.id AS questionId, U.id AS userId')
@@ -433,17 +711,44 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return $questionInfo;
     }
 
-    private function isUserAllowedToAccept($questionInfo)
+    /**
+     * Helper method to check if a user could accept an answer.
+     *
+     * Checks if an user could accepts an answer. Only users who has logged in
+     * as admin or the author of the related question could accept an answer.
+     *
+     * @param  int      the user id of the author who wrote the question.
+     *
+     * @return boolean true if user is allowed to accept, false otherwise.
+     */
+    private function isUserAllowedToAccept($userId)
     {
         $isAllowedToAccept = false;
         $userIdInSession = $this->LoggedIn->getUserId();
-        if ($questionInfo->userId === $userIdInSession) {
+        if ($userId === $userIdInSession) {
             $isAllowedToAccept = true;
         }
 
         return $isAllowedToAccept;
     }
 
+    /**
+     * Helper method to update an answer accept.
+     *
+     * Gets the id for an accepted answer. If no accepted answer is found, it
+     * sets answer with the answer id to accepted. Increases the activity score
+     * and number of accepts. Uses the parameter lastInsertedId to prevent
+     * increasing the counters by calling the action methods directly from the
+     * browsers address field.
+     *
+     * If an answer is already accepted, it removes the accepted sign and sets
+     * the accepted sign to the new accepted answer.
+     *
+     * @param  int $answerId     the answer id of the accepted answer.
+     * @param  $questionInfo     the question info of the related question.
+     *
+     * @return void
+     */
     private function updateAccept($answerId, $questionInfo)
     {
         $questionId = $questionInfo->questionId;
@@ -465,6 +770,16 @@ class AnswersController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to get the answer id for an accepted answer.
+     *
+     * Gets the answer id for an accepted answer from DB via the related
+     * question id.
+     *
+     * @param  int $questionId  the id of the related question.
+     *
+     * @return int | false  the answer id if found, false otherwise.
+     */
     private function getAcceptedAnswerIdForQuestion($questionId)
     {
         $answerId = $this->answers->query('Lf_Answer.id')
@@ -479,6 +794,15 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return $answerId;
     }
 
+    /**
+     * Helper method to set an answer to accepted.
+     *
+     * Sets an answer to accepted in DB.
+     *
+     * @param int $answerId the answer id of the answer to be accepted.
+     *
+     * @return boolean  true if answer is accepted, false otherwise.
+     */
     private function setAnswerToAccepted($answerId)
     {
         $isSaved = $this->answers->save(array(
@@ -489,6 +813,19 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return $isSaved;
     }
 
+    /**
+     * Helper method to add activity score to an user.
+     *
+     * Redirects to the users controller to add the activity score to the user
+     * who accepted the answer.
+     *
+     * Uses the session to prevent adding score by calling the action method
+     * directly from the browser address field.
+     *
+     * @param int $answerId the answer id of the answer to be accepted.
+     *
+     * @return void
+     */
     private function addActivityScoreToUser($answerId)
     {
         $this->session->set('lastInsertedId', $answerId);
@@ -500,15 +837,33 @@ class AnswersController implements \Anax\DI\IInjectionAware
         ]);
     }
 
-    private function increaseAcceptsCounter($id)
+    /**
+     * Helper method to increase the users accept counter.
+     *
+     * Redirect to the user controller to increase the user accepts counter.
+     *
+     * @param  int $userId  the id of the user to add accepted activity points.
+     *
+     * @return void
+     */
+    private function increaseAcceptsCounter($userId)
     {
         $this->dispatcher->forward([
             'controller' => 'users',
             'action'     => 'increase-accepts-counter',
-            'params'     => [$id]
+            'params'     => [$userId]
         ]);
     }
 
+    /**
+     * Helper method to unset an accepted answer.
+     *
+     * Removes the accepted flag in DB for an accepted answer.
+     *
+     * @param int $answerIdAccept the id of the accepted answer.
+     *
+     * @return boolean true if an accepted was removed, false otherwise.
+     */
     private function unsetAnswerToAccepted($answerIdAccept)
     {
         $isSaved = $this->answers->save(array(
@@ -519,6 +874,16 @@ class AnswersController implements \Anax\DI\IInjectionAware
         return $isSaved;
     }
 
+    /**
+     * Lists all answers for a user.
+     *
+     * Lists all answers written by a user, if found. Otherwise sets an flash
+     * error message.
+     *
+     * @param  int $userId  user id of the user who has written the answers.
+     *
+     * @return void
+     */
     public function listUserAnswersAction($userId = null)
     {
         if (isset($userId)) {
@@ -529,6 +894,15 @@ class AnswersController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to list all answers written by the user.
+     *
+     * Gets all answers for a user and creates a view with a heading.
+     *
+     * @param  int $userId the user id of the user who has written the answers.
+     *
+     * @return void
+     */
     private function listUserAnswers($userId)
     {
         $allAnswers = $this->getAllAnswersForUser($userId);
@@ -545,6 +919,15 @@ class AnswersController implements \Anax\DI\IInjectionAware
         ], 'main-wide');
     }
 
+    /**
+     * Helper method to get all the answers for a user.
+     *
+     * Gets all answers for a user in the DB.
+     *
+     * @param  int $userId the user id of the user who has written the answers.
+     *
+     * @return [object]     All answers written by a user.
+     */
     private function getAllAnswersForUser($userId)
     {
         $answerData = $this->answers->query('Lf_Answer.*, Q.id AS questionId, Q.title AS questionTitle, U.id AS userId, U.acronym')
