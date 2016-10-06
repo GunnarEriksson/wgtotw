@@ -5,9 +5,9 @@ namespace Anax\AnswerToComment;
 /**
  * Answer Comment controller
  *
- * Communicates with the mapping table, which maps comments with the related
- * answer in the database.
- * Handles all mapping tasks between comments and the related answer.
+ * Communicates with the mapping table, which maps answer with the related
+ * comment in the database.
+ * Handles all mapping tasks between answer and the related comment.
  */
 class AnswerCommentController implements \Anax\DI\IInjectionAware
 {
@@ -35,7 +35,7 @@ class AnswerCommentController implements \Anax\DI\IInjectionAware
      * Adds a connection between an answer and a comment if the answer id and
      * comment id is present, otherwise it creates a flash error message.
      *
-     * @param int $answerId  the answer id to be mapped to a question id.
+     * @param int $answerId  the answer id to be mapped to a comment id.
      * @param int $commentId the comment id to be mapped to an answer id.
      *
      * @return void
@@ -72,7 +72,7 @@ class AnswerCommentController implements \Anax\DI\IInjectionAware
     }
 
     /**
-     * Helper method to connect a comment to a answer.
+     * Helper method to connect an answer to a comment.
      *
      * @param int $answerId the answer id to be connected to a comment id.
      * @param  $commentId   the comment id to be connected to an answer id.
@@ -93,7 +93,7 @@ class AnswerCommentController implements \Anax\DI\IInjectionAware
     }
 
     /**
-     * Helper method to check if it is allowe to add a comment to an answer.
+     * Helper method to check if it is allowed to add a comment to an answer.
      *
      * Checks if the user has logged in and the call is from a redirect and not
      * via the browsers addess field.
@@ -147,6 +147,8 @@ class AnswerCommentController implements \Anax\DI\IInjectionAware
      *
      * @param int $answerId the answer id to be connected to a comment id.
      * @param int $commentId the comment id to be connected to an answer id.
+     *
+     * @return boolean true if saved, false otherwise.
      */
     private function addCommentToAnswerInDb($answerId, $commentId)
     {

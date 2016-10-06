@@ -2,6 +2,12 @@
 
 namespace Anax\HTMLForm\Questions;
 
+/**
+ * Add question form
+ *
+ * Creates an question form for the user to add a question in DB.
+ * Dispatches all other related tasks to other controllers.
+ */
 class CFormAddQuestion extends \Mos\HTMLForm\CForm
 {
     use \Anax\DI\TInjectionAware,
@@ -14,6 +20,11 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
 
     /**
      * Constructor
+     *
+     * Creates a form to add a question.
+     *
+     * @param int $userId           the id of the user who wants to add a question.
+     * @param [string] $tagNames    the name of all tags.
      */
     public function __construct($userId, $tagNames)
     {
@@ -86,8 +97,19 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
     }
 
     /**
-     * Callback What to do if the form was submitted?
+     * Callback when the form was successfully submitted.
      *
+     * Dispatches related tasks to other controllers such as mapping tags to
+     * question, mapping question to user, add activity score to the user and
+     * increase the question counter for the user.
+     *
+     * Resets the last inserted id in the session, if set. The parameter is
+     * used to prevent direct access to other controllers, for example increase
+     * activity score via the browser address bar.
+     *
+     * Prints out a warning if the last inserted id could not be saved.
+     *
+     * @return void.
      */
     public function callbackSuccess()
     {
@@ -110,6 +132,14 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
         }
     }
 
+    /**
+     * Helper method to map the tags to the question.
+     *
+     * Redirects to the QuestionTag controller to map the id of the tags to
+     * the id of the question.
+     *
+     * @return void
+     */
     private function addTagsToQuestion()
     {
         $this->di->dispatcher->forward([
@@ -119,6 +149,14 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
         ]);
     }
 
+    /**
+     * Helper method to map the user to the question.
+     *
+     * Redirects to the UserQuestion controller to map the id of the user to the
+     * id of the question.
+     *
+     * @return void.
+     */
     private function addQuestionToUser()
     {
         $this->di->dispatcher->forward([
@@ -128,6 +166,14 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
         ]);
     }
 
+    /**
+     * Helper method to add the activity score to write a question.
+     *
+     * Redirects to the Users controller to add an activity score to the user.
+     * The activity score to write a question.
+     *
+     * @return void.
+     */
     private function addActivityScoreToUser()
     {
         $this->di->dispatcher->forward([
@@ -137,6 +183,14 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
         ]);
     }
 
+    /**
+     * Helper method to increase the question counter for a user.
+     *
+     * Redirects to the Users controller to increase the question counter with
+     * one for user.
+     *
+     * @return void.
+     */
     private function increaseQuestionsCounter()
     {
         $this->di->dispatcher->forward([
@@ -149,6 +203,9 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
     /**
      * Callback What to do when form could not be processed?
      *
+     * Prints out a message that question could not be saved in DB.
+     *
+     * @return void.
      */
     public function callbackFail()
     {

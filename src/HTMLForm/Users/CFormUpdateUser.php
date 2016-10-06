@@ -3,8 +3,9 @@
 namespace Anax\HTMLForm\Users;
 
 /**
- * Anax base class for wrapping sessions.
+ * Update user form
  *
+ * Creates a user form to update and save a user in DB.
  */
 class CFormUpdateUser extends \Mos\HTMLForm\CForm
 {
@@ -25,7 +26,9 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
     /**
      * Constructor
      *
-     * @param [] the user data for the user.
+     * Creates a form to update a user.
+     *
+     * @param [mixed] the user data to be updated.
      */
     public function __construct($userData)
     {
@@ -139,7 +142,9 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
 
 
     /**
-     * Callback What to do if the form was submitted?
+     * Callback at success.
+     *
+     * Redirects to the user information.
      *
      */
     public function callbackSuccess()
@@ -147,10 +152,11 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
         $this->redirectTo('users/id/' . $this->id);
     }
 
-
-
     /**
-     * Callback What to do when form could not be processed?
+     * Callback at failure.
+     *
+     * Prints out an error message that the user data could not be updated in
+     * DB.
      *
      */
     public function callbackFail()

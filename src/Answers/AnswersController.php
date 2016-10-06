@@ -3,7 +3,7 @@
 namespace Anax\Answers;
 
 /**
- * Answer controller
+ * Answers controller
  *
  * Communicates with the answer and question table in the database.
  * Handles all answer releated tasks and present the results to views.
@@ -68,6 +68,7 @@ class AnswersController implements \Anax\DI\IInjectionAware
      *
      * @param  int $questionId  the question id, which the answers are related to.
      * @param  string $orderBy  the order the answer should be sorted.
+     *
      * @return [object]         all answers with user id, user acronym and user
      *                          gravatar connected to the author of the answer.
      */
@@ -269,12 +270,14 @@ class AnswersController implements \Anax\DI\IInjectionAware
     }
 
     /**
-     * Helper function for initiate no such user view.
+     * Helper function for initiate an error message.
      *
-     * Initiates a view which shows a message the user with the specfic
-     * id is not found. Contains a return button.
+     * Forwards an error message to the error controller, which displays the
+     * message to a view. The error message contains of a subtitle, an error
+     * message and a return button.
      *
-     * @param  [] $content the subtitle and the message shown at page.
+     * @param string $subtitle  The subtitle of the error.
+     * @param string $message   The error message.
      *
      * @return void
      */
@@ -426,7 +429,7 @@ class AnswersController implements \Anax\DI\IInjectionAware
      * Checks if the user has logged in and the user is admin or the author of
      * the answer.
      *
-     * @param  int  $answerId   the id of the answer.
+     * @param  int $answerId   the id of the answer.
      *
      * @return boolean          true if allowed to update, false otherwise.
      */
@@ -451,7 +454,8 @@ class AnswersController implements \Anax\DI\IInjectionAware
      *
      * @param  int $answerId    the id of the answer.
      *
-     * @return int  the id of the user who wrote the answer.
+     * @return int | false  the id of the user who wrote the answer, false
+     *                      otherwise.
      */
     private function getAnswerAuthorId($answerId)
     {
@@ -468,10 +472,11 @@ class AnswersController implements \Anax\DI\IInjectionAware
 
     /**
      * Helper method to update the answer.
-     * Gets the question and anwer info from DB to create and form for updating
-     * the question. If information is missing, an error message is shown.
      *
-     * @param  int $answerId    the id of the answer.
+     * Gets the question and anwer info from DB to create an form for updating
+     * the answer. If information is missing, an error message is shown.
+     *
+     * @param  int $answerId    the id of the answer to update.
      *
      * @return void
      */

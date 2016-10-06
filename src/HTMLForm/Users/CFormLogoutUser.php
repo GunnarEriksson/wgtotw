@@ -2,6 +2,11 @@
 
 namespace Anax\HTMLForm\Users;
 
+/**
+ * Logout user form
+ *
+ * Creates a form to log out a user and remove the user from the session.
+ */
 class CFormLogoutUser extends \Mos\HTMLForm\CForm
 {
     use \Anax\DI\TInjectionAware,
@@ -12,6 +17,7 @@ class CFormLogoutUser extends \Mos\HTMLForm\CForm
     /**
      * Constructor
      *
+     * Creates a form to log out a user.
      */
     public function __construct()
     {
@@ -38,7 +44,9 @@ class CFormLogoutUser extends \Mos\HTMLForm\CForm
     /**
      * Callback for submit-button.
      *
-     * @return boolean true if data was added in db, false otherwise.
+     * Logs out a user and sets a log out message about the result.
+     *
+     * @return boolean true if the user is logged out, false otherwise.
      */
     public function callbackSubmit()
     {
@@ -54,6 +62,14 @@ class CFormLogoutUser extends \Mos\HTMLForm\CForm
         }
     }
 
+    /**
+     * Helper method to check if the log out is successful or not.
+     *
+     * Checks if the user is saved in session or not. Sets a message about the
+     * the result.
+     *
+     * @return boolean true if user is logged out, false otherwise.
+     */
     private function isLogoutSuccessful()
     {
         if (isset($_SESSION["user"])) {
@@ -66,8 +82,11 @@ class CFormLogoutUser extends \Mos\HTMLForm\CForm
     }
 
     /**
-     * Callback What to do if the form was submitted?
+     * Callback at success.
      *
+     * Prints out the log out message and redirects back to the form.
+     *
+     * @return void.
      */
     public function callbackSuccess()
     {
@@ -78,8 +97,11 @@ class CFormLogoutUser extends \Mos\HTMLForm\CForm
 
 
     /**
-     * Callback What to do when form could not be processed?
+     * Callback at failure.
      *
+     * Prints out a log out message and redirects back to the form.
+     *
+     * @return void.
      */
     public function callbackFail()
     {

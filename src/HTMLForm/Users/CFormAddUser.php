@@ -3,8 +3,9 @@
 namespace Anax\HTMLForm\Users;
 
 /**
- * Anax base class for wrapping sessions.
+ * Add user form
  *
+ * Creates a user form to add and save a user in DB.
  */
 class CFormAddUser extends \Mos\HTMLForm\CForm
 {
@@ -22,6 +23,7 @@ class CFormAddUser extends \Mos\HTMLForm\CForm
     /**
      * Constructor
      *
+     * Creates a form to add a user.
      */
     public function __construct()
     {
@@ -88,6 +90,8 @@ class CFormAddUser extends \Mos\HTMLForm\CForm
     /**
      * Callback for submit-button.
      *
+     * Saves a user in DB.
+     *
      * @return boolean true if data was added in db, false otherwise.
      */
     public function callbackSubmit()
@@ -127,8 +131,10 @@ class CFormAddUser extends \Mos\HTMLForm\CForm
 
 
     /**
-     * Callback What to do if the form was submitted?
+     * Callback at success.
      *
+     * Prints out a welcome message for the user who creates a new account.
+     * Redirects back to the form.
      */
     public function callbackSuccess()
     {
@@ -139,7 +145,9 @@ class CFormAddUser extends \Mos\HTMLForm\CForm
 
 
     /**
-     * Callback What to do when form could not be processed?
+     * Callback at failure.
+     *
+     * Prints out an error message and redirects back to the form.
      *
      */
     public function callbackFail()

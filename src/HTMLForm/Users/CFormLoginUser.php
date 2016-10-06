@@ -3,8 +3,9 @@
 namespace Anax\HTMLForm\Users;
 
 /**
- * Anax base class for wrapping sessions.
+ * Login user form
  *
+ * Creates a form to sign in a user an save the user in session.
  */
 class CFormLoginUser extends \Mos\HTMLForm\CForm
 {
@@ -15,6 +16,8 @@ class CFormLoginUser extends \Mos\HTMLForm\CForm
 
     /**
      * Constructor
+     *
+     * Creates a form to sign in a user.
      *
      */
     public function __construct()
@@ -58,7 +61,9 @@ class CFormLoginUser extends \Mos\HTMLForm\CForm
     /**
      * Callback for submit-button.
      *
-     * @return boolean true if data was added in db, false otherwise.
+     * Checks if the sign in is valid.
+     *
+     * @return boolean true if the user is signed in, false otherwise.
      */
     public function callbackSubmit()
     {
@@ -133,8 +138,11 @@ class CFormLoginUser extends \Mos\HTMLForm\CForm
     }
 
     /**
-     * Callback What to do if the form was submitted?
+     * Callback at success.
      *
+     * Redirects to the user information.
+     *
+     * @return void.
      */
     public function callbackSuccess()
     {
@@ -144,8 +152,11 @@ class CFormLoginUser extends \Mos\HTMLForm\CForm
 
 
     /**
-     * Callback What to do when form could not be processed?
+     * Callback at failure.
      *
+     * Redirects back to the login page.
+     *
+     * @return void.
      */
     public function callbackFail()
     {

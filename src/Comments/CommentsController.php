@@ -4,15 +4,21 @@
 namespace Anax\Comments;
 
 /**
- * To attach comments-flow to a page or some content.
+ * Comments controller
  *
+ * Communicates with the comment and question table in the database.
+ * Handles all comment releated tasks and present the results to views.
  */
+
 class CommentsController implements \Anax\DI\IInjectionAware
 {
     use \Anax\DI\TInjectable;
 
     /**
      * Initialize the controller.
+     *
+     * Initializes the session, the comment and
+     * question models.
      *
      * @return void
      */
@@ -27,6 +33,23 @@ class CommentsController implements \Anax\DI\IInjectionAware
         $this->questions->setDI($this->di);
     }
 
+    /**
+     * Adds an comment to a question or an answer.
+     *
+     * Checks if mandatory parameters are present and the user has logged in
+     * to be able to add an answer. If mandatory parameters are not present, the
+     * user is redirected to an error page. If user is not logged in, the user
+     * is redirected to the log in page.
+     *
+     * @param int $id               the question or answer id. Default null.
+     * @param int $questionId       the question id. Used for redirecting purpose.
+     *                              Default null.
+     * @param string $title         The heading of the comment form. Default null.
+     * @param string $controller    The name of the controller to redirect to.
+     *                              Default null.
+     *
+     * @return void
+     */
     public function addAction($id = null, $questionId = null, $title = null, $controller = null)
     {
         if ($this->isMandatoryParametersPresent($id, $questionId, $title, $controller)) {
@@ -43,6 +66,19 @@ class CommentsController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to check if mandatory parameters are present.
+     *
+     * Checks if mandatory parameters are present and returns the result.
+     *
+     * @param int $id               the question or answer id.
+     * @param int $questionId       the question id. Used for redirecting purpose.
+     * @param string $title         The heading of the comment form.
+     * @param string $controller    The name of the controller to redirect to.
+     *
+     * @return boolean              true if mandatory parameters are present, false
+     *                              otherwise.
+     */
     private function isMandatoryParametersPresent($id, $questionId, $title, $controller)
     {
         $isPresent = false;
@@ -54,6 +90,19 @@ class CommentsController implements \Anax\DI\IInjectionAware
         return $isPresent;
     }
 
+    /**
+     * Helper method to create an comment form.
+     *
+     * Creates an comment form and its view. Uses the title of the question or
+     * the beginning of the answer for the heading of the form.
+     *
+     * @param int $id               the question or answer id.
+     * @param int $questionId       the question id. Used for redirecting purpose.
+     * @param string $title         The heading of the comment form.
+     * @param string $controller    The name of the controller to redirect to.
+     *
+     * @return void
+     */
     private function addComment($id, $questionId, $title, $controller)
     {
         $userId = $this->LoggedIn->getUserId();
@@ -77,12 +126,14 @@ class CommentsController implements \Anax\DI\IInjectionAware
     }
 
     /**
-     * Helper function for initiate no such user view.
+     * Helper function for initiate an error message.
      *
-     * Initiates a view which shows a message the user with the specfic
-     * id is not found. Contains a return button.
+     * Forwards an error message to the error controller, which displays the
+     * message to a view. The error message contains of a subtitle, an error
+     * message and a return button.
      *
-     * @param  [] $content the subtitle and the message shown at page.
+     * @param string $subtitle  The subtitle of the error.
+     * @param string $message   The error message.
      *
      * @return void
      */
@@ -106,6 +157,16 @@ class CommentsController implements \Anax\DI\IInjectionAware
         ]);
     }
 
+    /**
+     * Updates a comment.
+     *
+     * Updates the comment if the user is allowed to update. To be able to update,
+     * the user must be admin or the author of the comment.
+     *
+     * @param  int $commentId    the id of the comment. Default null.
+     *
+     * @return void
+     */
     public function updateAction($commentId = null)
     {
         if ($this->isUpdateAllowed($commentId)) {
@@ -115,6 +176,16 @@ class CommentsController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to check if the user is allowed to update the comment.
+     *
+     * Checks if the user has logged in and the user is admin or the author of
+     * the comment.
+     *
+     * @param  int $commentId   the id of the comment.
+     *
+     * @return boolean          true if allowed to update, false otherwise.
+     */
     private function isUpdateAllowed($commentId)
     {
         $isUpdateAllowed = false;
@@ -129,6 +200,16 @@ class CommentsController implements \Anax\DI\IInjectionAware
         return $isUpdateAllowed;
     }
 
+    /**
+     * Helper method to get the id of the user who wrote the comment.
+     *
+     * Gets the user id of the user who wrote the comment from DB.
+     *
+     * @param  int $commentId    the id of the comment.
+     *
+     * @return int | false  the id of the user who wrote the comment, false
+     *                      otherwise.
+     */
     private function getCommentAuthorId($commentId)
     {
         $authorId = $this->comments->query('U.id')
@@ -142,6 +223,20 @@ class CommentsController implements \Anax\DI\IInjectionAware
         return $authorId;
     }
 
+    /**
+     * Helper method to update the comment.
+     *
+     * Gets information about the parent of the comment. The parent could be
+     * either a question or an comment. The form uses the title of the
+     * question, if the comment is related to a question or the beginning of
+     * the answer, if the comment is related to an answer.
+     *
+     * Creates an update comment form if comment data is found, creates a flash
+     * error message otherwise.
+     *
+     * @param  int $commentId   the id of the comment.
+     * @return void
+     */
     private function updateComment($commentId)
     {
         $commentParentInfo = $this->getCommentParentInfo($commentId);
@@ -161,11 +256,26 @@ class CommentsController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to get the parent info for a comment.
+     *
+     * Gets the parent info for a comment. The parent could be either a
+     * question or an comment.
+     *
+     * If the comment is related to an answer, the question id is the id of the
+     * question the answer is related to.
+     *
+     * @param  id $commentId    the id of the comment.
+     *
+     * @return [mixed]          the question id, the question title if the comment
+     *                          is related to a question and answer content if
+     *                          comment is related to an answer.
+     */
     private function getCommentParentInfo($commentId)
     {
         $answerInfo = $this->getAnswerInfoFromCommentId($commentId);
         if (isset($answerInfo->id)) {
-            $questionInfo = $this->getQuestionIdFromAnswerId($answerInfo->id);
+            $questionInfo = $this->getQuestionInfoFromAnswerId($answerInfo->id);
         } else {
             $questionInfo = $this->getQuestionInfoFromCommentId($commentId);
         }
@@ -179,6 +289,15 @@ class CommentsController implements \Anax\DI\IInjectionAware
         return $commentParentInfo;
     }
 
+    /**
+     * Helper method to get answer info from comment id.
+     *
+     * Gets the answer info of the answer the comment is related to in DB.
+     *
+     * @param  int $commentId    the id of the comment.
+     *
+     * @return [object]  the answer info, if found. Otherwise false.
+     */
     private function getAnswerInfoFromCommentId($commentId)
     {
         $answerInfo = $this->comments->query('A.id, A.content')
@@ -192,7 +311,16 @@ class CommentsController implements \Anax\DI\IInjectionAware
         return $answerInfo;
     }
 
-    private function getQuestionIdFromAnswerId($answerId)
+    /**
+     * Helper method to get question info from answer id.
+     *
+     * Gets the question info in DB from the answer the question is related to.
+     *
+     * @param  int $answerId    the id of the answer the question is related to.
+     *
+     * @return [object]  the question info, if found. Otherwise false.
+     */
+    private function getQuestionInfoFromAnswerId($answerId)
     {
         $questionInfo = $this->questions->query('Lf_Question.id')
             ->join('Question2Answer AS Q2A', 'Q2A.idQuestion = Lf_Question.id')
@@ -205,6 +333,15 @@ class CommentsController implements \Anax\DI\IInjectionAware
         return $questionInfo;
     }
 
+    /**
+     * Helper method to get question info from comment id.
+     *
+     * Gets the question info in DB from the comment the question is related to.
+     *
+     * @param  int $commentId    the id of the comment the question is related to.
+     *
+     * @return [object]  the question info, if found. Otherwise false.
+     */
     private function getQuestionInfoFromCommentId($commentId)
     {
         $questionInfo = $this->comments->query('Q.id, Q.title')
@@ -263,7 +400,19 @@ class CommentsController implements \Anax\DI\IInjectionAware
         return $pos;
     }
 
-
+    /**
+     * Helper method to create an update comment form and send it to a view.
+     *
+     * Creates an update comment form and sends it to a view.
+     *
+     * @param  [mixed] $commentData      All comment information.
+     * @param  int $questionId          the question id the comment is related to.
+     * @param  string $title            the title of the question the or the
+     *                                  beginning of the answer the comment is
+     *                                  related to.
+     *
+     * @return void
+     */
     private function createUpdateCommentForm($commentData, $questionId, $title)
     {
         $form = new \Anax\HTMLForm\Comments\CFormUpdateComment($commentData, $questionId);
@@ -277,6 +426,16 @@ class CommentsController implements \Anax\DI\IInjectionAware
         ], 'main');
     }
 
+    /**
+     * Helper method to handle update is not allowed.
+     *
+     * Handles the action when an update is not allowed. Creates an error message
+     * and redirects the user.
+     *
+     * @param  int $commentId    the id of the comment.
+     *
+     * @return void
+     */
     private function handleUpdateIsNotAllowed($commentId)
     {
         if (!isset($commentId)) {
@@ -298,6 +457,16 @@ class CommentsController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to redirect to the question controllers id action method.
+     *
+     * Redirects to the controllers id action method, which shows the question
+     * with releated answers and comments.
+     *
+     * @param  int $questionId  the id of the question.
+     *
+     * @return void
+     */
     private function redirectToQuestion($questionId)
     {
         $this->dispatcher->forward([
@@ -307,6 +476,14 @@ class CommentsController implements \Anax\DI\IInjectionAware
         ]);
     }
 
+    /**
+     * Helper method to redirect to the question controllers list action method.
+     *
+     * Redirects to the controllers list action method, which shows all
+     * questions in DB.
+     *
+     * @return void
+     */
     private function redirectToQuestions()
     {
         $this->dispatcher->forward([
@@ -315,6 +492,16 @@ class CommentsController implements \Anax\DI\IInjectionAware
         ]);
     }
 
+    /**
+     * Lists all comments for a user.
+     *
+     * Lists alla comments for user if user id is found. If not, creats a flash
+     * error message.
+     *
+     * @param  int $userId  the user id. Default null.
+     *
+     * @return void
+     */
     public function listUserCommentsAction($userId = null)
     {
         if (isset($userId)) {
@@ -325,6 +512,20 @@ class CommentsController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to list all comments for a user.
+     *
+     * Gets all comments for a user in DB. Creats a navigation bar for the user
+     * to choose between questions, answers and comments.
+     *
+     * Gets parent info to set the the title of the related question or answer
+     * for the comment. Gets the question id to be able to redirect the user
+     * and creates a view for all answers.
+     *
+     * @param  int $userId  the user id.
+     *
+     * @return void
+     */
     private function listUserComments($userId)
     {
         $allComments = $this->getAllCommentsForUser($userId);
@@ -339,6 +540,15 @@ class CommentsController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to get all comments for a user in DB.
+     *
+     * Gets all comments for a user in DB.
+     *
+     * @param  int $userId  the users id.
+     *
+     * @return [object]     all comment data for a user.
+     */
     private function getAllCommentsForUser($userId)
     {
         $commentData = $this->comments->query('Lf_Comment.*, U.id AS userId, U.acronym')
@@ -350,6 +560,18 @@ class CommentsController implements \Anax\DI\IInjectionAware
         return $commentData;
     }
 
+    /**
+     * Helper method to create a navigation bar.
+     *
+     * Creats a navigation bar to show number of questions, answers or comments
+     * for a user. Contains tabs to show questions, answers or comments for a
+     * user. Lists all comments.
+     *
+     * @param  int $userId              the user id.
+     * @param  [object] $allComments    all comments for a user.
+     *
+     * @return void
+     */
     private function createItemNavigationBar($userId, $allComments)
     {
         $this->views->add('users/itemHeading', [
@@ -360,6 +582,17 @@ class CommentsController implements \Anax\DI\IInjectionAware
         ], 'main-wide');
     }
 
+    /**
+     * Helper method to create a comment title.
+     *
+     * Checks if the parent of a comment is a question or an answer. If it is
+     * a question, the title is Fråga and the question title.
+     * If it is an answer, the title is Svar and the beginning of the answer.
+     *
+     * @param  [string] $commentParentInfo  the parent information of the comment.
+     *
+     * @return string  the title of the comment.
+     */
     private function getCommentTitle($commentParentInfo)
     {
         $title = isset($commentParentInfo['questionTitle']) ? "Fråga: " . $commentParentInfo['questionTitle'] : null;
@@ -370,11 +603,29 @@ class CommentsController implements \Anax\DI\IInjectionAware
         return $title;
     }
 
+    /**
+     * Helper method to get the question id for the related question.
+     *
+     * @param  [mixed] $commentParentInfo   the parent info to the related comment.
+     *
+     * @return int | null   the id of the question, if found. Otherwise false.
+     */
     private function getQuestionId($commentParentInfo)
     {
         return isset($commentParentInfo['questionId']) ? $commentParentInfo['questionId'] : null;
     }
 
+    /**
+     * Helper method to create a comment view.
+     *
+     * Creates a comment view for comment.
+     *
+     * @param  string $title    the title for the comment.
+     * @param  int $questionId  the id of the related question.
+     * @param  string $comment  the comment text.
+     *
+     * @return void
+     */
     private function createCommentView($title, $questionId, $comment)
     {
         $this->views->add('comment/comment', [
@@ -384,6 +635,16 @@ class CommentsController implements \Anax\DI\IInjectionAware
         ], 'main-wide');
     }
 
+    /**
+     * Increases the votes counter at an up vote action.
+     *
+     * Redirects to the comment vote controller to increase the vote counter
+     * with one when a user push the up vote arrow for a comment.
+     *
+     * @param  int $commentId   the id of the comment.
+     *
+     * @return void
+     */
     public function upVoteAction($commentId)
     {
         $this->dispatcher->forward([
@@ -393,6 +654,16 @@ class CommentsController implements \Anax\DI\IInjectionAware
         ]);
     }
 
+    /**
+     * Decreases the votes counter at a down vote action.
+     *
+     * Redirects to the comment vote controller to decrease the vote counter
+     * with one when a user push the down vote arrow for a comment.
+     *
+     * @param  int $commentId   the id of the comment.
+     *
+     * @return void
+     */
     public function downVoteAction($commentId)
     {
         $this->dispatcher->forward([

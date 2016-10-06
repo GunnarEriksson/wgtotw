@@ -3,8 +3,10 @@
 namespace Anax\HTMLForm\Comments;
 
 /**
- * Anax base class for wrapping sessions.
+ * Update Comment form
  *
+ * Creates a comment form for the user to update the users comment to a question
+ * or an answer in DB.
  */
 class CFormUpdateComment extends \Mos\HTMLForm\CForm
 {
@@ -19,7 +21,10 @@ class CFormUpdateComment extends \Mos\HTMLForm\CForm
     /**
      * Constructor
      *
-     * @param string $pageKey the page name for the comment.
+     * Creates a form to update the users comment to a question or answer.
+     *
+     * @param [mixed]   $commentData the comment data to be updated.
+     * @param int $questionId the id of the related question.
      */
     public function __construct($commentData, $questionId)
     {
@@ -77,8 +82,13 @@ class CFormUpdateComment extends \Mos\HTMLForm\CForm
     }
 
     /**
-     * Callback What to do if the form was submitted?
+     * Callback What to do if the form was sucessfully submitted?
      *
+     * Redirects to the related question if the question id is present.
+     * Otherwise an warning message is printed out that the related question
+     * id is missing.
+     *
+     * @return void.
      */
     public function callbackSuccess()
     {
@@ -95,6 +105,9 @@ class CFormUpdateComment extends \Mos\HTMLForm\CForm
     /**
      * Callback What to do when form could not be processed?
      *
+     * Prints out that the updated comment could not be saved in DB.
+     *
+     * @return void.
      */
     public function callbackFail()
     {

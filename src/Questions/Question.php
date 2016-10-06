@@ -2,8 +2,10 @@
 namespace Anax\Questions;
 
 /**
- * Model for Users.
+ * Model for Question.
  *
+ * Handles question data in the tabel question
+ * in the database.
  */
 class Question extends \Anax\MVC\CDatabaseModel
 {

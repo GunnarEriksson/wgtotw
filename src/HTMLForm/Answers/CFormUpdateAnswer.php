@@ -2,6 +2,12 @@
 
 namespace Anax\HTMLForm\Answers;
 
+/**
+ * Update answer form
+ *
+ * Creates an answer form for the user to update the users answer to a question
+ * in DB.
+ */
 class CFormUpdateAnswer extends \Mos\HTMLForm\CForm
 {
     use \Anax\DI\TInjectionAware,
@@ -15,6 +21,11 @@ class CFormUpdateAnswer extends \Mos\HTMLForm\CForm
 
     /**
      * Constructor
+     *
+     * Creates a form to update the users answer to a question.
+     *
+     * @param [mixed] $answerData the answer data to be updated.
+     * @param int $questionId the id of the related question.
      */
     public function __construct($answerData, $questionId)
     {
@@ -74,8 +85,13 @@ class CFormUpdateAnswer extends \Mos\HTMLForm\CForm
     }
 
     /**
-     * Callback What to do if the form was submitted?
+     * Callback what to do if the form was sucessfully submitted?
      *
+     * Redirects to the related question if the question id is present.
+     * Otherwise an warning message is printed out that the related question
+     * id is missing.
+     *
+     * @return void.
      */
     public function callbackSuccess()
     {
@@ -87,11 +103,12 @@ class CFormUpdateAnswer extends \Mos\HTMLForm\CForm
         }
     }
 
-
-
     /**
      * Callback What to do when form could not be processed?
      *
+     * Prints out that the updated answer could not be saved in DB.
+     *
+     * @return void.
      */
     public function callbackFail()
     {

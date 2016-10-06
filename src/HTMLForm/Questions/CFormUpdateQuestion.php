@@ -2,6 +2,12 @@
 
 namespace Anax\HTMLForm\Questions;
 
+/**
+ * Update question form
+ *
+ * Creates a question form for the user to update the users question in DB.
+ * Dispatches all other related tasks to other controllers.
+ */
 class CFormUpdateQuestion extends \Mos\HTMLForm\CForm
 {
     use \Anax\DI\TInjectionAware,
@@ -16,6 +22,12 @@ class CFormUpdateQuestion extends \Mos\HTMLForm\CForm
 
     /**
      * Constructor
+     *
+     * Creates a form to update the users question.
+     *
+     * @param [mixed] $questionData the question data to be updated.
+     * @param [string] $tagNames    the name of the question related tags.
+     * @param [string] $oldTags     the tag names before the update.
      */
     public function __construct($questionData, $tagNames, $oldTags)
     {
@@ -91,8 +103,13 @@ class CFormUpdateQuestion extends \Mos\HTMLForm\CForm
     }
 
     /**
-     * Callback What to do if the form was submitted?
+     * Callback what to do if the form was sucessfully submitted?
      *
+     * Redirects to the related question if the question id is present.
+     * Otherwise an warning message is printed out that the related question
+     * id is missing.
+     *
+     * @return void.
      */
     public function callbackSuccess()
     {
@@ -109,6 +126,14 @@ class CFormUpdateQuestion extends \Mos\HTMLForm\CForm
         }
     }
 
+    /**
+     * Helper method to update the related tags to the question.
+     *
+     * Redirects to the QuestionTag controller to remove superfluous tags and
+     * add new ones after the question has been updated.
+     *
+     * @return void.
+     */
     private function updateTagsToQuestion()
     {
         $this->di->dispatcher->forward([
@@ -122,6 +147,9 @@ class CFormUpdateQuestion extends \Mos\HTMLForm\CForm
     /**
      * Callback What to do when form could not be processed?
      *
+     * Prints out that the updated question could not be saved in DB.
+     *
+     * @return void.
      */
     public function callbackFail()
     {

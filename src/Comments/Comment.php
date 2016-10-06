@@ -2,7 +2,10 @@
 namespace Anax\Comments;
 
 /**
- * Model for Users.
+ * Model for Comment.
+ *
+ * Handles comment data in the table comment
+ * in the database.
  *
  */
 class Comment extends \Anax\MVC\CDatabaseModel

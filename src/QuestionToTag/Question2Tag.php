@@ -2,8 +2,10 @@
 namespace Anax\QuestionToTag;
 
 /**
- * Model for Users.
+ * Model for Question to Tag.
  *
+ * Handles the mapping between question and the related tags
+ * in the database.
  */
 class Question2Tag extends \Anax\MVC\CDatabaseModel
 {
