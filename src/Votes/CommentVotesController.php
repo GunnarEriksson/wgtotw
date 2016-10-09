@@ -2,10 +2,22 @@
 
 namespace Anax\Votes;
 
+/**
+ * Comment Votes controller
+ *
+ * Communicates with the mapping table, which maps user with a comment
+ * in the database.
+ * Handles all comment voting tasks between user and the related comment.
+ *
+ * Inherits from Vote class.
+ */
 class CommentVotesController extends Vote
 {
     /**
      * Initialize the controller.
+     *
+     * Initializes the comment vote model, the comment model
+     * and the question model.
      *
      * @return void
      */
@@ -21,6 +33,15 @@ class CommentVotesController extends Vote
         $this->questions->setDI($this->di);
     }
 
+    /**
+     * Gets the user ID for a specific comment in DB.
+     *
+     * Gets the ID of the comment writer in DB.
+     *
+     * @param  int $id  the id of the comment.
+     *
+     * @return int      the ID of the comment writer.
+     */
     protected function getUserId($id)
     {
         $userId = $this->comments->query('U.id')
@@ -34,6 +55,17 @@ class CommentVotesController extends Vote
         return $userId;
     }
 
+    /**
+     * Checks if the voter has already voted on the comment.
+     *
+     * Checks in the mapping table in DB, if voter has already voted on the
+     * comment.
+     *
+     * @param  int  $id         the id of the comment.
+     * @param  int  $userId     the user id of the voter.
+     *
+     * @return boolean          true if user already has voted, false otherwise.
+     */
     protected function hasUserVoted($id, $userId)
     {
         $id = $this->commentVotes->query('Lf_CommentVote.id')
@@ -45,6 +77,15 @@ class CommentVotesController extends Vote
         return $hasVoted;
     }
 
+    /**
+     * Adds that a user has voted on a comment.
+     *
+     * Maps a user id to a comment id, which marks that a user has voted on
+     * a comment.
+     *
+     * @param int $id       the id of the comment.
+     * @param int $userId   the user id of the voter.
+     */
     protected function addUserAsVoter($id, $userId)
     {
         $isSaved = $this->commentVotes->create(array(
@@ -55,6 +96,18 @@ class CommentVotesController extends Vote
         return $isSaved;
     }
 
+    /**
+     * Increases the score counter for a comment.
+     *
+     * Gets the score in DB and increases the score with one. Saves the new
+     * score in DB.
+     * The score is used to rank the comment.
+     *
+     * @param  int $id  the comment id for the comment to rank.
+     *
+     * @return boolean  true if the increased value could be saved in DB, false
+     *                  otherwise.
+     */
     protected function increaseScoreCounter($id)
     {
         $score = $this->getScoreNumber($id);
@@ -68,6 +121,15 @@ class CommentVotesController extends Vote
         return $isSaved;
     }
 
+    /**
+     * Gets the comment ranking score from DB.
+     *
+     * Gets the comment ranking score from DB, if found. If not, false is
+     * returned.
+     *
+     * @param  int $id  the id of the comment.
+     * @return int | false  the ranking score for the comment. False, if not found.
+     */
     protected function getScoreNumber($id)
     {
         $score = $this->comments->query('score')
@@ -79,6 +141,17 @@ class CommentVotesController extends Vote
         return $score;
     }
 
+    /**
+     * Gets the related question ID for the comment.
+     *
+     * Gets the question ID for which the comment belongs to. Handles both if
+     * a comment belongs directly to a comment or via an answer (belongs to an
+     * answer).
+     *
+     * @param  int $id      the ID of the comment.
+     * @return int | false  the question ID which the comment belongs to, if found.
+     *                      False otherwise.
+     */
     protected function getQuestionId($id)
     {
         $answerId = $this->getAnswerIdFromCommentId($id);
@@ -91,6 +164,16 @@ class CommentVotesController extends Vote
         return $questionId;
     }
 
+    /**
+     * Helper method to get the related answer ID from a comment ID in DB.
+     *
+     * Gets the related answer ID if the comment belongs to an answer.
+     *
+     * @param  int $commentId   the comment ID.
+     *
+     * @return int | false      the answer ID if comment belongs to an
+     *                          answer, false otherwise.
+     */
     private function getAnswerIdFromCommentId($commentId)
     {
         $answerId = $this->comments->query('A.id')
@@ -104,6 +187,16 @@ class CommentVotesController extends Vote
         return $answerId;
     }
 
+    /**
+     * Helper method to get the related question ID from a comment ID in DB.
+     *
+     * Gets the related question ID if the comment belongs to a question.
+     *
+     * @param  int $commentId   the comment ID.
+     *
+     * @return int | false      the question ID if comment belongs to a
+     *                          comment, false otherwise.
+     */
     private function getQuestionIdFromCommentId($commentId)
     {
         $questionId = $this->comments->query('Q.id')
@@ -117,6 +210,16 @@ class CommentVotesController extends Vote
         return $questionId;
     }
 
+    /**
+     * Helper function to get related question ID from the answer ID in DB.
+     *
+     * Gets the related question ID from the answer ID. Used when a comment
+     * belongs to an answer.
+     *
+     * @param  int $answerId    the answer ID.
+     * @return int | false      the question ID, if the answer belongs to a
+     *                          question. False otherwise.
+     */
     private function getQuestionIdFromAnswerId($answerId)
     {
         $questionId = $this->questions->query('Lf_Question.id')
@@ -130,6 +233,18 @@ class CommentVotesController extends Vote
         return $questionId;
     }
 
+    /**
+     * Decreases the score counter for comment.
+     *
+     * Gets the score in DB and decreases the score with one. Saves the new
+     * score in DB.
+     * The score is used to rank the comment.
+     *
+     * @param  int $id  the comment id for the comment to rank.
+     *
+     * @return boolean  true if the decreased value could be saved in DB, false
+     *                  otherwise.
+     */
     protected function decreaseScoreCounter($id)
     {
         $score = $this->getScoreNumber($id);

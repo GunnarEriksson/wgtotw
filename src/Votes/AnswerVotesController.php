@@ -2,11 +2,23 @@
 
 namespace Anax\Votes;
 
+/**
+ * Answer Votes controller
+ *
+ * Communicates with the mapping table, which maps user with an answer
+ * in the database.
+ * Handles all answer voting tasks between user and the related answer.
+ *
+ * Inherits from Vote class.
+ */
 class AnswerVotesController extends Vote
 {
 
     /**
      * Initialize the controller.
+     *
+     * Initializes the answer vote model and the
+     * answer model.
      *
      * @return void
      */
@@ -19,6 +31,15 @@ class AnswerVotesController extends Vote
         $this->answers->setDI($this->di);
     }
 
+    /**
+     * Gets the user ID for a specific answer in DB.
+     *
+     * Gets the ID of the answer writer in DB.
+     *
+     * @param  int $id  the id of the answer.
+     *
+     * @return int      the ID of the answer writer.
+     */
     protected function getUserId($id)
     {
         $userId = $this->answers->query('U.id')
@@ -32,6 +53,17 @@ class AnswerVotesController extends Vote
         return $userId;
     }
 
+    /**
+     * Checks if the voter has already voted on the answer.
+     *
+     * Checks in the mapping table in DB, if voter has already voted on the
+     * answer.
+     *
+     * @param  int  $id         the id of the answer.
+     * @param  int  $userId     the user id of the voter.
+     *
+     * @return boolean          true if user already has voted, false otherwise.
+     */
     protected function hasUserVoted($id, $userId)
     {
         $id = $this->answerVotes->query('Lf_AnswerVote.id')
@@ -43,6 +75,15 @@ class AnswerVotesController extends Vote
         return $hasVoted;
     }
 
+    /**
+     * Adds that a user has voted on an answer.
+     *
+     * Maps a user id to an answer id, which marks that a user has voted on
+     * an answer.
+     *
+     * @param int $id       the id of the answer.
+     * @param int $userId   the user id of the voter.
+     */
     protected function addUserAsVoter($id, $userId)
     {
         $isSaved = $this->answerVotes->create(array(
@@ -53,6 +94,18 @@ class AnswerVotesController extends Vote
         return $isSaved;
     }
 
+    /**
+     * Increases the score counter for an answer.
+     *
+     * Gets the score in DB and increases the score with one. Saves the new
+     * score in DB.
+     * The score is used to rank the answer.
+     *
+     * @param  int $id  the answer id for the answer to rank.
+     *
+     * @return boolean  true if the increased value could be saved in DB, false
+     *                  otherwise.
+     */
     protected function increaseScoreCounter($id)
     {
         $score = $this->getScoreNumber($id);
@@ -66,6 +119,15 @@ class AnswerVotesController extends Vote
         return $isSaved;
     }
 
+    /**
+     * Gets the answers ranking score from DB.
+     *
+     * Gets the answers ranking score from DB, if found. If not, false is
+     * returned.
+     *
+     * @param  int $id  the id of the answer.
+     * @return int | false  the ranking score for the answer. False, if not found.
+     */
     protected function getScoreNumber($id)
     {
         $score = $this->answers->query('score')
@@ -77,6 +139,15 @@ class AnswerVotesController extends Vote
         return $score;
     }
 
+    /**
+     * Gets the related question id for the answer.
+     *
+     * Gets the question id for which the answer belongs to.
+     *
+     * @param  int $id      the id of the answer.
+     * @return int | false  the question id which the answer belongs to, if found.
+     *                      False otherwise.
+     */
     protected function getQuestionId($id)
     {
         $questionId = $this->answers->query('Q.id')
@@ -90,6 +161,18 @@ class AnswerVotesController extends Vote
         return $questionId;
     }
 
+    /**
+     * Decreases the score counter for an answer.
+     *
+     * Gets the score in DB and decreases the score with one. Saves the new
+     * score in DB.
+     * The score is used to rank the answer.
+     *
+     * @param  int $id  the answer id for the answer to rank.
+     *
+     * @return boolean  true if the decreased value could be saved in DB, false
+     *                  otherwise.
+     */
     protected function decreaseScoreCounter($id)
     {
         $score = $this->getScoreNumber($id);

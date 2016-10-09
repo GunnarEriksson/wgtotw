@@ -2,6 +2,8 @@
 namespace Anax\Users;
 
 /**
+ * User Login Controller
+ *
  * A controller for users login and logout related events.
  */
 class UserLoginController implements \Anax\DI\IInjectionAware
@@ -10,6 +12,8 @@ class UserLoginController implements \Anax\DI\IInjectionAware
 
     /**
      * Initialize the controller.
+     *
+     * Initializes the session.
      *
      * @return void
      */
@@ -21,6 +25,14 @@ class UserLoginController implements \Anax\DI\IInjectionAware
         $this->users->setDI($this->di);
     }
 
+    /**
+     * Creates a log in action for the user.
+     *
+     * Creates a log in form and the and accompanying instructions how to create
+     * a new account if the user is not a member of the community.
+     *
+     * @return void.
+     */
     public function loginAction()
     {
         $form = new \Anax\HTMLForm\Users\CFormLoginUser();
@@ -42,6 +54,13 @@ class UserLoginController implements \Anax\DI\IInjectionAware
         ], 'sidebar');
     }
 
+    /**
+     * Creates a log out action.
+     *
+     * Creates a log out form for the user to log out.
+     *
+     * @return void.
+     */
     public function logoutAction()
     {
         $form = new \Anax\HTMLForm\Users\CFormLogoutUser();

@@ -2,13 +2,17 @@
 namespace Anax\Users;
 
 /**
- * Model for Users.
+ * Model for User.
  *
+ * Handles user data in the tabel user
+ * in the database.
  */
 class User extends \Anax\MVC\CDatabaseModel
 {
     /**
-     * Find acronym and return specific.
+     * Find acronym
+     *
+     * Searches after an acronym in DB.
      *
      * @return this
      */
@@ -19,6 +23,7 @@ class User extends \Anax\MVC\CDatabaseModel
             ->where("acronym = ?");
 
         $this->db->execute([$acronym]);
+
         return $this->db->fetchInto($this);
     }
 }

@@ -1,8 +1,7 @@
 <?php
 /**
- * This is a Anax-MVC front controller for the me page.
- *
- * Contains a short presentation of the author of this page.
+ * This is a Anax-MVC front controller for the web site
+ * "Allt om naturfotografering".
  */
 require __DIR__ . '/config_with_app.php';
 
@@ -11,6 +10,13 @@ $app->url->setUrlType(\Anax\Url\CUrl::URL_CLEAN);
 $app->navbar->configure(ANAX_APP_PATH . 'config/navbar_me.php');
 $app->theme->configure(ANAX_APP_PATH . 'config/theme_me.php');
 
+/**
+ * The home page for the website.
+ *
+ * Views the presentation of the website and redirects to different
+ * controllers to show latest questions, the most popular tags and
+ * the most active users.
+ */
 $app->router->add('', function () use ($app) {
     $app->theme->setTitle("Allt om landskapsfotografering");
 
@@ -40,6 +46,11 @@ $app->router->add('', function () use ($app) {
     ]);
 });
 
+/**
+ * List all questions.
+ *
+ * Redirects to the Question controller to list all questions.
+ */
 $app->router->add('questions', function () use ($app) {
     $app->dispatcher->forward([
         'controller' => 'questions',
@@ -47,6 +58,11 @@ $app->router->add('questions', function () use ($app) {
     ]);
 });
 
+/**
+ * List all tags.
+ *
+ * Redirects to the Tags controller to list all tags.
+ */
 $app->router->add('tags', function () use ($app) {
     $app->dispatcher->forward([
         'controller' => 'tags',
@@ -54,6 +70,11 @@ $app->router->add('tags', function () use ($app) {
     ]);
 });
 
+/**
+ * List all users.
+ *
+ * Redirects to the Users controller to list all users.
+ */
 $app->router->add('users', function () use ($app) {
     $app->dispatcher->forward([
         'controller' => 'users',
@@ -61,6 +82,12 @@ $app->router->add('users', function () use ($app) {
     ]);
 });
 
+/**
+ * Show information about the page and the creator.
+ *
+ * Views information about the website and a byline with information of
+ * the creator of the website.
+ */
 $app->router->add('about', function () use ($app) {
     $app->theme->setTitle("Om Oss");
 
@@ -80,6 +107,11 @@ $app->router->add('about', function () use ($app) {
 
 });
 
+/**
+ * Show form to log in.
+ *
+ * Redirects to the UserLogin controller to view a form to log in.
+ */
 $app->router->add('login', function () use ($app) {
     $app->theme->setTitle("Logga in");
 
@@ -89,6 +121,11 @@ $app->router->add('login', function () use ($app) {
     ]);
 });
 
+/**
+ * Show the user profile of a user.
+ *
+ * Views information about the user and the user related activities.
+ */
 $app->router->add('profile', function () use ($app) {
 
     $userId = $app->LoggedIn->getUserId();
@@ -102,6 +139,12 @@ $app->router->add('profile', function () use ($app) {
     ]);
 });
 
+/**
+ * Show form to create an account to be able to sign in.
+ *
+ * Shows information about the benefits to be member and a form to create
+ * an account.
+ */
 $app->router->add('registration', function () use ($app) {
     $app->theme->setTitle("Skapa Konto");
 

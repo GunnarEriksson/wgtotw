@@ -2,8 +2,10 @@
 namespace Anax\Users;
 
 /**
- * A controller for users and admin related events.
+ * Users controller
  *
+ * Communicates with the user table in the database.
+ * Handles all user releated tasks and present the results to views.
  */
 class UsersController implements \Anax\DI\IInjectionAware
 {
@@ -11,6 +13,8 @@ class UsersController implements \Anax\DI\IInjectionAware
 
     /**
      * Initialize the controller.
+     *
+     * Initializes the session, the user model.
      *
      * @return void
      */
@@ -23,7 +27,9 @@ class UsersController implements \Anax\DI\IInjectionAware
     }
 
     /**
-     * List all users.
+     * Lists all questions in DB.
+     *
+     * Lists all users in DB starting with the latest created user.
      *
      * @return void
      */
@@ -103,11 +109,20 @@ class UsersController implements \Anax\DI\IInjectionAware
     }
 
     /**
-     * List user with id.
+     * Lists a specific user with related questions, answers and comments.
      *
-     * @param int $id of user to display
+     * Checks if a user has logged in to be able to show more detailed
+     * information about a user.
      *
-     * @return void
+     * Information such as full name, town, e-mail, date of membership,
+     * written questions, answers and comments. A table with the users
+     * activities are also shown with the activity scores.
+     *
+     * @param  int $id          the user id of the user to list, default null.
+     * @param  string $type     the type of list to show (question, answer or
+     *                          comments)
+     *
+     * @return void.
      */
     public function idAction($id = null, $type = "question")
     {
@@ -138,7 +153,7 @@ class UsersController implements \Anax\DI\IInjectionAware
      * Helper method to show a user profile.
      *
      * Shows a user profile based on the user id. If no user could be found, an
-     * error message are shown.
+     * error message are shown. Lists
      *
      * @param  int $id the id of the user to be shown.
      *
@@ -171,6 +186,14 @@ class UsersController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to create default activity scores.
+     *
+     * Sets all activity scores to zero.
+     *
+     * @return [int]    A default activity score array with the score names
+     *                  as keys.
+     */
     private function createDefaultUserActivityInfo()
     {
         $userInfoScores = [
@@ -192,6 +215,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         return $userInfoScores;
     }
 
+    /**
+     * Helper method to get question scores from DB.
+     *
+     * Gets the question scores for a user from DB.
+     *
+     * @param  int $userId          the id of the user.
+     * @param  [int] $activityInfo  the activity info array for the user.
+     *
+     * @return [int]                the activity info array for the user.
+     */
     private function getQuestionScores($userId, $activityInfo)
     {
         $questionScores = $this->users->query('Q.score')
@@ -212,6 +245,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         return $activityInfo;
     }
 
+    /**
+     * Helper method to get answers scores from DB.
+     *
+     * Gets the answers scores for a user from DB.
+     *
+     * @param  int $userId          the id of the user.
+     * @param  [int] $activityInfo  the activity info array for the user.
+     *
+     * @return [int]                the activity info array for the user.
+     */
     private function getAnswerScores($userId, $activityInfo)
     {
         $answerScores = $this->users->query('A.score')
@@ -232,6 +275,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         return $activityInfo;
     }
 
+    /**
+     * Helper method to get comment scores from DB.
+     *
+     * Gets the comment scores for a user from DB.
+     *
+     * @param  int $userId          the id of the user.
+     * @param  [int] $activityInfo  the activity info array for the user.
+     *
+     * @return [int]                the activity info array for the user.
+     */
     private function getCommentScores($userId, $activityInfo)
     {
         $commentScores = $this->users->query('C.score')
@@ -252,6 +305,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         return $activityInfo;
     }
 
+    /**
+     * Helper method to get number how many answers a user has accepted from DB.
+     *
+     * Gets the number how many answers a user has accepted from DB.
+     *
+     * @param  int $userId          the id of the user.
+     * @param  [int] $activityInfo  the activity info array for the user.
+     *
+     * @return [int]                the activity info array for the user.
+     */
     private function getNumberOfAccepts($userId, $activityInfo)
     {
         $acceptedAnswers = $this->users->query('A.id')
@@ -269,6 +332,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         return $activityInfo;
     }
 
+    /**
+     * Helper method to calculate the sum of the ranking points.
+     *
+     * Calculates the sum of the rankingpoints by adding the points for
+     * question rank, answer rank and comments rank.
+     *
+     * @param  [int] $activityInfo  the activity info array for the user.
+     *
+     * @return [int] $activityInfo  the activity info array for the user.
+     */
     private function getRankPoints($activityInfo)
     {
         $rankPoints = $activityInfo['questionRank'] + $activityInfo['answerRank'] + $activityInfo['commentRank'];
@@ -277,6 +350,18 @@ class UsersController implements \Anax\DI\IInjectionAware
         return $activityInfo;
     }
 
+    /**
+     * Helper method to calculate the total sum of points.
+     *
+     * Calculates the total sum of points by adding the points for
+     * question score, answer score, comments score, accept score,
+     * vote score and ranking points.
+     *
+     * @param  [int] $activityInfo  the activity info array for the user.
+     * @param  int the id of the user.
+     *
+     * @return [int] $activityInfo  the activity info array for the user.
+     */
     private function calculateSum($activityInfo, $user)
     {
         $votesScore = isset($user['numVotes']) ? $user['numVotes'] : 0;
@@ -310,30 +395,60 @@ class UsersController implements \Anax\DI\IInjectionAware
         ], 'main');
     }
 
-    private function showUserComments($id)
+    /**
+     * Helper method to show user comments.
+     *
+     * Redirects to the Comments controller to list all comments created
+     * by the user.
+     *
+     * @param  int $userId  the id of the user.
+     *
+     * @return void.
+     */
+    private function showUserComments($userId)
     {
         $this->dispatcher->forward([
             'controller' => 'comments',
             'action'     => 'list-user-comments',
-            'params'     => [$id]
+            'params'     => [$userId]
         ]);
     }
 
-    private function showUserAnswers($id)
+    /**
+     * Helper method to show user answers.
+     *
+     * Redirects to the Comments controller to list all answers created
+     * by the user.
+     *
+     * @param  int $userId  the id of the user.
+     *
+     * @return void.
+     */
+    private function showUserAnswers($userId)
     {
         $this->dispatcher->forward([
             'controller' => 'answers',
             'action'     => 'list-user-answers',
-            'params'     => [$id]
+            'params'     => [$userId]
         ]);
     }
 
-    private function showUserQuestions($id)
+    /**
+     * Helper method to show user questions.
+     *
+     * Redirects to the Comments controller to list all questions created
+     * by the user.
+     *
+     * @param  int $userId  the id of the user.
+     *
+     * @return void.
+     */
+    private function showUserQuestions($userId)
     {
         $this->dispatcher->forward([
             'controller' => 'questions',
             'action'     => 'list-user-questions',
-            'params'     => [$id]
+            'params'     => [$userId]
         ]);
     }
 
@@ -355,6 +470,9 @@ class UsersController implements \Anax\DI\IInjectionAware
 
     /**
      * Add new user.
+     *
+     * Creates a form to add a new user with and accompanying information about
+     * the website.
      *
      * @param string $acronym of user to add.
      *
@@ -383,7 +501,11 @@ class UsersController implements \Anax\DI\IInjectionAware
     /**
      * Update user
      *
-     * @param integer $id of user to delete.
+     * Updates the user profile of a user, if the user is allowed to update
+     * the profile. If the user is not allowed to update the profile, a page
+     * not found is shown.
+     *
+     * @param integer $id the id of user, which should update the profile.
      *
      * @return void
      */
@@ -403,7 +525,7 @@ class UsersController implements \Anax\DI\IInjectionAware
      * the right to update all profiles. Other users has the right to update
      * their own profile.
      *
-     * @param  integer  $id the id of the user profile to be updated.
+     * @param  integer  $id the id of the user who should update the profile.
      *
      * @return boolean  true if the user has the right to update the profile, false
      *                       otherwise.
@@ -427,8 +549,8 @@ class UsersController implements \Anax\DI\IInjectionAware
     /**
      * Helper method to update a user profile.
      *
-     * Updates a user profile if the id could be found in the database. If not
-     * an error message are shown.
+     * Creates a form to update the user information, if the user could be found
+     * in DB.
      *
      * @param  integer $id the id of the user to be updated.
      *
@@ -460,9 +582,18 @@ class UsersController implements \Anax\DI\IInjectionAware
     }
 
     /**
-     * Update user
+     * Add score action.
      *
-     * @param integer $id of user to delete.
+     * Checks if it is allowed to update activity score and the score could be
+     * saved in DB. If it could not be saved in DB, a flash error message is
+     * created.
+     *
+     * Uses the last inserted id from session to prevent score to be added from
+     * the web browsers address bar. The call to the method must come from
+     * another controller. If not, page not found is shown.
+     *
+     * @param int $activityScore    the activity score to be added.
+     * @param int $lastInsertedId   the id of the last added type in DB.
      *
      * @return void
      */
@@ -483,6 +614,15 @@ class UsersController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to check if it is allowed to add score.
+     *
+     * Checks if the last inserted id is stored in session.
+     *
+     * @param  int  $id     the last inserted id to check in session.
+     *
+     * @return boolean      true if it is allowed to add score, false otherwise.
+     */
     private function isAllowedToAddScore($id)
     {
         $isAllowed = false;
@@ -499,6 +639,18 @@ class UsersController implements \Anax\DI\IInjectionAware
         return $isAllowed;
     }
 
+    /**
+     * Helper method to update the activity score for a user.
+     *
+     * Gets the activity score from DB and add the new ones before saving the
+     * sum to the DB.
+     *
+     * @param  int $userId          the user id of the score owner.
+     * @param  int $activityScore   the score to add to the existing score.
+     *
+     * @return boolean              the new score could be saved in DB, false
+     *                              otherwise.
+     */
     private function updateActivityScore($userId, $activityScore)
     {
         $activityScoreInDb = $this->getActivityScoreFromDb($userId);
@@ -516,6 +668,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         return $isSaved;
     }
 
+    /**
+     * Helper method to get a users activity score from DB.
+     *
+     * Gets a users activity score from DB. If no activity score is found, zero
+     * is returned.
+     *
+     * @param  int $userId  the user id of the score owner.
+     *
+     * @return int  the activity score.
+     */
     private function getActivityScoreFromDb($userId)
     {
         $activityScore = $this->users->query('activityScore')
@@ -525,13 +687,22 @@ class UsersController implements \Anax\DI\IInjectionAware
         return empty($activityScore) ? 0 : $activityScore[0]->activityScore;
     }
 
-    /**
-     * Update user
-     *
-     * @param integer $id of user to delete.
-     *
-     * @return void
-     */
+     /**
+      * Increase question counter.
+      *
+      * Checks if it is allowed to increase the question counter and if the
+      * new counter number could be saved in DB.
+      * If it is not allowed to increase the counter or the new counter number
+      * could not be saved in DB, a flash error message is created.
+      *
+      * Uses the last inserted id in session to prevent score to be increased
+      * directly from the browsers address bar. The call must come from an
+      * another controller to be valid.
+      *
+      * @param int $lastInsertedId   the id of the last added type in DB.
+      *
+      * @return void
+      */
     public function increaseQuestionsCounterAction($lastInsertedId)
     {
         if ($this->isAllowedToAddScore($lastInsertedId)) {
@@ -546,6 +717,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to increase the question counter for a user.
+     *
+     * Gets the number of written questions for a user in DB. Increases the
+     * number of with one and saves the new number in DB.
+     *
+     * @param  int $userId  the id of the user who owns the question counter.
+     *
+     * @return boolean      true if the new counter number is saved, false otherwise.
+     */
     private function increaseQuestionsCounter($userId)
     {
         $numOfQuestions = $this->getNumOfQuestionsFromDb($userId);
@@ -563,6 +744,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         return $isSaved;
     }
 
+    /**
+     * Helper method to get a users number of written questions from DB.
+     *
+     * Gets a users number of written questions from DB. If no number of written
+     * questions is found, zero is returned.
+     *
+     * @param  int $userId  the user id of the counter owner.
+     *
+     * @return int  the number of written questions.
+     */
     private function getNumOfQuestionsFromDb($userId)
     {
         $numOfQuestions = $this->users->query('numQuestions')
@@ -573,9 +764,18 @@ class UsersController implements \Anax\DI\IInjectionAware
     }
 
     /**
-     * Update user
+     * Increase answer counter.
      *
-     * @param integer $id of user to delete.
+     * Checks if it is allowed to increase the answer counter and if the
+     * new counter number could be saved in DB.
+     * If it is not allowed to increase the counter or the new counter number
+     * could not be saved in DB, a flash error message is created.
+     *
+     * Uses the last inserted id in session to prevent score to be increased
+     * directly from the browsers address bar. The call must come from an
+     * another controller to be valid.
+     *
+     * @param int $lastInsertedId   the id of the last added type in DB.
      *
      * @return void
      */
@@ -593,6 +793,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to increase the answer counter for a user.
+     *
+     * Gets the number of written answers for a user in DB. Increases the number
+     * with one and saves the new number in DB.
+     *
+     * @param  int $userId  the id of the user who owns the answer counter.
+     *
+     * @return boolean      true if the new counter number is saved, false otherwise.
+     */
     private function increaseAnswersCounter($userId)
     {
         $numOfAnswers = $this->getNumOfAnswersFromDb($userId);
@@ -610,6 +820,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         return $isSaved;
     }
 
+    /**
+     * Helper method to get a users number of written answers from DB.
+     *
+     * Gets a users number of written answers from DB. If no number of written
+     * answers is found, zero is returned.
+     *
+     * @param  int $userId  the user id of the counter owner.
+     *
+     * @return int  the number of written answers.
+     */
     private function getNumOfAnswersFromDb($userId)
     {
         $numOfAnswers = $this->users->query('numAnswers')
@@ -620,9 +840,18 @@ class UsersController implements \Anax\DI\IInjectionAware
     }
 
     /**
-     * Update user
+     * Increase comment counter.
      *
-     * @param integer $id of user to delete.
+     * Checks if it is allowed to increase the comment counter and if the
+     * new counter number could be saved in DB.
+     * If it is not allowed to increase the counter or the new counter number
+     * could not be saved in DB, a flash error message is created.
+     *
+     * Uses the last inserted id in session to prevent score to be increased
+     * directly from the browsers address bar. The call must come from an
+     * another controller to be valid.
+     *
+     * @param int $lastInsertedId   the id of the last added type in DB.
      *
      * @return void
      */
@@ -640,6 +869,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to increase the comment counter for a user.
+     *
+     * Gets the number of written comments for a user in DB. Increases the number
+     * with one and saves the new number in DB.
+     *
+     * @param  int $userId  the id of the user who owns the comment counter.
+     *
+     * @return boolean      true if the new counter number is saved, false otherwise.
+     */
     private function increaseCommentsCounter($userId)
     {
         $numOfComments = $this->getNumOfCommentsFromDb($userId);
@@ -657,6 +896,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         return $isSaved;
     }
 
+    /**
+     * Helper method to get a users number of written comments from DB.
+     *
+     * Gets a users number of written comments from DB. If no number of written
+     * comments is found, zero is returned.
+     *
+     * @param  int $userId  the user id of the counter owner.
+     *
+     * @return int  the number of written comments.
+     */
     private function getNumOfCommentsFromDb($userId)
     {
         $numOfComments = $this->users->query('numComments')
@@ -667,9 +916,18 @@ class UsersController implements \Anax\DI\IInjectionAware
     }
 
     /**
-     * Update user
+     * Increase vote counter.
      *
-     * @param integer $id of user to delete.
+     * Checks if it is allowed to increase the vote counter and if the
+     * new counter number could be saved in DB.
+     * If it is not allowed to increase the counter or the new counter number
+     * could not be saved in DB, a flash error message is created.
+     *
+     * Uses the last inserted id in session to prevent score to be increased
+     * directly from the browsers address bar. The call must come from an
+     * another controller to be valid.
+     *
+     * @param int $lastInsertedId   the id of the last added type in DB.
      *
      * @return void
      */
@@ -687,6 +945,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to increase the vote counter for a user.
+     *
+     * Gets the number of vote made by the user in DB. Increases the number
+     * with one and saves the new number in DB.
+     *
+     * @param  int $userId  the id of the user who owns the vote counter.
+     *
+     * @return boolean      true if the new counter number is saved, false otherwise.
+     */
     private function increaseVotesCounter($userId)
     {
         $numOfVotes = $this->getNumOfVotesFromDb($userId);
@@ -704,6 +972,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         return $isSaved;
     }
 
+    /**
+     * Helper method to get a users number of votes from DB.
+     *
+     * Gets a users number of votes from DB. If no number of votes is found, zero
+     * is returned.
+     *
+     * @param  int $userId  the user id of the counter owner.
+     *
+     * @return int  the number of votes.
+     */
     private function getNumOfVotesFromDb($userId)
     {
         $numOfVotes = $this->users->query('numVotes')
@@ -714,9 +992,18 @@ class UsersController implements \Anax\DI\IInjectionAware
     }
 
     /**
-     * Update user
+     * Increase accepted answers counter.
      *
-     * @param integer $id of user to delete.
+     * Checks if it is allowed to increase the accepted anwers counter and if
+     * the new counter number could be saved in DB.
+     * If it is not allowed to increase the counter or the new counter number
+     * could not be saved in DB, a flash error message is created.
+     *
+     * Uses the last inserted id in session to prevent score to be increased
+     * directly from the browsers address bar. The call must come from an
+     * another controller to be valid.
+     *
+     * @param int $lastInsertedId   the id of the last added type in DB.
      *
      * @return void
      */
@@ -734,6 +1021,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         }
     }
 
+    /**
+     * Helper method to increase the accepted answers counter for a user.
+     *
+     * Gets the number of accepted answers made by the user in DB. Increases
+     * the number with one and saves the new number in DB.
+     *
+     * @param  int $userId  the id of the user who owns the accepted answers counter.
+     *
+     * @return boolean      true if the new counter number is saved, false otherwise.
+     */
     private function increaseAcceptsCounter($userId)
     {
         $numOfAccepts = $this->getNumOfAcceptsFromDb($userId);
@@ -751,6 +1048,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         return $isSaved;
     }
 
+    /**
+     * Helper method to get a users number accepted answers from DB.
+     *
+     * Gets a users number of accepted answers from DB. If no number of votes
+     * is found, zero is returned.
+     *
+     * @param  int $userId  the user id of the counter owner.
+     *
+     * @return int  the number of accepted answers.
+     */
     private function getNumOfAcceptsFromDb($userId)
     {
         $numOfAccepts = $this->users->query('numAccepts')
@@ -760,6 +1067,18 @@ class UsersController implements \Anax\DI\IInjectionAware
         return empty($numOfAccepts) ? 0 : $numOfAccepts[0]->numAccepts;
     }
 
+    /**
+     * Lists the most active users.
+     *
+     * Lists the most active users based on the users activity such as write
+     * questions, answers, comments, vote and accepts answers. The question
+     * score, answer score and comment score are not included when rating the
+     * the most active users. List the most active users first.
+     *
+     * @param  int $num number of active users to be shown.
+     *
+     * @return void.
+     */
     public function listActiveAction($num)
     {
         $users = $this->getMostActiveUsers($num);
@@ -770,6 +1089,16 @@ class UsersController implements \Anax\DI\IInjectionAware
         ], 'triptych-3');
     }
 
+    /**
+     * Helper method to get the most active users.
+     *
+     * Gets the users gravatar, user id and acronym. List the users in
+     * ascending order based on the activity score.
+     *
+     * @param  int $num     number of users to list.
+     *
+     * @return [object]     the most active users.    
+     */
     private function getMostActiveUsers($num)
     {
         $users = $this->users->query('Lf_User.gravatar, Lf_User.id, Lf_User.acronym')

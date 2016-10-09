@@ -1,6 +1,7 @@
 <?php
 /**
- * Config-file for Anax, theme related settings, return it all as array.
+ * Config-file for Anax, theme related settings for the website "Allt om
+ * Landskapsfotografering", return it all as array.
  *
  */
 return [
