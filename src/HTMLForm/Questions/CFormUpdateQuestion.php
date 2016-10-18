@@ -25,9 +25,9 @@ class CFormUpdateQuestion extends \Mos\HTMLForm\CForm
      *
      * Creates a form to update the users question.
      *
-     * @param [mixed] $questionData the question data to be updated.
-     * @param [string] $tagNames    the name of the question related tags.
-     * @param [string] $oldTags     the tag names before the update.
+     * @param mixed[] $questionData the question data to be updated.
+     * @param string[] $tagNames    the name of the question related tags.
+     * @param string[] $oldTags     the tag names before the update.
      */
     public function __construct($questionData, $tagNames, $oldTags)
     {
@@ -44,14 +44,14 @@ class CFormUpdateQuestion extends \Mos\HTMLForm\CForm
                 'label'       => 'Rubrik',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => $questionData['title']
+                'value'       => htmlentities($questionData['title'], null, 'UTF-8'),
             ],
             'content' => [
                 'type'        => 'textarea',
                 'label'       => 'Kommentar',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => $questionData['content'],
+                'value'       => htmlentities($questionData['content'], null, 'UTF-8'),
                 'description' => 'Du kan använda <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a> för att formatera texten'
             ],
             "tags" => [

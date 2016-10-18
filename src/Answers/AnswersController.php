@@ -69,7 +69,7 @@ class AnswersController implements \Anax\DI\IInjectionAware
      * @param  int $questionId  the question id, which the answers are related to.
      * @param  string $orderBy  the order the answer should be sorted.
      *
-     * @return [object]         all answers with user id, user acronym and user
+     * @return object[]         all answers with user id, user acronym and user
      *                          gravatar connected to the author of the answer.
      */
     private function listAllAnswersForOneQuestion($questionId, $orderBy)
@@ -141,7 +141,7 @@ class AnswersController implements \Anax\DI\IInjectionAware
      *
      * @param  int $answerId    the answer id, which the comments are related to.
      *
-     * @return [object]         all comments releated to an anwser. User id and
+     * @return object[]         all comments releated to an anwser. User id and
      *                          acronym of the comment author are included.
      */
     private function getAllCommentsForSpecificAnswer($answerId)
@@ -163,8 +163,8 @@ class AnswersController implements \Anax\DI\IInjectionAware
      *
      * Creates an answer view with all answers and included answer comments.
      *
-     * @param  [object] $answer     Answer releated to a question.
-     * @param  [object] $comments   All comments releated to an anwser.
+     * @param  object[] $answer     Answer releated to a question.
+     * @param  object[] $comments   All comments releated to an anwser.
      * @param  int $questionUserId  the id of the question, which the answer is
      *                              related to.
      * @return void
@@ -508,7 +508,7 @@ class AnswersController implements \Anax\DI\IInjectionAware
      *
      * Creates an update answer form and sends it to a view.
      *
-     * @param  [mixed] $answerData      All answer information.
+     * @param  mixed[] $answerData      All answer information.
      * @param  int $questionId          the question id the answer is related to.
      * @param  string $questionTitle    the title of the question the answer is
      *                                  related to.
@@ -567,7 +567,7 @@ class AnswersController implements \Anax\DI\IInjectionAware
      *
      * @param  int $answerId    the id of the related question.
      *
-     * @return [object] | false the question id and title if found, false otherwise.
+     * @return object[] | false the question id and title if found, false otherwise.
      */
     private function getQuestionInfoFromAnswerId($answerId)
     {
@@ -698,7 +698,7 @@ class AnswersController implements \Anax\DI\IInjectionAware
      *
      * @param  int $answerId    the ansewer id of the related answer.
      *
-     * @return [object]         the question id and the id of the question author
+     * @return object[]         the question id and the id of the question author
      *                          for the related question.
      */
     private function getQuestionInfoForAnswer($answerId)
@@ -931,7 +931,7 @@ class AnswersController implements \Anax\DI\IInjectionAware
      *
      * @param  int $userId the user id of the user who has written the answers.
      *
-     * @return [object]     All answers written by a user.
+     * @return object[]     All answers written by a user.
      */
     private function getAllAnswersForUser($userId)
     {

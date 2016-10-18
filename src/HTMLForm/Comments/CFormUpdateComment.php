@@ -23,7 +23,7 @@ class CFormUpdateComment extends \Mos\HTMLForm\CForm
      *
      * Creates a form to update the users comment to a question or answer.
      *
-     * @param [mixed]   $commentData the comment data to be updated.
+     * @param mixed[] $commentData the comment data to be updated.
      * @param int $questionId the id of the related question.
      */
     public function __construct($commentData, $questionId)
@@ -39,7 +39,7 @@ class CFormUpdateComment extends \Mos\HTMLForm\CForm
                 'label'       => 'Kommentar',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => $commentData['content'],
+                'value'       => htmlentities($commentData['content'], null, 'UTF-8'),
                 'description' => 'Du kan använda <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a> för att formatera texten'
             ],
             'submit' => [

@@ -24,7 +24,7 @@ class CFormAddQuestion extends \Mos\HTMLForm\CForm
      * Creates a form to add a question.
      *
      * @param int $userId           the id of the user who wants to add a question.
-     * @param [string] $tagNames    the name of all tags.
+     * @param string[] $tagNames    the name of all tags.
      */
     public function __construct($userId, $tagNames)
     {

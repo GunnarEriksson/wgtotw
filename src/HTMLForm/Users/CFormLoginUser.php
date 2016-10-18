@@ -102,7 +102,7 @@ class CFormLoginUser extends \Mos\HTMLForm\CForm
      *
      * @param  string $acronym the acronym to use to get user information.
      *
-     * @return [object] the array with a user object. If the user is not found, an
+     * @return object[] the array with a user object. If the user is not found, an
      *                  empty array is returned.
      */
     private function getUserFromDb($acronym)

@@ -11,10 +11,10 @@
             <h4><a href='<?=$this->url->create('questions/id/' . $answer->questionId)?>'>Fråga: <?= $answer->questionTitle ?></a></h4>
         </div>
         <div class="item-content">
-            <?= $this->textFilter->doFilter($answer->content, 'shortcode, markdown') ?>
+            <?= $this->textFilter->doFilter(htmlentities($answer->content, null, 'UTF-8'), 'shortcode, markdown') ?>
         </div>
         <div class="item-author-wrapper">
-            <span class='item-author'><?= $answer->acronym ?></span>
+            <span class='item-author'><?= htmlentities($answer->acronym, null, 'UTF-8') ?></span>
             <span class='item-time'> &#0149; <?= $answer->created ?></span>
         </div>
     </div>

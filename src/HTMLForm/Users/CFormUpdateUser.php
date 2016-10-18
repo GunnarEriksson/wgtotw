@@ -28,7 +28,7 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
      *
      * Creates a form to update a user.
      *
-     * @param [mixed] the user data to be updated.
+     * @param mixed[] the user data to be updated.
      */
     public function __construct($userData)
     {
@@ -49,7 +49,7 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
                 'label'       => 'Akronym (kan ej ändras)',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => $userData['acronym'],
+                'value'       => htmlentities($userData['acronym'], null, 'UTF-8'),
                 'readonly'    => true,
             ],
             'firstName' => [
@@ -57,28 +57,28 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
                 'label'       => 'Förnamn',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => $userData['firstName'],
+                'value'       => htmlentities($userData['firstName'], null, 'UTF-8'),
             ],
             'lastName' => [
                 'type'        => 'text',
                 'label'       => 'Efternamn',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => $userData['lastName'],
+                'value'       => htmlentities($userData['lastName'], null, 'UTF-8'),
             ],
             'town' => [
                 'type'        => 'text',
                 'label'       => 'Ort',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => $userData['town'],
+                'value'       => htmlentities($userData['town'], null, 'UTF-8'),
             ],
             'email' => [
                 'type'        => 'text',
                 'label'       => 'E-post',
                 'required'    => true,
                 'validation'  => ['not_empty', 'email_adress'],
-                'value'       => $userData['email'],
+                'value'       => htmlentities($userData['email'], null, 'UTF-8'),
             ],
             'password' => [
                 'type'        => 'password',

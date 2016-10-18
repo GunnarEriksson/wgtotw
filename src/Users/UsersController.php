@@ -11,6 +11,11 @@ class UsersController implements \Anax\DI\IInjectionAware
 {
     use \Anax\DI\TInjectable;
 
+    const ACTIVITY_SCORE_QUESTION = 5;
+    const ACTIVITY_SCORE_ANSWER = 3;
+    const ACTIVITY_SCORE_ACCEPT = 3;
+    const ACTIVITY_SCORE_COMMENT = 2;
+
     /**
      * Initialize the controller.
      *
@@ -48,7 +53,7 @@ class UsersController implements \Anax\DI\IInjectionAware
      * Creates a table of all users containing id, name, user active information,
      * and the possiblity to edit and delete a user.
      *
-     * @param  [object] $data an array of user objects.
+     * @param  object[] $data an array of user objects.
      *
      * @return html the user table
      */
@@ -65,7 +70,7 @@ class UsersController implements \Anax\DI\IInjectionAware
                 'title'    => 'Gravatar',
                 'function'    => function ($user) {
                     if ($this->LoggedIn->isLoggedin()) {
-                        return '<a href="users/id/'. $user->id . '"><img src="' . $user->gravatar .'?s=40" alt="Gravatar"></a>';
+                        return '<a href="'. $this->url->create('users/id/' . $user->id) . '"><img src="' . $user->gravatar .'?s=40" alt="Gravatar"></a>';
                     } else {
                         return '<img src="' . $user->gravatar .'?s=40" alt="Gravatar">';
                     }
@@ -75,7 +80,7 @@ class UsersController implements \Anax\DI\IInjectionAware
                 'title'    => 'Akronym',
                 'function'    => function ($user) {
                     if ($this->LoggedIn->isLoggedin()) {
-                        return '<a href="users/id/'. $user->id . '">' . $user->acronym . '</a>';
+                        return '<a href="'. $this->url->create('users/id/' . $user->id) . '">' . $user->acronym . '</a>';
                     } else {
                         return $user->acronym;
                     }
@@ -96,7 +101,7 @@ class UsersController implements \Anax\DI\IInjectionAware
                     $acronym = $this->LoggedIn->getAcronym();
                     if ($acronym) {
                         if (strcmp($acronym, "admin") === 0 || strcmp($acronym, $user->acronym) === 0) {
-                            $edit = '<a href="users/update/' . $user->id . '"><i class="fa fa-pencil-square-o" style="color:green" aria-hidden="true"></i></a>';
+                            $edit = '<a href="'. $this->url->create('users/update/' . $user->id) . '"><i class="fa fa-pencil-square-o" style="color:green" aria-hidden="true"></i></a>';
                         }
                     }
 
@@ -191,7 +196,7 @@ class UsersController implements \Anax\DI\IInjectionAware
      *
      * Sets all activity scores to zero.
      *
-     * @return [int]    A default activity score array with the score names
+     * @return  int[]    A default activity score array with the score names
      *                  as keys.
      */
     private function createDefaultUserActivityInfo()
@@ -221,9 +226,9 @@ class UsersController implements \Anax\DI\IInjectionAware
      * Gets the question scores for a user from DB.
      *
      * @param  int $userId          the id of the user.
-     * @param  [int] $activityInfo  the activity info array for the user.
+     * @param  int[] $activityInfo  the activity info array for the user.
      *
-     * @return [int]                the activity info array for the user.
+     * @return int[]                the activity info array for the user.
      */
     private function getQuestionScores($userId, $activityInfo)
     {
@@ -239,7 +244,8 @@ class UsersController implements \Anax\DI\IInjectionAware
         }
 
         $activityInfo['questions'] = count($questionScores);
-        $activityInfo['questionScore'] = $activityInfo['questions'] * 5;
+        $score = $activityInfo['questions'] * UsersController::ACTIVITY_SCORE_QUESTION;
+        $activityInfo['questionScore'] = $score;
         $activityInfo['questionRank'] = $scores;
 
         return $activityInfo;
@@ -251,9 +257,9 @@ class UsersController implements \Anax\DI\IInjectionAware
      * Gets the answers scores for a user from DB.
      *
      * @param  int $userId          the id of the user.
-     * @param  [int] $activityInfo  the activity info array for the user.
+     * @param  int[] $activityInfo  the activity info array for the user.
      *
-     * @return [int]                the activity info array for the user.
+     * @return int[]                the activity info array for the user.
      */
     private function getAnswerScores($userId, $activityInfo)
     {
@@ -269,7 +275,8 @@ class UsersController implements \Anax\DI\IInjectionAware
         }
 
         $activityInfo['answers'] = count($answerScores);
-        $activityInfo['answerScore'] = $activityInfo['answers'] * 3;
+        $score = $activityInfo['answers'] * UsersController::ACTIVITY_SCORE_ANSWER;
+        $activityInfo['answerScore'] = $score;
         $activityInfo['answerRank'] = $scores;
 
         return $activityInfo;
@@ -281,9 +288,9 @@ class UsersController implements \Anax\DI\IInjectionAware
      * Gets the comment scores for a user from DB.
      *
      * @param  int $userId          the id of the user.
-     * @param  [int] $activityInfo  the activity info array for the user.
+     * @param  int[] $activityInfo  the activity info array for the user.
      *
-     * @return [int]                the activity info array for the user.
+     * @return int[]                the activity info array for the user.
      */
     private function getCommentScores($userId, $activityInfo)
     {
@@ -299,7 +306,8 @@ class UsersController implements \Anax\DI\IInjectionAware
         }
 
         $activityInfo['comments'] = count($commentScores);
-        $activityInfo['commentScore'] = $activityInfo['comments'] * 2;
+        $score = $activityInfo['comments'] * UsersController::ACTIVITY_SCORE_COMMENT;
+        $activityInfo['commentScore'] = $score;
         $activityInfo['commentRank'] = $scores;
 
         return $activityInfo;
@@ -311,9 +319,9 @@ class UsersController implements \Anax\DI\IInjectionAware
      * Gets the number how many answers a user has accepted from DB.
      *
      * @param  int $userId          the id of the user.
-     * @param  [int] $activityInfo  the activity info array for the user.
+     * @param  int[] $activityInfo  the activity info array for the user.
      *
-     * @return [int]                the activity info array for the user.
+     * @return int[]                the activity info array for the user.
      */
     private function getNumberOfAccepts($userId, $activityInfo)
     {
@@ -327,7 +335,8 @@ class UsersController implements \Anax\DI\IInjectionAware
             ->execute([$userId]);
 
         $activityInfo['accepts'] = count($acceptedAnswers);
-        $activityInfo['acceptScore'] = $activityInfo['accepts'] * 3;
+        $score = $activityInfo['accepts'] * UsersController::ACTIVITY_SCORE_ACCEPT;
+        $activityInfo['acceptScore'] = $score;
 
         return $activityInfo;
     }
@@ -338,9 +347,9 @@ class UsersController implements \Anax\DI\IInjectionAware
      * Calculates the sum of the rankingpoints by adding the points for
      * question rank, answer rank and comments rank.
      *
-     * @param  [int] $activityInfo  the activity info array for the user.
+     * @param  int[] $activityInfo  the activity info array for the user.
      *
-     * @return [int] $activityInfo  the activity info array for the user.
+     * @return int[] $activityInfo  the activity info array for the user.
      */
     private function getRankPoints($activityInfo)
     {
@@ -357,10 +366,10 @@ class UsersController implements \Anax\DI\IInjectionAware
      * question score, answer score, comments score, accept score,
      * vote score and ranking points.
      *
-     * @param  [int] $activityInfo  the activity info array for the user.
+     * @param  int[] $activityInfo  the activity info array for the user.
      * @param  int the id of the user.
      *
-     * @return [int] $activityInfo  the activity info array for the user.
+     * @return int[] $activityInfo  the activity info array for the user.
      */
     private function calculateSum($activityInfo, $user)
     {
@@ -381,7 +390,7 @@ class UsersController implements \Anax\DI\IInjectionAware
      * Initiates a view which shows a message the user with the specfic
      * id is not found. Contains a return button.
      *
-     * @param  [] $content the subtitle and the message shown at page.
+     * @param  string[] $content the subtitle and the message shown at page.
      *
      * @return void
      */
@@ -478,7 +487,7 @@ class UsersController implements \Anax\DI\IInjectionAware
      *
      * @return void
      */
-    public function addAction($acronym = null)
+    public function addAction()
     {
         $form = new \Anax\HTMLForm\Users\CFormAddUser();
         $form->setDI($this->di);
@@ -1097,7 +1106,7 @@ class UsersController implements \Anax\DI\IInjectionAware
      *
      * @param  int $num     number of users to list.
      *
-     * @return [object]     the most active users.    
+     * @return object[]     the most active users.
      */
     private function getMostActiveUsers($num)
     {

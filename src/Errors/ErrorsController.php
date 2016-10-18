@@ -31,7 +31,7 @@ class ErrorsController implements \Anax\DI\IInjectionAware
      * access to some controller action methods directly via the browswer
      * address field.
      *
-     * @param  [string] $errorInfo  Error information to be shown.
+     * @param  string[] $errorInfo  Error information to be shown.
      *
      * @return void
      */

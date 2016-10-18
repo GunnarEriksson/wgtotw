@@ -38,8 +38,9 @@ class CommentsController implements \Anax\DI\IInjectionAware
      *
      * Checks if mandatory parameters are present and the user has logged in
      * to be able to add an answer. If mandatory parameters are not present, the
-     * user is redirected to an error page. If user is not logged in, the user
-     * is redirected to the log in page.
+     * user is redirected to an error page. If user is not logged in, a flash
+     * message is created and the user is directed to the question, if question
+     * ID exists, else to the page with all the questions.
      *
      * @param int $id               the question or answer id. Default null.
      * @param int $questionId       the question id. Used for redirecting purpose.
@@ -56,7 +57,13 @@ class CommentsController implements \Anax\DI\IInjectionAware
             if ($this->LoggedIn->isLoggedin()) {
                 $this->addComment($id, $questionId, $title, $controller);
             } else {
-                $this->redirectToLoginPage();
+                $noticeMessage = "Du måste vara inloggad för att kommentera!";
+                $this->flash->noticeMessage($noticeMessage);
+                if ($questionId) {
+                    $this->redirectToQuestion($questionId);
+                } else {
+                    $this->redirectToQuestions();
+                }
             }
         } else {
             $subtitle = "Parametrar saknas";
@@ -231,7 +238,7 @@ class CommentsController implements \Anax\DI\IInjectionAware
      * question, if the comment is related to a question or the beginning of
      * the answer, if the comment is related to an answer.
      *
-     * Creates an update comment form if comment data is found, creates a flash
+     * Creates an update comment form if comment data is found, creates an
      * error message otherwise.
      *
      * @param  int $commentId   the id of the comment.
@@ -267,7 +274,7 @@ class CommentsController implements \Anax\DI\IInjectionAware
      *
      * @param  id $commentId    the id of the comment.
      *
-     * @return [mixed]          the question id, the question title if the comment
+     * @return mixed[]          the question id, the question title if the comment
      *                          is related to a question and answer content if
      *                          comment is related to an answer.
      */
@@ -296,7 +303,7 @@ class CommentsController implements \Anax\DI\IInjectionAware
      *
      * @param  int $commentId    the id of the comment.
      *
-     * @return [object]  the answer info, if found. Otherwise false.
+     * @return object[]  the answer info, if found. Otherwise false.
      */
     private function getAnswerInfoFromCommentId($commentId)
     {
@@ -318,7 +325,7 @@ class CommentsController implements \Anax\DI\IInjectionAware
      *
      * @param  int $answerId    the id of the answer the question is related to.
      *
-     * @return [object]  the question info, if found. Otherwise false.
+     * @return object[]  the question info, if found. Otherwise false.
      */
     private function getQuestionInfoFromAnswerId($answerId)
     {
@@ -340,7 +347,7 @@ class CommentsController implements \Anax\DI\IInjectionAware
      *
      * @param  int $commentId    the id of the comment the question is related to.
      *
-     * @return [object]  the question info, if found. Otherwise false.
+     * @return object[]  the question info, if found. Otherwise false.
      */
     private function getQuestionInfoFromCommentId($commentId)
     {
@@ -405,7 +412,7 @@ class CommentsController implements \Anax\DI\IInjectionAware
      *
      * Creates an update comment form and sends it to a view.
      *
-     * @param  [mixed] $commentData      All comment information.
+     * @param  mixed[] $commentData     All comment information.
      * @param  int $questionId          the question id the comment is related to.
      * @param  string $title            the title of the question the or the
      *                                  beginning of the answer the comment is
@@ -547,7 +554,7 @@ class CommentsController implements \Anax\DI\IInjectionAware
      *
      * @param  int $userId  the users id.
      *
-     * @return [object]     all comment data for a user.
+     * @return object[]     all comment data for a user.
      */
     private function getAllCommentsForUser($userId)
     {
@@ -568,15 +575,16 @@ class CommentsController implements \Anax\DI\IInjectionAware
      * user. Lists all comments.
      *
      * @param  int $userId              the user id.
-     * @param  [object] $allComments    all comments for a user.
+     * @param  object[] $allComments    all comments for a user.
      *
      * @return void
      */
     private function createItemNavigationBar($userId, $allComments)
     {
+        $item = count($allComments) === 1 ? "Kommentar" : "Kommentarer";
         $this->views->add('users/itemHeading', [
             'numOfAnswers'  => count($allComments),
-            'item'          => "Kommentarer",
+            'item'          => $item,
             'type'          => "comment",
             'userId'        => $userId,
         ], 'main-wide');
@@ -589,9 +597,9 @@ class CommentsController implements \Anax\DI\IInjectionAware
      * a question, the title is Fråga and the question title.
      * If it is an answer, the title is Svar and the beginning of the answer.
      *
-     * @param  [string] $commentParentInfo  the parent information of the comment.
+     * @param  string[] $commentParentInfo  the parent information of the comment.
      *
-     * @return string  the title of the comment.
+     * @return string   the title of the comment.
      */
     private function getCommentTitle($commentParentInfo)
     {
@@ -606,7 +614,7 @@ class CommentsController implements \Anax\DI\IInjectionAware
     /**
      * Helper method to get the question id for the related question.
      *
-     * @param  [mixed] $commentParentInfo   the parent info to the related comment.
+     * @param  mixed[] $commentParentInfo   the parent info to the related comment.
      *
      * @return int | null   the id of the question, if found. Otherwise false.
      */

@@ -1,7 +1,7 @@
-<h1><?= $user->acronym  ?></h1>
+<h1><?= htmlentities($user->acronym, null, 'UTF-8') ?></h1>
 <div id="user-profile">
     <div id='left'>
-        <img src='<?= $user->gravatar ?>?s=90' alt='Gravatar'>
+        <img src='<?= htmlentities($user->gravatar, null, 'UTF-8') ?>?s=90' alt='Gravatar'>
     </div>
     <div id="user-info">
         <table>
@@ -10,7 +10,7 @@
                     <i class="fa fa-user" aria-hidden="true"></i>
                 </td>
                 <td>
-                    <?= $user->firstName ?> <?= $user->lastName ?>
+                    <?= htmlentities($user->firstName, null, 'UTF-8') ?> <?= htmlentities($user->lastName, null, 'UTF-8') ?>
                 </td>
             </tr>
             <tr>
@@ -18,7 +18,7 @@
                     <i class="fa fa-map-marker" aria-hidden="true"></i>
                 </td>
                 <td>
-                    <?= $user->town ?>
+                    <?= htmlentities($user->town, null, 'UTF-8') ?>
                 </td>
             </tr>
             <tr>
@@ -26,7 +26,7 @@
                     <i class="fa fa-envelope-o" aria-hidden="true"></i>
                 </td>
                 <td>
-                    <a target="_top" href='mailto:<?= $user->email ?>'><?= $user->email ?></a>
+                    <a target="_top" href='mailto:<?= htmlentities($user->email, null, 'UTF-8') ?>'><?= htmlentities($user->email, null, 'UTF-8') ?></a>
                 </td>
             </tr>
             <tr>
@@ -34,7 +34,7 @@
                     <i class="fa fa-clock-o" aria-hidden="true"></i>
                 </td>
                 <td>
-                    <?= $user->created ?>
+                    <?= htmlentities($user->created, null, 'UTF-8') ?>
                 </td>
             </tr>
         </table>

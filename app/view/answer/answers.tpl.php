@@ -15,7 +15,7 @@
                 <td class=content-cell>
                     <div>
                         <div class="content-text">
-                            <?= $this->textFilter->doFilter($answer->content, 'shortcode, markdown') ?>
+                            <?= $this->textFilter->doFilter(htmlentities($answer->content, null, 'UTF-8'), 'shortcode, markdown') ?>
                         </div>
                         <table class="answer-requester">
                             <tbody>
@@ -31,10 +31,10 @@
                                                 <span class='time'><?= $answer->created ?></span>
                                             </div>
                                             <div class="user-gravatar">
-                                                <img src='<?= $answer->gravatar ?>?s=20' alt='Gravatar'>
+                                                <img src='<?= htmlentities($answer->gravatar, null, 'UTF-8') ?>?s=20' alt='Gravatar'>
                                             </div>
                                             <div class="user-details">
-                                                <span class='author'><?= $answer->acronym ?></span>
+                                                <span class='author'><?= htmlentities($answer->acronym, null, 'UTF-8') ?></span>
                                             </div>
                                         </div>
                                     </td>

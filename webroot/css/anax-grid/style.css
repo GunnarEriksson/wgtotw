@@ -2638,12 +2638,17 @@ hr {
   margin: 22px auto;
 }
 body {
+  background-color: #eee;
+  margin: 8px auto;
   overflow-y: scroll;
 }
 #wrapper {
+  background-color: #fff;
+  border-radius: 7px;
   margin: 0 auto;
   max-width: 960px;
   overflow: auto;
+  padding-top: 8px;
 }
 #header {
   display: inline;
@@ -3124,6 +3129,7 @@ th {
 }
 #user-activity {
   float: right;
+  margin-bottom: 11px;
 }
 #user-activity table {
   border-collapse: separate;
@@ -3426,7 +3432,6 @@ th {
   background-color: #fafafa;
   border: 1px solid #eee;
   float: left;
-  font-size: 0.875em;
   margin-bottom: 10px;
   margin-right: 10px;
   min-height: 200px;

@@ -43,7 +43,7 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
      * Helper method to create an array with all question related tags labels
      * and the related IDs.
      *
-     * @return [int] the tag IDs with the name of the tags as the key.
+     * @return int[] the tag IDs with the name of the tags as the key.
      */
     private function createTagToIdArray()
     {
@@ -65,7 +65,7 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
      * message.
      *
      * @param int $questionId       the question id to be mapped to a comment id.
-     * @param [string] | false $checkedTags the related tags for a question, if
+     * @param string[] | false $checkedTags the related tags for a question, if
      *                         present.
      *
      * @return void
@@ -137,7 +137,7 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
      * question. If not present, a default tag is mapped to the question.
      *
      * @param int $questionId   the question id to map the tags to.
-     * @param [string] | false $checkedTags the checked tags, if present.
+     * @param string[] | false $checkedTags the checked tags, if present.
      */
     private function addTags($questionId, $checkedTags)
     {
@@ -171,7 +171,7 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
      * counts number of tag connections.
      *
      * @param int $questionId   the question id.
-     * @param [string] $checkedTags the checked tag names.
+     * @param string[] $checkedTags the checked tag names.
      *
      * @return boolean true if tags are mapped to the question, false otherwise.
      */
@@ -258,8 +258,8 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
      * prevent direct access from the browsers address bar.
      *
      * @param  int $questionId      the question id.
-     * @param  [string] $newTags    added tags to the question.
-     * @param  [string] $oldTags    removed tags from the question.
+     * @param  string[] $newTags    added tags to the question.
+     * @param  string[] $oldTags    removed tags from the question.
      *
      * @return void.
      */
@@ -283,8 +283,8 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
      * or new ones be added, a flash error message is shown.
      *
      * @param  int $questionId      the question id.
-     * @param  [string] $newTags    added tags to the question.
-     * @param  [string] $oldTags    removed tags from the question.
+     * @param  string[] $newTags    added tags to the question.
+     * @param  string[] $oldTags    removed tags from the question.
      *
      * @return void.
      */
@@ -310,7 +310,7 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
      * specific tag.
      *
      * @param  int $questionId          the question id.
-     * @param  [string] $tagsToRemove   tags to remove from the question.
+     * @param  string[] $tagsToRemove   tags to remove from the question.
      *
      * @return boolean  true if old tags are removed, false otherwise.
      */

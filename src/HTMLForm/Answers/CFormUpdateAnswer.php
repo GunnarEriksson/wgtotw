@@ -24,7 +24,7 @@ class CFormUpdateAnswer extends \Mos\HTMLForm\CForm
      *
      * Creates a form to update the users answer to a question.
      *
-     * @param [mixed] $answerData the answer data to be updated.
+     * @param mixed[] $answerData the answer data to be updated.
      * @param int $questionId the id of the related question.
      */
     public function __construct($answerData, $questionId)
@@ -41,7 +41,7 @@ class CFormUpdateAnswer extends \Mos\HTMLForm\CForm
                 'label'       => 'Kommentar',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => $answerData['content'],
+                'value'       => htmlentities($answerData['content'], null, 'UTF-8'),
                 'description' => 'Du kan använda <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a> för att formatera texten'
             ],
             'submit' => [

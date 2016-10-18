@@ -70,7 +70,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      *
      * @param  string $orderBy the order in which the questions should be presented.
      *
-     * @return [object]     All questions in DB, with author acronym included.
+     * @return object[]     All questions in DB, with author acronym included.
      */
     private function getQuestionsWithUserAcronym($orderBy)
     {
@@ -134,7 +134,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      *
      * @param  int $questionId  the id of the question to list.
      *
-     * @return [object]     the question data and the authors user id, acronym
+     * @return object[]     the question data and the authors user id, acronym
      *                      and gravatar.
      */
     private function findQuestionFromId($questionId)
@@ -171,7 +171,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      * @param  int $questionId  the id of the question to get all the tag id and
      *                          tag labels for.
      *
-     * @return [object]         All tag id and labels for a question.
+     * @return object[]         All tag id and labels for a question.
      */
     private function getTagIdAndLabelFromQuestionId($questionId)
     {
@@ -192,7 +192,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      * specific question.
      *
      * @param  int $questionId  the question id, which the comments are related to.
-     * @return [object]         All comments with the related authors user id
+     * @return object[]         All comments with the related authors user id
      *                          and acronym.
      */
     private function getAllCommentsForSpecificQuestion($questionId)
@@ -285,7 +285,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      * Creates a form for user to create a new question.
      *
      * @param  int $userId          the user id of the author.
-     * @param  [string] $tagLabels  All possible tag names.
+     * @param  string[] $tagLabels  All possible tag names.
      *
      * @return void
      */
@@ -307,7 +307,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      *
      * Gets all tag names in DB.
      *
-     * @return [object] All tag names in DB.
+     * @return object[] All tag names in DB.
      */
     private function getAllTagLables()
     {
@@ -320,9 +320,9 @@ class QuestionsController implements \Anax\DI\IInjectionAware
     /**
      * Helper method ot convert an object of tag names to an array of tag names.
      *
-     * @param  [object] $object the array of tag name objects.
+     * @param  object[] $object the array of tag name objects.
      *
-     * @return [string] the array of tag names.
+     * @return string[] the array of tag names.
      */
     private function convertToLabelArray($object)
     {
@@ -358,7 +358,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      *
      * @param  int $tagId   the tag id, which is related to questions.
      *
-     * @return [object]     All related questions and the authors user id.
+     * @return object[]     All related questions and the authors user id.
      */
     public function tagIdAction($tagId = null)
     {
@@ -503,7 +503,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      *
      * @param  int $questionId  the question id to get data for.
      *
-     * @return [mixed] | false  if found, the question data. False otherwise.
+     * @return mixed[] | false  if found, the question data. False otherwise.
      */
     private function getQuestionInfo($questionId)
     {
@@ -519,7 +519,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      * Gets all tag labels and the checked tags related to the question. Together
      * with the question data, creates a form for the user to update the question.
      *
-     * @param  [mixed] $questionInfo    the question data to be updated.
+     * @param  mixed[] $questionInfo    the question data to be updated.
      *
      * @return void.
      */
@@ -604,7 +604,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      * @param  int $questionId  the question id of the question containing the
      *                          checked tags.
      *
-     * @return [string]         the names of the checked tags.
+     * @return string[]         the names of the checked tags.
      */
     private function getCheckedTagsFromQuestionId($questionId)
     {
@@ -665,7 +665,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      * @param  int $questionId  the question id for the questions with the
      *                          number of answers.
      *
-     * @return [object]         the number of answers to a question.
+     * @return object[]         the number of answers to a question.
      */
     private function getNumberOfAnswerConnections($questionId)
     {
@@ -800,7 +800,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      *
      * @param  int $num     number of questions to be listed.
      *
-     * @return [object]     number of latest created questions, together with
+     * @return object[]     number of latest created questions, together with
      *                      the authors acronyms.
      */
     private function getLatestQuestions($num)
@@ -842,16 +842,17 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      * Lists all questions, which a user has created, together with the number
      * of questions.
      *
-     * @param  [type]  $userId [description]
+     * @param  int  $userId [description]
      * @return boolean         [description]
      */
     private function lisUserQuestions($userId)
     {
         $allQuestions = $this->getAllQuestionsForUser($userId);
+        $item = count($allQuestions) === 1 ? "Fråga" : "Frågor";
 
         $this->views->add('users/itemHeading', [
             'numOfAnswers'  => count($allQuestions),
-            'item'          => "Frågor",
+            'item'          => $item,
             'type'          => "question",
             'userId'        => $userId,
         ], 'main-wide');
@@ -868,7 +869,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      * the user (author).
      *
      * @param  int $userId  the user id of the user.
-     * @return [object]     all questions related to a user and the users acronym.
+     * @return object[]     all questions related to a user and the users acronym.
      */
     private function getAllQuestionsForUser($userId)
     {

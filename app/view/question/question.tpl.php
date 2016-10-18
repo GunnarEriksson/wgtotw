@@ -14,7 +14,7 @@
                 <td id=content-cell>
                     <div>
                         <div id="content-text">
-                            <?= $this->textFilter->doFilter($question->content, 'shortcode, markdown') ?>
+                            <?= $this->textFilter->doFilter(htmlentities($question->content, null, 'UTF-8'), 'shortcode, markdown') ?>
                         </div>
                         <div id="question-tags">
                             <?php foreach ($tags as $tag) : ?>
@@ -40,10 +40,10 @@
                                                 <span id='time'><?= $question->created ?></span>
                                             </div>
                                             <div id="user-gravatar">
-                                                <img src='<?= $question->gravatar ?>?s=20' alt='Gravatar'>
+                                                <img src='<?= htmlentities($question->gravatar, null, 'UTF-8') ?>?s=20' alt='Gravatar'>
                                             </div>
                                             <div id="user-details">
-                                                <span id='author'><?= $question->acronym ?></span>
+                                                <span id='author'><?= htmlentities($question->acronym, null, 'UTF-8') ?></span>
                                             </div>
                                         </div>
                                     </td>
@@ -70,11 +70,11 @@
                                         </td>
                                         <td class="comment-cell">
                                             <div class="comment-text">
-                                                <?= $this->textFilter->doFilter($comment->content, 'shortcode, markdown') ?>
+                                                <?= $this->textFilter->doFilter(htmlentities($comment->content, null, 'UTF-8'), 'shortcode, markdown') ?>
                                                 <?php if ($this->LoggedIn->isAllowed($comment->userId)) : ?>
                                                     <p><a id="edit" href='<?=$this->url->create('comments/update/' . $comment->id)?>'>Uppdatera</a></p>
                                                 <?php endif; ?>
-                                                <span id='comment-author'> - <?= $comment->acronym ?></span>
+                                                <span id='comment-author'> - <?= htmlentities($comment->acronym, null, 'UTF-8') ?></span>
                                                 <span id='comment-time'> &#0149; <?= $comment->created ?></span>
                                             </div>
                                         </td>
