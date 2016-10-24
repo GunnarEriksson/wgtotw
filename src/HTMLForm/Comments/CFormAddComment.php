@@ -120,7 +120,6 @@ class CFormAddComment extends \Mos\HTMLForm\CForm
             $this->mapComment();
             $this->addCommentToUser();
             $this->addActivityScoreToUser();
-            $this->increaseCommentsCounter();
 
             if ($this->di->session->has('lastInsertedId')) {
                 unset($_SESSION["lastInsertedId"]);
@@ -181,23 +180,6 @@ class CFormAddComment extends \Mos\HTMLForm\CForm
             'controller' => 'users',
             'action'     => 'add-score',
             'params'     => [CFormAddComment::ACTIVITY_SCORE_COMMENT, $this->lastInsertedId]
-        ]);
-    }
-
-    /**
-     * Helper method to increase the comment counter for a user.
-     *
-     * Redirects to the Users controller to increase the comment counter with
-     * one for a user.
-     *
-     * @return void.
-     */
-    private function increaseCommentsCounter()
-    {
-        $this->di->dispatcher->forward([
-            'controller' => 'users',
-            'action'     => 'increase-comments-counter',
-            'params'     => [$this->lastInsertedId]
         ]);
     }
 

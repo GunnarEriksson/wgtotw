@@ -110,7 +110,6 @@ class CFormAddAnswer extends \Mos\HTMLForm\CForm
             $this->addAnswerToQuestion();
             $this->addAnswerToUser();
             $this->addActivityScoreToUser();
-            $this->increaseAnswersCounter();
 
             if ($this->di->session->has('lastInsertedId')) {
                 unset($_SESSION["lastInsertedId"]);
@@ -171,23 +170,6 @@ class CFormAddAnswer extends \Mos\HTMLForm\CForm
             'controller' => 'users',
             'action'     => 'add-score',
             'params'     => [CFormAddAnswer::ACTIVITY_SCORE_ANSWER, $this->lastInsertedId]
-        ]);
-    }
-
-    /**
-     * Helper method to increase the answer counter for a user.
-     *
-     * Redirects to the Users controller to increase the answer counter with
-     * one for user.
-     *
-     * @return void.
-     */
-    private function increaseAnswersCounter()
-    {
-        $this->di->dispatcher->forward([
-            'controller' => 'users',
-            'action'     => 'increase-answers-counter',
-            'params'     => [$this->lastInsertedId]
         ]);
     }
 

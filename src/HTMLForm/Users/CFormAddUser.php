@@ -113,11 +113,7 @@ class CFormAddUser extends \Mos\HTMLForm\CForm
                 'gravatar'      => 'http://www.gravatar.com/avatar/' . md5(strtolower(trim($this->Value('email')))) . '.jpg',
                 'password'      => password_hash($this->Value('password'), PASSWORD_DEFAULT),
                 'activityScore' => 0,
-                'numQuestions'  => 0,
-                'numAnswers'    => 0,
-                'numComments'   => 0,
                 'numVotes'      => 0,
-                'numAccepts'    => 0,
                 'created'       => $now
             ));
         } catch (\Exception $e) {

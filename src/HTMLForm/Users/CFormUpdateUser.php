@@ -16,11 +16,7 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
     private $password;
     private $created;
     private $activityScore;
-    private $numQuestions;
-    private $numAnswers;
-    private $numComments;
     private $numVotes;
-    private $numAccepts;
 
 
     /**
@@ -37,11 +33,7 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
         $this->password = $userData['password'];
         $this->created = $userData['created'];
         $this->activityScore = $userData['activityScore'];
-        $this->numQuestions = $userData['numQuestions'];
-        $this->numAnswers = $userData['numAnswers'];
-        $this->numComments = $userData['numComments'];
         $this->numVotes = $userData['numVotes'];
-        $this->numAccepts = $userData['numAccepts'];
 
         parent::__construct([], [
             'acronym' => [
@@ -128,11 +120,7 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
             'gravatar'      => $this->gravatar,
             'password'      => $password,
             'activityScore' => $this->activityScore,
-            'numQuestions'  => $this->numQuestions,
-            'numAnswers'    => $this->numAnswers,
-            'numComments'   => $this->numComments,
             'numVotes'      => $this->numVotes,
-            'numAccepts'    => $this->numAccepts,
             'created'       => $this->created,
         ));
 

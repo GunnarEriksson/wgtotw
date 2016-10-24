@@ -27,12 +27,14 @@ Alternative 1
 * Copy the text in the file db/sqldbworkbench.sql
 * Paste the text in SQL tab in MySQL Workbench.
 * Execute the statements in MySQL Workbench.
-* Create an administrator with the acronym admin.
+* Login as Administrator at the website and change the information and password.
+Acronym is admin and default password is admin.
 
 Alternative 2
 * Import SQL tables from folder db/sqlimport.sql to your SQL host using the import
 feature. This will import all the used tables.
-* Create an administrator with the acronym admin.
+* Login as Administrator at the website and change the information and password.
+Acronym is admin and default password is admin.
 
 
 Use WGTOTW

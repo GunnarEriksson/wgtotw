@@ -762,7 +762,6 @@ class AnswersController implements \Anax\DI\IInjectionAware
             if ($this->setAnswerToAccepted($answerId)) {
                 $this->session->set('lastInsertedId', $answerId);
                 $this->addActivityScoreToUser($answerId);
-                $this->increaseAcceptsCounter($answerId);
 
                 if ($this->session->has('lastInsertedId')) {
                     unset($_SESSION["lastInsertedId"]);
@@ -839,24 +838,6 @@ class AnswersController implements \Anax\DI\IInjectionAware
             'controller' => 'users',
             'action'     => 'add-score',
             'params'     => [AnswersController::ACTIVITY_SCORE_ACCEPT, $answerId]
-        ]);
-    }
-
-    /**
-     * Helper method to increase the users accept counter.
-     *
-     * Redirect to the user controller to increase the user accepts counter.
-     *
-     * @param  int $userId  the id of the user to add accepted activity points.
-     *
-     * @return void
-     */
-    private function increaseAcceptsCounter($userId)
-    {
-        $this->dispatcher->forward([
-            'controller' => 'users',
-            'action'     => 'increase-accepts-counter',
-            'params'     => [$userId]
         ]);
     }
 
