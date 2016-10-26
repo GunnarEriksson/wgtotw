@@ -220,9 +220,9 @@ class CommentsController implements \Anax\DI\IInjectionAware
     private function getCommentAuthorId($commentId)
     {
         $authorId = $this->comments->query('U.id')
-            ->join('User2Comment AS U2C', 'U2C.idComment = Lf_Comment.id')
-            ->join('User AS U', 'U2C.idUser = U.id')
-            ->where('Lf_Comment.id = ?')
+            ->join('user2comment AS U2C', 'U2C.idComment = lf_comment.id')
+            ->join('user AS U', 'U2C.idUser = U.id')
+            ->where('lf_comment.id = ?')
             ->execute([$commentId]);
 
         $authorId = empty($authorId) ? false : $authorId[0]->id;
@@ -308,9 +308,9 @@ class CommentsController implements \Anax\DI\IInjectionAware
     private function getAnswerInfoFromCommentId($commentId)
     {
         $answerInfo = $this->comments->query('A.id, A.content')
-            ->join('Answer2Comment AS A2C', 'A2C.idComment = Lf_Comment.id')
-            ->join('Answer AS A', 'A2C.idAnswer = A.id')
-            ->where('Lf_Comment.id = ?')
+            ->join('answer2comment AS A2C', 'A2C.idComment = lf_comment.id')
+            ->join('answer AS A', 'A2C.idAnswer = A.id')
+            ->where('lf_comment.id = ?')
             ->execute([$commentId]);
 
         $answerInfo = empty($answerInfo) ? false : $answerInfo[0];
@@ -329,9 +329,9 @@ class CommentsController implements \Anax\DI\IInjectionAware
      */
     private function getQuestionInfoFromAnswerId($answerId)
     {
-        $questionInfo = $this->questions->query('Lf_Question.id')
-            ->join('Question2Answer AS Q2A', 'Q2A.idQuestion = Lf_Question.id')
-            ->join('Answer AS A', 'Q2A.idAnswer = A.id')
+        $questionInfo = $this->questions->query('lf_question.id')
+            ->join('question2answer AS Q2A', 'Q2A.idQuestion = lf_question.id')
+            ->join('answer AS A', 'Q2A.idAnswer = A.id')
             ->where('A.id = ?')
             ->execute([$answerId]);
 
@@ -352,9 +352,9 @@ class CommentsController implements \Anax\DI\IInjectionAware
     private function getQuestionInfoFromCommentId($commentId)
     {
         $questionInfo = $this->comments->query('Q.id, Q.title')
-            ->join('Question2Comment AS Q2C', 'Q2C.idComment = Lf_Comment.id')
-            ->join('Question AS Q', 'Q2C.idQuestion = Q.id')
-            ->where('Lf_Comment.id = ?')
+            ->join('question2comment AS Q2C', 'Q2C.idComment = lf_comment.id')
+            ->join('question AS Q', 'Q2C.idQuestion = Q.id')
+            ->where('lf_comment.id = ?')
             ->execute([$commentId]);
 
         $questionInfo = empty($questionInfo) ? false : $questionInfo[0];
@@ -558,9 +558,9 @@ class CommentsController implements \Anax\DI\IInjectionAware
      */
     private function getAllCommentsForUser($userId)
     {
-        $commentData = $this->comments->query('Lf_Comment.*, U.id AS userId, U.acronym')
-            ->join('User2Comment AS U2C', 'U2C.idComment = Lf_Comment.id')
-            ->join('User AS U', 'U2C.idUser = U.id')
+        $commentData = $this->comments->query('lf_comment.*, U.id AS userId, U.acronym')
+            ->join('user2comment AS U2C', 'U2C.idComment = lf_comment.id')
+            ->join('user AS U', 'U2C.idUser = U.id')
             ->where('U.id = ?')
             ->execute([$userId]);
 

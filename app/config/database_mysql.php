@@ -6,7 +6,7 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
             'username'        => "root",
             'password'        => "",
             'driver_options'  => [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'"],
-            'table_prefix'    => "Lf_",
+            'table_prefix'    => "lf_",
 
             // Display details on what happens
             //'verbose' => true,
@@ -21,7 +21,7 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
             'username'        => "guer16",
             'password'        => DB_PASSWORD,
             'driver_options'  => [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'"],
-            'table_prefix'    => "Lf_",
+            'table_prefix'    => "lf_",
         ];
     }
 }

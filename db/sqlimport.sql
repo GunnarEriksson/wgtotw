@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 4.5.1
+-- version 4.2.12deb2+deb8u2
 -- http://www.phpmyadmin.net
 --
--- Värd: 127.0.0.1
--- Tid vid skapande: 24 okt 2016 kl 18:58
--- Serverversion: 10.1.9-MariaDB
--- PHP-version: 5.6.15
+-- Host: blu-ray.student.bth.se
+-- Generation Time: Oct 26, 2016 at 01:09 PM
+-- Server version: 5.5.52-0+deb8u1-log
+-- PHP Version: 5.6.27-0+deb8u1
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -14,20 +14,20 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+/*!40101 SET NAMES utf8 */;
 
 --
--- Databas: `wgtotw`
+-- Database: `guer16`
 --
 
 -- --------------------------------------------------------
 
 --
--- Tabellstruktur `lf_answer`
+-- Table structure for table `lf_answer`
 --
 
-CREATE TABLE `lf_answer` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `lf_answer` (
+`id` int(11) NOT NULL,
   `content` varchar(255) DEFAULT NULL,
   `score` int(11) NOT NULL,
   `accepted` tinyint(4) NOT NULL,
@@ -37,10 +37,10 @@ CREATE TABLE `lf_answer` (
 -- --------------------------------------------------------
 
 --
--- Tabellstruktur `lf_answer2comment`
+-- Table structure for table `lf_answer2comment`
 --
 
-CREATE TABLE `lf_answer2comment` (
+CREATE TABLE IF NOT EXISTS `lf_answer2comment` (
   `idAnswer` int(11) NOT NULL,
   `idComment` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -48,11 +48,11 @@ CREATE TABLE `lf_answer2comment` (
 -- --------------------------------------------------------
 
 --
--- Tabellstruktur `lf_answervote`
+-- Table structure for table `lf_answervote`
 --
 
-CREATE TABLE `lf_answervote` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `lf_answervote` (
+`id` int(11) NOT NULL,
   `idAnswer` int(11) NOT NULL,
   `idUser` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -60,11 +60,11 @@ CREATE TABLE `lf_answervote` (
 -- --------------------------------------------------------
 
 --
--- Tabellstruktur `lf_comment`
+-- Table structure for table `lf_comment`
 --
 
-CREATE TABLE `lf_comment` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `lf_comment` (
+`id` int(11) NOT NULL,
   `content` varchar(255) DEFAULT NULL,
   `score` int(11) DEFAULT NULL,
   `created` datetime DEFAULT NULL
@@ -73,11 +73,11 @@ CREATE TABLE `lf_comment` (
 -- --------------------------------------------------------
 
 --
--- Tabellstruktur `lf_commentvote`
+-- Table structure for table `lf_commentvote`
 --
 
-CREATE TABLE `lf_commentvote` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `lf_commentvote` (
+`id` int(11) NOT NULL,
   `idComment` int(11) NOT NULL,
   `idUser` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -85,11 +85,11 @@ CREATE TABLE `lf_commentvote` (
 -- --------------------------------------------------------
 
 --
--- Tabellstruktur `lf_question`
+-- Table structure for table `lf_question`
 --
 
-CREATE TABLE `lf_question` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `lf_question` (
+`id` int(11) NOT NULL,
   `title` varchar(80) DEFAULT NULL,
   `content` varchar(255) DEFAULT NULL,
   `score` int(11) DEFAULT NULL,
@@ -100,10 +100,10 @@ CREATE TABLE `lf_question` (
 -- --------------------------------------------------------
 
 --
--- Tabellstruktur `lf_question2answer`
+-- Table structure for table `lf_question2answer`
 --
 
-CREATE TABLE `lf_question2answer` (
+CREATE TABLE IF NOT EXISTS `lf_question2answer` (
   `idQuestion` int(11) NOT NULL,
   `idAnswer` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -111,10 +111,10 @@ CREATE TABLE `lf_question2answer` (
 -- --------------------------------------------------------
 
 --
--- Tabellstruktur `lf_question2comment`
+-- Table structure for table `lf_question2comment`
 --
 
-CREATE TABLE `lf_question2comment` (
+CREATE TABLE IF NOT EXISTS `lf_question2comment` (
   `idQuestion` int(11) NOT NULL,
   `idComment` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -122,10 +122,10 @@ CREATE TABLE `lf_question2comment` (
 -- --------------------------------------------------------
 
 --
--- Tabellstruktur `lf_question2tag`
+-- Table structure for table `lf_question2tag`
 --
 
-CREATE TABLE `lf_question2tag` (
+CREATE TABLE IF NOT EXISTS `lf_question2tag` (
   `idQuestion` int(11) NOT NULL,
   `idTag` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -133,11 +133,11 @@ CREATE TABLE `lf_question2tag` (
 -- --------------------------------------------------------
 
 --
--- Tabellstruktur `lf_questionvote`
+-- Table structure for table `lf_questionvote`
 --
 
-CREATE TABLE `lf_questionvote` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `lf_questionvote` (
+`id` int(11) NOT NULL,
   `idQuestion` int(11) NOT NULL,
   `idUser` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -145,18 +145,18 @@ CREATE TABLE `lf_questionvote` (
 -- --------------------------------------------------------
 
 --
--- Tabellstruktur `lf_tag`
+-- Table structure for table `lf_tag`
 --
 
-CREATE TABLE `lf_tag` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `lf_tag` (
+`id` int(11) NOT NULL,
   `label` char(20) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   `numQuestions` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 
 --
--- Dumpning av Data i tabell `lf_tag`
+-- Dumping data for table `lf_tag`
 --
 
 INSERT INTO `lf_tag` (`id`, `label`, `description`, `numQuestions`) VALUES
@@ -173,11 +173,11 @@ INSERT INTO `lf_tag` (`id`, `label`, `description`, `numQuestions`) VALUES
 -- --------------------------------------------------------
 
 --
--- Tabellstruktur `lf_user`
+-- Table structure for table `lf_user`
 --
 
-CREATE TABLE `lf_user` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `lf_user` (
+`id` int(11) NOT NULL,
   `acronym` char(20) NOT NULL,
   `firstName` varchar(80) DEFAULT NULL,
   `lastName` varchar(80) DEFAULT NULL,
@@ -188,22 +188,22 @@ CREATE TABLE `lf_user` (
   `activityScore` int(11) DEFAULT NULL,
   `numVotes` int(11) DEFAULT NULL,
   `created` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 --
--- Dumpning av Data i tabell `lf_user`
+-- Dumping data for table `lf_user`
 --
 
 INSERT INTO `lf_user` (`id`, `acronym`, `firstName`, `lastName`, `town`, `email`, `gravatar`, `password`, `activityScore`, `numVotes`, `created`) VALUES
-(1, 'admin', 'Administrator', 'Administrator', 'Staden', 'wgtotw@mail.se', 'http://www.gravatar.com/avatar/4af1d7ebcf0b456d6b4e85ae64523539.jpg', '$2y$10$pbDZHhkpHhlHdzfrfBfleOSZAPsbhSQGRtRpZkmyqeke8iiT5Wa2K', 0, 0, '2016-10-24 18:54:24');
+(1, 'admin', 'Administrator', 'Administrator', 'Staden', 'wgtotw@mail.se', 'http://www.gravatar.com/avatar/4af1d7ebcf0b456d6b4e85ae64523539.jpg', '$2y$10$pbDZHhkpHhlHdzfrfBfleOSZAPsbhSQGRtRpZkmyqeke8iiT5Wa2K', 0, 0, '2016-10-26 12:41:04');
 
 -- --------------------------------------------------------
 
 --
--- Tabellstruktur `lf_user2answer`
+-- Table structure for table `lf_user2answer`
 --
 
-CREATE TABLE `lf_user2answer` (
+CREATE TABLE IF NOT EXISTS `lf_user2answer` (
   `idUser` int(11) NOT NULL,
   `idAnswer` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -211,10 +211,10 @@ CREATE TABLE `lf_user2answer` (
 -- --------------------------------------------------------
 
 --
--- Tabellstruktur `lf_user2comment`
+-- Table structure for table `lf_user2comment`
 --
 
-CREATE TABLE `lf_user2comment` (
+CREATE TABLE IF NOT EXISTS `lf_user2comment` (
   `idUser` int(11) NOT NULL,
   `idComment` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -222,212 +222,204 @@ CREATE TABLE `lf_user2comment` (
 -- --------------------------------------------------------
 
 --
--- Tabellstruktur `lf_user2question`
+-- Table structure for table `lf_user2question`
 --
 
-CREATE TABLE `lf_user2question` (
+CREATE TABLE IF NOT EXISTS `lf_user2question` (
   `idUser` int(11) NOT NULL,
   `idQuestion` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Index för dumpade tabeller
+-- Indexes for dumped tables
 --
 
 --
--- Index för tabell `lf_answer`
+-- Indexes for table `lf_answer`
 --
 ALTER TABLE `lf_answer`
-  ADD PRIMARY KEY (`id`);
+ ADD PRIMARY KEY (`id`);
 
 --
--- Index för tabell `lf_answer2comment`
+-- Indexes for table `lf_answer2comment`
 --
 ALTER TABLE `lf_answer2comment`
-  ADD PRIMARY KEY (`idAnswer`,`idComment`),
-  ADD KEY `idComment` (`idComment`);
+ ADD PRIMARY KEY (`idAnswer`,`idComment`), ADD KEY `idComment` (`idComment`);
 
 --
--- Index för tabell `lf_answervote`
+-- Indexes for table `lf_answervote`
 --
 ALTER TABLE `lf_answervote`
-  ADD PRIMARY KEY (`id`);
+ ADD PRIMARY KEY (`id`);
 
 --
--- Index för tabell `lf_comment`
+-- Indexes for table `lf_comment`
 --
 ALTER TABLE `lf_comment`
-  ADD PRIMARY KEY (`id`);
+ ADD PRIMARY KEY (`id`);
 
 --
--- Index för tabell `lf_commentvote`
+-- Indexes for table `lf_commentvote`
 --
 ALTER TABLE `lf_commentvote`
-  ADD PRIMARY KEY (`id`);
+ ADD PRIMARY KEY (`id`);
 
 --
--- Index för tabell `lf_question`
+-- Indexes for table `lf_question`
 --
 ALTER TABLE `lf_question`
-  ADD PRIMARY KEY (`id`);
+ ADD PRIMARY KEY (`id`);
 
 --
--- Index för tabell `lf_question2answer`
+-- Indexes for table `lf_question2answer`
 --
 ALTER TABLE `lf_question2answer`
-  ADD PRIMARY KEY (`idQuestion`,`idAnswer`),
-  ADD KEY `idAnswer` (`idAnswer`);
+ ADD PRIMARY KEY (`idQuestion`,`idAnswer`), ADD KEY `idAnswer` (`idAnswer`);
 
 --
--- Index för tabell `lf_question2comment`
+-- Indexes for table `lf_question2comment`
 --
 ALTER TABLE `lf_question2comment`
-  ADD PRIMARY KEY (`idQuestion`,`idComment`),
-  ADD KEY `idComment` (`idComment`);
+ ADD PRIMARY KEY (`idQuestion`,`idComment`), ADD KEY `idComment` (`idComment`);
 
 --
--- Index för tabell `lf_question2tag`
+-- Indexes for table `lf_question2tag`
 --
 ALTER TABLE `lf_question2tag`
-  ADD PRIMARY KEY (`idQuestion`,`idTag`),
-  ADD KEY `idTag` (`idTag`);
+ ADD PRIMARY KEY (`idQuestion`,`idTag`), ADD KEY `idTag` (`idTag`);
 
 --
--- Index för tabell `lf_questionvote`
+-- Indexes for table `lf_questionvote`
 --
 ALTER TABLE `lf_questionvote`
-  ADD PRIMARY KEY (`id`);
+ ADD PRIMARY KEY (`id`);
 
 --
--- Index för tabell `lf_tag`
+-- Indexes for table `lf_tag`
 --
 ALTER TABLE `lf_tag`
-  ADD PRIMARY KEY (`id`);
+ ADD PRIMARY KEY (`id`);
 
 --
--- Index för tabell `lf_user`
+-- Indexes for table `lf_user`
 --
 ALTER TABLE `lf_user`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `acronym` (`acronym`);
+ ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `acronym` (`acronym`);
 
 --
--- Index för tabell `lf_user2answer`
+-- Indexes for table `lf_user2answer`
 --
 ALTER TABLE `lf_user2answer`
-  ADD PRIMARY KEY (`idUser`,`idAnswer`),
-  ADD KEY `idAnswer` (`idAnswer`);
+ ADD PRIMARY KEY (`idUser`,`idAnswer`), ADD KEY `idAnswer` (`idAnswer`);
 
 --
--- Index för tabell `lf_user2comment`
+-- Indexes for table `lf_user2comment`
 --
 ALTER TABLE `lf_user2comment`
-  ADD PRIMARY KEY (`idUser`,`idComment`),
-  ADD KEY `idComment` (`idComment`);
+ ADD PRIMARY KEY (`idUser`,`idComment`), ADD KEY `idComment` (`idComment`);
 
 --
--- Index för tabell `lf_user2question`
+-- Indexes for table `lf_user2question`
 --
 ALTER TABLE `lf_user2question`
-  ADD PRIMARY KEY (`idUser`,`idQuestion`),
-  ADD KEY `idQuestion` (`idQuestion`);
+ ADD PRIMARY KEY (`idUser`,`idQuestion`), ADD KEY `idQuestion` (`idQuestion`);
 
 --
--- AUTO_INCREMENT för dumpade tabeller
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT för tabell `lf_answer`
+-- AUTO_INCREMENT for table `lf_answer`
 --
 ALTER TABLE `lf_answer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
--- AUTO_INCREMENT för tabell `lf_answervote`
+-- AUTO_INCREMENT for table `lf_answervote`
 --
 ALTER TABLE `lf_answervote`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
--- AUTO_INCREMENT för tabell `lf_comment`
+-- AUTO_INCREMENT for table `lf_comment`
 --
 ALTER TABLE `lf_comment`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
--- AUTO_INCREMENT för tabell `lf_commentvote`
+-- AUTO_INCREMENT for table `lf_commentvote`
 --
 ALTER TABLE `lf_commentvote`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
--- AUTO_INCREMENT för tabell `lf_question`
+-- AUTO_INCREMENT for table `lf_question`
 --
 ALTER TABLE `lf_question`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
--- AUTO_INCREMENT för tabell `lf_questionvote`
+-- AUTO_INCREMENT for table `lf_questionvote`
 --
 ALTER TABLE `lf_questionvote`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
--- AUTO_INCREMENT för tabell `lf_tag`
+-- AUTO_INCREMENT for table `lf_tag`
 --
 ALTER TABLE `lf_tag`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=10;
 --
--- AUTO_INCREMENT för tabell `lf_user`
+-- AUTO_INCREMENT for table `lf_user`
 --
 ALTER TABLE `lf_user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 --
--- Restriktioner för dumpade tabeller
+-- Constraints for dumped tables
 --
 
 --
--- Restriktioner för tabell `lf_answer2comment`
+-- Constraints for table `lf_answer2comment`
 --
 ALTER TABLE `lf_answer2comment`
-  ADD CONSTRAINT `lf_answer2comment_ibfk_1` FOREIGN KEY (`idAnswer`) REFERENCES `lf_answer` (`id`),
-  ADD CONSTRAINT `lf_answer2comment_ibfk_2` FOREIGN KEY (`idComment`) REFERENCES `lf_comment` (`id`);
+ADD CONSTRAINT `lf_answer2comment_ibfk_1` FOREIGN KEY (`idAnswer`) REFERENCES `lf_answer` (`id`),
+ADD CONSTRAINT `lf_answer2comment_ibfk_2` FOREIGN KEY (`idComment`) REFERENCES `lf_comment` (`id`);
 
 --
--- Restriktioner för tabell `lf_question2answer`
+-- Constraints for table `lf_question2answer`
 --
 ALTER TABLE `lf_question2answer`
-  ADD CONSTRAINT `lf_question2answer_ibfk_1` FOREIGN KEY (`idQuestion`) REFERENCES `lf_question` (`id`),
-  ADD CONSTRAINT `lf_question2answer_ibfk_2` FOREIGN KEY (`idAnswer`) REFERENCES `lf_answer` (`id`);
+ADD CONSTRAINT `lf_question2answer_ibfk_1` FOREIGN KEY (`idQuestion`) REFERENCES `lf_question` (`id`),
+ADD CONSTRAINT `lf_question2answer_ibfk_2` FOREIGN KEY (`idAnswer`) REFERENCES `lf_answer` (`id`);
 
 --
--- Restriktioner för tabell `lf_question2comment`
+-- Constraints for table `lf_question2comment`
 --
 ALTER TABLE `lf_question2comment`
-  ADD CONSTRAINT `lf_question2comment_ibfk_1` FOREIGN KEY (`idQuestion`) REFERENCES `lf_question` (`id`),
-  ADD CONSTRAINT `lf_question2comment_ibfk_2` FOREIGN KEY (`idComment`) REFERENCES `lf_comment` (`id`);
+ADD CONSTRAINT `lf_question2comment_ibfk_1` FOREIGN KEY (`idQuestion`) REFERENCES `lf_question` (`id`),
+ADD CONSTRAINT `lf_question2comment_ibfk_2` FOREIGN KEY (`idComment`) REFERENCES `lf_comment` (`id`);
 
 --
--- Restriktioner för tabell `lf_question2tag`
+-- Constraints for table `lf_question2tag`
 --
 ALTER TABLE `lf_question2tag`
-  ADD CONSTRAINT `lf_question2tag_ibfk_1` FOREIGN KEY (`idQuestion`) REFERENCES `lf_question` (`id`),
-  ADD CONSTRAINT `lf_question2tag_ibfk_2` FOREIGN KEY (`idTag`) REFERENCES `lf_tag` (`id`);
+ADD CONSTRAINT `lf_question2tag_ibfk_1` FOREIGN KEY (`idQuestion`) REFERENCES `lf_question` (`id`),
+ADD CONSTRAINT `lf_question2tag_ibfk_2` FOREIGN KEY (`idTag`) REFERENCES `lf_tag` (`id`);
 
 --
--- Restriktioner för tabell `lf_user2answer`
+-- Constraints for table `lf_user2answer`
 --
 ALTER TABLE `lf_user2answer`
-  ADD CONSTRAINT `lf_user2answer_ibfk_1` FOREIGN KEY (`idUser`) REFERENCES `lf_user` (`id`),
-  ADD CONSTRAINT `lf_user2answer_ibfk_2` FOREIGN KEY (`idAnswer`) REFERENCES `lf_answer` (`id`);
+ADD CONSTRAINT `lf_user2answer_ibfk_1` FOREIGN KEY (`idUser`) REFERENCES `lf_user` (`id`),
+ADD CONSTRAINT `lf_user2answer_ibfk_2` FOREIGN KEY (`idAnswer`) REFERENCES `lf_answer` (`id`);
 
 --
--- Restriktioner för tabell `lf_user2comment`
+-- Constraints for table `lf_user2comment`
 --
 ALTER TABLE `lf_user2comment`
-  ADD CONSTRAINT `lf_user2comment_ibfk_1` FOREIGN KEY (`idUser`) REFERENCES `lf_user` (`id`),
-  ADD CONSTRAINT `lf_user2comment_ibfk_2` FOREIGN KEY (`idComment`) REFERENCES `lf_comment` (`id`);
+ADD CONSTRAINT `lf_user2comment_ibfk_1` FOREIGN KEY (`idUser`) REFERENCES `lf_user` (`id`),
+ADD CONSTRAINT `lf_user2comment_ibfk_2` FOREIGN KEY (`idComment`) REFERENCES `lf_comment` (`id`);
 
 --
--- Restriktioner för tabell `lf_user2question`
+-- Constraints for table `lf_user2question`
 --
 ALTER TABLE `lf_user2question`
-  ADD CONSTRAINT `lf_user2question_ibfk_1` FOREIGN KEY (`idUser`) REFERENCES `lf_user` (`id`),
-  ADD CONSTRAINT `lf_user2question_ibfk_2` FOREIGN KEY (`idQuestion`) REFERENCES `lf_question` (`id`);
+ADD CONSTRAINT `lf_user2question_ibfk_1` FOREIGN KEY (`idUser`) REFERENCES `lf_user` (`id`),
+ADD CONSTRAINT `lf_user2question_ibfk_2` FOREIGN KEY (`idQuestion`) REFERENCES `lf_question` (`id`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

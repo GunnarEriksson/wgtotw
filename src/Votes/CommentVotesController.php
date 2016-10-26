@@ -45,9 +45,9 @@ class CommentVotesController extends Vote
     protected function getUserId($id)
     {
         $userId = $this->comments->query('U.id')
-            ->join('User2Comment AS U2C', 'U2C.idComment = Lf_Comment.id')
-            ->join('User AS U', 'U2C.idUser = U.id')
-            ->where('Lf_Comment.id = ?')
+            ->join('user2comment AS U2C', 'U2C.idComment = lf_comment.id')
+            ->join('user AS U', 'U2C.idUser = U.id')
+            ->where('lf_comment.id = ?')
             ->execute([$id]);
 
         $userId = empty($userId) ? false : $userId[0]->id;
@@ -68,8 +68,8 @@ class CommentVotesController extends Vote
      */
     protected function hasUserVoted($id, $userId)
     {
-        $id = $this->commentVotes->query('Lf_CommentVote.id')
-            ->where('Lf_CommentVote.idComment = ? AND Lf_CommentVote.idUser = ?')
+        $id = $this->commentVotes->query('lf_commentvote.id')
+            ->where('lf_commentvote.idComment = ? AND lf_commentvote.idUser = ?')
             ->execute([$id, $userId]);
 
         $hasVoted = empty($id) ? false : true;
@@ -177,9 +177,9 @@ class CommentVotesController extends Vote
     private function getAnswerIdFromCommentId($commentId)
     {
         $answerId = $this->comments->query('A.id')
-            ->join('Answer2Comment AS A2C', 'A2C.idComment = Lf_Comment.id')
-            ->join('Answer AS A', 'A2C.idAnswer = A.id')
-            ->where('Lf_Comment.id = ?')
+            ->join('answer2comment AS A2C', 'A2C.idComment = lf_comment.id')
+            ->join('answer AS A', 'A2C.idAnswer = A.id')
+            ->where('lf_comment.id = ?')
             ->execute([$commentId]);
 
         $answerId = empty($answerId) ? false : $answerId[0]->id;
@@ -200,9 +200,9 @@ class CommentVotesController extends Vote
     private function getQuestionIdFromCommentId($commentId)
     {
         $questionId = $this->comments->query('Q.id')
-            ->join('Question2Comment AS Q2C', 'Q2C.idComment = Lf_Comment.id')
-            ->join('Question AS Q', 'Q2C.idQuestion = Q.id')
-            ->where('Lf_Comment.id = ?')
+            ->join('question2comment AS Q2C', 'Q2C.idComment = lf_comment.id')
+            ->join('question AS Q', 'Q2C.idQuestion = Q.id')
+            ->where('lf_comment.id = ?')
             ->execute([$commentId]);
 
         $questionId = empty($questionId) ? false : $questionId[0]->id;
@@ -222,9 +222,9 @@ class CommentVotesController extends Vote
      */
     private function getQuestionIdFromAnswerId($answerId)
     {
-        $questionId = $this->questions->query('Lf_Question.id')
-            ->join('Question2Answer AS Q2A', 'Q2A.idQuestion = Lf_Question.id')
-            ->join('Answer AS A', 'Q2A.idAnswer = A.id')
+        $questionId = $this->questions->query('lf_question.id')
+            ->join('question2answer AS Q2A', 'Q2A.idQuestion = lf_question.id')
+            ->join('answer AS A', 'Q2A.idAnswer = A.id')
             ->where('A.id = ?')
             ->execute([$answerId]);
 

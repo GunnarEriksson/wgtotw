@@ -1,7 +1,7 @@
 --
 -- Create User Table
 --
-CREATE TABLE Lf_User
+CREATE TABLE lf_user
 (
   id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
   acronym CHAR(20) UNIQUE NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE Lf_User
 ) ENGINE INNODB CHARACTER SET utf8;
 
 
-INSERT INTO Lf_User (acronym, firstName, lastName, town, email, gravatar, password, activityScore, numVotes, created) VALUES
+INSERT INTO lf_user (acronym, firstName, lastName, town, email, gravatar, password, activityScore, numVotes, created) VALUES
   ('admin', 'Administrator', 'Administrator', 'Staden', 'wgtotw@mail.se', 'http://www.gravatar.com/avatar/4af1d7ebcf0b456d6b4e85ae64523539.jpg', '$2y$10$pbDZHhkpHhlHdzfrfBfleOSZAPsbhSQGRtRpZkmyqeke8iiT5Wa2K', 0, 0, NOW())
 ;
 
@@ -26,7 +26,7 @@ INSERT INTO Lf_User (acronym, firstName, lastName, town, email, gravatar, passwo
 --
 -- Create Question Table
 --
-CREATE TABLE Lf_Question
+CREATE TABLE lf_question
 (
   id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
   title VARCHAR(80),
@@ -42,7 +42,7 @@ CREATE TABLE Lf_Question
 --
 -- Create Tag Table
 --
-CREATE TABLE Lf_Tag
+CREATE TABLE lf_tag
 (
   id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
   label CHAR(20) NOT NULL,
@@ -50,7 +50,7 @@ CREATE TABLE Lf_Tag
   numQuestions INT
 ) ENGINE INNODB CHARACTER SET utf8;
 
-INSERT INTO Lf_Tag (label, description, numQuestions) VALUES
+INSERT INTO lf_tag (label, description, numQuestions) VALUES
   ('Landskap', 'En tag för landskap där vi ser horisonten som t ex öppna landskap eller bilder från hav och sjö.', 0),
   ('Intima-landskap', 'En tag för landskap där vi inte har någon horisont som t ex skogslandskap eller närbilder av det lilla landskapet.', 0),
   ('Platser', 'En tag för platser runt om vår värld, t ex en plats som man vill åka till eller där man redan har varit.', 0),
@@ -66,7 +66,7 @@ INSERT INTO Lf_Tag (label, description, numQuestions) VALUES
 --
 -- Create Answer Table
 --
-CREATE TABLE Lf_Answer
+CREATE TABLE lf_answer
 (
   id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
   content VARCHAR(255),
@@ -79,7 +79,7 @@ CREATE TABLE Lf_Answer
 --
 -- Create Comment Table
 --
-CREATE TABLE Lf_Comment
+CREATE TABLE lf_comment
 (
   id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
   content VARCHAR(255),
@@ -91,7 +91,7 @@ CREATE TABLE Lf_Comment
 --
 -- Create Question Vote table
 --
-CREATE TABLE Lf_QuestionVote
+CREATE TABLE lf_questionvote
 (
   id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
   idQuestion INT NOT NULL,
@@ -101,7 +101,7 @@ CREATE TABLE Lf_QuestionVote
 --
 -- Create Answer Vote table
 --
-CREATE TABLE Lf_AnswerVote
+CREATE TABLE lf_answervote
 (
   id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
   idAnswer INT NOT NULL,
@@ -111,7 +111,7 @@ CREATE TABLE Lf_AnswerVote
 --
 -- Create Comment Vote table
 --
-CREATE TABLE Lf_CommentVote
+CREATE TABLE lf_commentvote
 (
   id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
   idComment INT NOT NULL,
@@ -121,13 +121,13 @@ CREATE TABLE Lf_CommentVote
 --
 -- Create User Question connection table.
 --
-CREATE TABLE Lf_User2Question
+CREATE TABLE lf_user2question
 (
   idUser INT NOT NULL,
   idQuestion INT NOT NULL,
 
-  FOREIGN KEY (idUser) REFERENCES Lf_User (id),
-  FOREIGN KEY (idQuestion) REFERENCES Lf_Question (id),
+  FOREIGN KEY (idUser) REFERENCES lf_user (id),
+  FOREIGN KEY (idQuestion) REFERENCES lf_question (id),
 
   PRIMARY KEY (idUser, idQuestion)
 ) ENGINE INNODB;
@@ -136,13 +136,13 @@ CREATE TABLE Lf_User2Question
 --
 -- Create Question Tag connection table.
 --
-CREATE TABLE Lf_Question2Tag
+CREATE TABLE lf_question2tag
 (
   idQuestion INT NOT NULL,
   idTag INT NOT NULL,
 
-  FOREIGN KEY (idQuestion) REFERENCES Lf_Question (id),
-  FOREIGN KEY (idTag) REFERENCES Lf_Tag (id),
+  FOREIGN KEY (idQuestion) REFERENCES lf_question (id),
+  FOREIGN KEY (idTag) REFERENCES lf_tag (id),
 
   PRIMARY KEY (idQuestion, idTag)
 ) ENGINE INNODB;
@@ -151,13 +151,13 @@ CREATE TABLE Lf_Question2Tag
 --
 -- Create Question Answer connection table.
 --
-CREATE TABLE Lf_Question2Answer
+CREATE TABLE lf_question2answer
 (
   idQuestion INT NOT NULL,
   idAnswer INT NOT NULL,
 
-  FOREIGN KEY (idQuestion) REFERENCES Lf_Question (id),
-  FOREIGN KEY (idAnswer) REFERENCES Lf_Answer (id),
+  FOREIGN KEY (idQuestion) REFERENCES lf_question (id),
+  FOREIGN KEY (idAnswer) REFERENCES lf_answer (id),
 
   PRIMARY KEY (idQuestion, idAnswer)
 ) ENGINE INNODB;
@@ -166,13 +166,13 @@ CREATE TABLE Lf_Question2Answer
 --
 -- Create User Answer connection table.
 --
-CREATE TABLE Lf_User2Answer
+CREATE TABLE lf_user2answer
 (
   idUser INT NOT NULL,
   idAnswer INT NOT NULL,
 
-  FOREIGN KEY (idUser) REFERENCES Lf_User (id),
-  FOREIGN KEY (idAnswer) REFERENCES Lf_Answer (id),
+  FOREIGN KEY (idUser) REFERENCES lf_user (id),
+  FOREIGN KEY (idAnswer) REFERENCES lf_answer (id),
 
   PRIMARY KEY (idUser, idAnswer)
 ) ENGINE INNODB;
@@ -180,13 +180,13 @@ CREATE TABLE Lf_User2Answer
 --
 -- Create User Answer connection table.
 --
-CREATE TABLE Lf_User2Comment
+CREATE TABLE lf_user2comment
 (
   idUser INT NOT NULL,
   idComment INT NOT NULL,
 
-  FOREIGN KEY (idUser) REFERENCES Lf_User (id),
-  FOREIGN KEY (idComment) REFERENCES Lf_Comment (id),
+  FOREIGN KEY (idUser) REFERENCES lf_user (id),
+  FOREIGN KEY (idComment) REFERENCES lf_comment (id),
 
   PRIMARY KEY (idUser, idComment)
 ) ENGINE INNODB;
@@ -194,13 +194,13 @@ CREATE TABLE Lf_User2Comment
 --
 -- Create Question Comment connection table.
 --
-CREATE TABLE Lf_Question2Comment
+CREATE TABLE lf_question2comment
 (
   idQuestion INT NOT NULL,
   idComment INT NOT NULL,
 
-  FOREIGN KEY (idQuestion) REFERENCES Lf_Question (id),
-  FOREIGN KEY (idComment) REFERENCES Lf_Comment (id),
+  FOREIGN KEY (idQuestion) REFERENCES lf_question (id),
+  FOREIGN KEY (idComment) REFERENCES lf_comment (id),
 
   PRIMARY KEY (idQuestion, idComment)
 ) ENGINE INNODB;
@@ -209,13 +209,13 @@ CREATE TABLE Lf_Question2Comment
 --
 -- Create Answer Comment connection table.
 --
-CREATE TABLE Lf_Answer2Comment
+CREATE TABLE lf_answer2comment
 (
   idAnswer INT NOT NULL,
   idComment INT NOT NULL,
 
-  FOREIGN KEY (idAnswer) REFERENCES Lf_Answer (id),
-  FOREIGN KEY (idComment) REFERENCES Lf_Comment (id),
+  FOREIGN KEY (idAnswer) REFERENCES lf_answer (id),
+  FOREIGN KEY (idComment) REFERENCES lf_comment (id),
 
   PRIMARY KEY (idAnswer, idComment)
 ) ENGINE INNODB;

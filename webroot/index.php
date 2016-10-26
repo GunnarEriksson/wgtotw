@@ -7,8 +7,8 @@ require __DIR__ . '/config_with_app.php';
 
 $app->url->setUrlType(\Anax\Url\CUrl::URL_CLEAN);
 
-$app->navbar->configure(ANAX_APP_PATH . 'config/navbar_lf.php');
-$app->theme->configure(ANAX_APP_PATH . 'config/theme_lf.php');
+$app->navbar->configure(ANAX_APP_PATH . 'config/navbar.php');
+$app->theme->configure(ANAX_APP_PATH . 'config/theme.php');
 
 /**
  * The home page for the website.

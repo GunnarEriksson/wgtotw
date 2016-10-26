@@ -43,9 +43,9 @@ class AnswerVotesController extends Vote
     protected function getUserId($id)
     {
         $userId = $this->answers->query('U.id')
-            ->join('User2Answer AS U2A', 'U2A.idAnswer = Lf_Answer.id')
-            ->join('User AS U', 'U2A.idUser = U.id')
-            ->where('Lf_Answer.id = ?')
+            ->join('user2answer AS U2A', 'U2A.idAnswer = lf_answer.id')
+            ->join('user AS U', 'U2A.idUser = U.id')
+            ->where('lf_answer.id = ?')
             ->execute([$id]);
 
         $userId = empty($userId) ? false : $userId[0]->id;
@@ -66,8 +66,8 @@ class AnswerVotesController extends Vote
      */
     protected function hasUserVoted($id, $userId)
     {
-        $id = $this->answerVotes->query('Lf_AnswerVote.id')
-            ->where('Lf_AnswerVote.idAnswer = ? AND Lf_AnswerVote.idUser = ?')
+        $id = $this->answerVotes->query('lf_answervote.id')
+            ->where('lf_answervote.idAnswer = ? AND lf_answervote.idUser = ?')
             ->execute([$id, $userId]);
 
         $hasVoted = empty($id) ? false : true;
@@ -151,9 +151,9 @@ class AnswerVotesController extends Vote
     protected function getQuestionId($id)
     {
         $questionId = $this->answers->query('Q.id')
-            ->join('Question2Answer AS Q2A', 'Q2A.idAnswer = Lf_Answer.id')
-            ->join('Question AS Q', 'Q2A.idQuestion = Q.id')
-            ->where('Lf_Answer.id = ?')
+            ->join('question2answer AS Q2A', 'Q2A.idAnswer = lf_answer.id')
+            ->join('question AS Q', 'Q2A.idQuestion = Q.id')
+            ->where('lf_answer.id = ?')
             ->execute([$id]);
 
         $questionId = empty($questionId) ? false : $questionId[0]->id;

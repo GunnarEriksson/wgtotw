@@ -1,6 +1,7 @@
 <?php
 /**
- * Config-file for Anax, theme related settings, return it all as array.
+ * Config-file for Anax, theme related settings for the website "Allt om
+ * Landskapsfotografering", return it all as array.
  *
  */
 return [
@@ -13,16 +14,35 @@ return [
      */
     'settings' => [
         'path' => ANAX_INSTALL_PATH . 'theme/',
-        'name' => 'anax-base',
+        'name' => 'anax-grid',
     ],
 
-    
     /**
      * Add default views.
      */
     'views' => [
-        ['region' => 'header', 'template' => 'welcome/header', 'data' => [], 'sort' => -1],
-        ['region' => 'footer', 'template' => 'welcome/footer', 'data' => [], 'sort' => -1],
+        // View for header
+        [
+            'region'   => 'header',
+            'template' => 'me/header',
+            'data'     => [],
+            'sort'     => -1
+        ],
+
+        // View for footer
+        ['region' => 'footer', 'template' => 'me/footer', 'data' => [], 'sort' => -1],
+
+        // View for navbar
+        [
+            'region' => 'navbar',
+            'template' => [
+                'callback' => function () {
+                    return $this->di->navbar->create();
+                },
+            ],
+            'data' => [],
+            'sort' => -1
+        ],
     ],
 
 
@@ -35,13 +55,16 @@ return [
         'lang' => 'sv',
 
         // Append this value to each <title>
-        'title_append' => ' | Anax a web template',
+        'title_append' => ' | WGTOTW',
 
         // Stylesheets
-        'stylesheets' => ['css/style.css'],
+        'stylesheets' => ['css/anax-grid/style.php'],
 
         // Inline style
         'style' => null,
+
+        //class for the html element
+        'theme_style' => null,
 
         // Favicon
         'favicon' => 'favicon.ico',

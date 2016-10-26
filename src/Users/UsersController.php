@@ -233,9 +233,9 @@ class UsersController implements \Anax\DI\IInjectionAware
     private function getQuestionScores($userId, $activityInfo)
     {
         $questionScores = $this->users->query('Q.score')
-            ->join('User2Question AS U2Q', 'U2Q.idUser = Lf_User.id')
-            ->join('Question AS Q', 'U2Q.idQuestion = Q.id')
-            ->where('Lf_User.id = ?')
+            ->join('user2question AS U2Q', 'U2Q.idUser = lf_user.id')
+            ->join('question AS Q', 'U2Q.idQuestion = Q.id')
+            ->where('lf_user.id = ?')
             ->execute([$userId]);
 
         $scores = 0;
@@ -264,9 +264,9 @@ class UsersController implements \Anax\DI\IInjectionAware
     private function getAnswerScores($userId, $activityInfo)
     {
         $answerScores = $this->users->query('A.score')
-            ->join('User2Answer AS U2A', 'U2A.idUser = Lf_User.id')
-            ->join('Answer AS A', 'U2A.idAnswer = A.id')
-            ->where('Lf_User.id = ?')
+            ->join('user2answer AS U2A', 'U2A.idUser = lf_user.id')
+            ->join('answer AS A', 'U2A.idAnswer = A.id')
+            ->where('lf_user.id = ?')
             ->execute([$userId]);
 
         $scores = 0;
@@ -295,9 +295,9 @@ class UsersController implements \Anax\DI\IInjectionAware
     private function getCommentScores($userId, $activityInfo)
     {
         $commentScores = $this->users->query('C.score')
-            ->join('User2Comment AS U2C', 'U2C.idUser = Lf_User.id')
-            ->join('Comment AS C', 'U2C.idComment = C.id')
-            ->where('Lf_User.id = ?')
+            ->join('user2comment AS U2C', 'U2C.idUser = lf_user.id')
+            ->join('comment AS C', 'U2C.idComment = C.id')
+            ->where('lf_user.id = ?')
             ->execute([$userId]);
 
         $scores = 0;
@@ -326,11 +326,11 @@ class UsersController implements \Anax\DI\IInjectionAware
     private function getNumberOfAccepts($userId, $activityInfo)
     {
         $acceptedAnswers = $this->users->query('A.id')
-            ->join('User2Question AS U2Q', 'U2Q.idUser = Lf_User.id')
-            ->join('Question AS Q', 'U2Q.idQuestion = Q.id')
-            ->join('Question2Answer AS Q2A', 'Q2A.idQuestion = Q.id')
-            ->join('Answer AS A', 'Q2A.idAnswer = A.id')
-            ->where('Lf_User.id = ?')
+            ->join('user2question AS U2Q', 'U2Q.idUser = lf_user.id')
+            ->join('question AS Q', 'U2Q.idQuestion = Q.id')
+            ->join('question2answer AS Q2A', 'Q2A.idQuestion = Q.id')
+            ->join('answer AS A', 'Q2A.idAnswer = A.id')
+            ->where('lf_user.id = ?')
             ->andWhere('A.accepted=1')
             ->execute([$userId]);
 
@@ -825,7 +825,7 @@ class UsersController implements \Anax\DI\IInjectionAware
      */
     private function getMostActiveUsers($num)
     {
-        $users = $this->users->query('Lf_User.gravatar, Lf_User.id, Lf_User.acronym')
+        $users = $this->users->query('lf_user.gravatar, lf_user.id, lf_user.acronym')
             ->orderBy('activityScore asc')
             ->limit($num)
             ->execute();

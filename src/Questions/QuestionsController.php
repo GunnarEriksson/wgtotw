@@ -46,7 +46,7 @@ class QuestionsController implements \Anax\DI\IInjectionAware
             $this->showFlashMessage();
         }
 
-        $allQuestions = $this->getQuestionsWithUserAcronym('Lf_Question.id desc');
+        $allQuestions = $this->getQuestionsWithUserAcronym('lf_question.id desc');
 
         $this->theme->setTitle("Alla frågor");
 
@@ -74,9 +74,9 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      */
     private function getQuestionsWithUserAcronym($orderBy)
     {
-        $questionsAndUserIds = $this->questions->query('Lf_Question.*, Lf_User.acronym AS author')
-            ->join('User2Question', 'Lf_Question.id = Lf_User2Question.idQuestion')
-            ->join('User', 'Lf_User2Question.idUser = Lf_User.id')
+        $questionsAndUserIds = $this->questions->query('lf_question.*, lf_user.acronym AS author')
+            ->join('user2question', 'lf_question.id = lf_user2question.idQuestion')
+            ->join('user', 'lf_user2question.idUser = lf_user.id')
             ->orderBy($orderBy)
             ->execute();
 
@@ -139,10 +139,10 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      */
     private function findQuestionFromId($questionId)
     {
-        $questionWithUserInfo = $this->questions->query('Lf_Question.*, Lf_User.id AS userId, Lf_User.acronym, Lf_User.gravatar')
-            ->join('User2Question', 'Lf_Question.id = Lf_User2Question.idQuestion')
-            ->join('User', 'Lf_User2Question.idUser = Lf_User.id')
-            ->where('Lf_Question.id = ?')
+        $questionWithUserInfo = $this->questions->query('lf_question.*, lf_user.id AS userId, lf_user.acronym, lf_user.gravatar')
+            ->join('user2question', 'lf_question.id = lf_user2question.idQuestion')
+            ->join('user', 'lf_user2question.idUser = lf_user.id')
+            ->where('lf_question.id = ?')
             ->execute([$questionId]);
 
         return $questionWithUserInfo;
@@ -175,11 +175,11 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      */
     private function getTagIdAndLabelFromQuestionId($questionId)
     {
-        $tagIdAndLabels = $this->questions->query('Lf_Tag.id, Lf_Tag.label')
-            ->join('Question2Tag', 'Lf_Question.id = Lf_Question2Tag.idQuestion')
-            ->join('Tag', 'Lf_Question2Tag.idTag = Lf_Tag.id')
-            ->where('Lf_Question.id = ?')
-            ->orderBy('Lf_Tag.id asc')
+        $tagIdAndLabels = $this->questions->query('lf_tag.id, lf_tag.label')
+            ->join('question2tag', 'lf_question.id = lf_question2tag.idQuestion')
+            ->join('tag', 'lf_question2tag.idTag = lf_tag.id')
+            ->where('lf_question.id = ?')
+            ->orderBy('lf_tag.id asc')
             ->execute([$questionId]);
 
         return $tagIdAndLabels;
@@ -198,11 +198,11 @@ class QuestionsController implements \Anax\DI\IInjectionAware
     private function getAllCommentsForSpecificQuestion($questionId)
     {
         $comments = $this->questions->query('C.*, U.id AS userId, U.acronym')
-            ->join('Question2Comment AS Q2C', 'Q2C.idQuestion = Lf_Question.id')
-            ->join('Comment AS C', 'Q2C.idComment = C.id')
-            ->join('User2Comment AS U2C', 'C.id = U2C.idComment')
-            ->join('User AS U', 'U2C.idUser = U.id')
-            ->where('Lf_Question.id = ?')
+            ->join('question2comment AS Q2C', 'Q2C.idQuestion = lf_question.id')
+            ->join('comment AS C', 'Q2C.idComment = C.id')
+            ->join('user2comment AS U2C', 'C.id = U2C.idComment')
+            ->join('user AS U', 'U2C.idUser = U.id')
+            ->where('lf_question.id = ?')
             ->orderBy('C.created asc')
             ->execute([$questionId]);
 
@@ -362,13 +362,13 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      */
     public function tagIdAction($tagId = null)
     {
-        $questions = $this->questions->query('Lf_Question.*, U.acronym AS author')
-            ->join('Question2Tag AS Q2T', 'Lf_Question.id = Q2T.idQuestion')
-            ->join('Tag AS T', 'Q2T.idTag = T.id')
-            ->join('User2Question AS U2Q', 'Lf_Question.id = U2Q.idQuestion')
-            ->join('User AS U', 'U2Q.idUser = U.id')
+        $questions = $this->questions->query('lf_question.*, U.acronym AS author')
+            ->join('question2tag AS Q2T', 'lf_question.id = Q2T.idQuestion')
+            ->join('tag AS T', 'Q2T.idTag = T.id')
+            ->join('user2question AS U2Q', 'lf_question.id = U2Q.idQuestion')
+            ->join('user AS U', 'U2Q.idUser = U.id')
             ->where('T.id = ?')
-            ->orderBy('Lf_Question.created desc')
+            ->orderBy('lf_question.created desc')
             ->execute([$tagId]);
 
         $label = $this->getTagLabelFromTagId($tagId);
@@ -464,9 +464,9 @@ class QuestionsController implements \Anax\DI\IInjectionAware
     private function getQuestionAuthorId($questionId)
     {
         $authorId = $this->questions->query('U.id')
-            ->join('User2Question AS U2Q', 'U2Q.idQuestion = Lf_Question.id')
-            ->join('User AS U', 'U2Q.idUser = U.id')
-            ->where('Lf_Question.id = ?')
+            ->join('user2question AS U2Q', 'U2Q.idQuestion = lf_question.id')
+            ->join('user AS U', 'U2Q.idUser = U.id')
+            ->where('lf_question.id = ?')
             ->execute([$questionId]);
 
         $authorId = empty($authorId) ? false : $authorId[0]->id;
@@ -631,12 +631,6 @@ class QuestionsController implements \Anax\DI\IInjectionAware
             'params'     => [$questionId]
         ]);
     }
-
-    /**
-     * Increase the answser connections counter
-     *
-     * Increases the number of connected answers counter.
-     */
 
     /**
      * Increase the answser connections counter.
@@ -805,11 +799,11 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      */
     private function getLatestQuestions($num)
     {
-        $questionsAndUserIds = $this->questions->query('Lf_Question.id, Lf_Question.title,
-                                                        Lf_Question.created, Lf_User.acronym AS author')
-            ->join('User2Question', 'Lf_Question.id = Lf_User2Question.idQuestion')
-            ->join('User', 'Lf_User2Question.idUser = Lf_User.id')
-            ->orderBy('Lf_Question.created desc')
+        $questionsAndUserIds = $this->questions->query('lf_question.id, lf_question.title,
+                                                        lf_question.created, lf_user.acronym AS author')
+            ->join('user2question', 'lf_question.id = lf_user2question.idQuestion')
+            ->join('user', 'lf_user2question.idUser = lf_user.id')
+            ->orderBy('lf_question.created desc')
             ->limit($num)
             ->execute();
 
@@ -873,9 +867,9 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      */
     private function getAllQuestionsForUser($userId)
     {
-        $questionsAndUserId = $this->questions->query('Lf_Question.*, U.acronym AS author')
-            ->join('User2Question AS U2C', 'Lf_Question.id = U2C.idQuestion')
-            ->join('User AS U', 'U2C.idUser = U.id')
+        $questionsAndUserId = $this->questions->query('lf_question.*, U.acronym AS author')
+            ->join('user2question AS U2C', 'lf_question.id = U2C.idQuestion')
+            ->join('user AS U', 'U2C.idUser = U.id')
             ->where('U.id = ?')
             ->orderBy('created desc')
             ->execute([$userId]);

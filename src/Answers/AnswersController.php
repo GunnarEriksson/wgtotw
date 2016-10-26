@@ -74,11 +74,11 @@ class AnswersController implements \Anax\DI\IInjectionAware
      */
     private function listAllAnswersForOneQuestion($questionId, $orderBy)
     {
-        $answers = $this->answers->query('Lf_Answer.*, U.id AS answerUserId, U.acronym, U.gravatar')
-            ->join('Question2Answer AS Q2A', 'Q2A.idAnswer = Lf_Answer.id')
-            ->join('Question AS Q', 'Q2A.idQuestion = Q.id')
-            ->join('User2Answer AS U2A', 'Lf_Answer.id = U2A.idAnswer')
-            ->join('User AS U', 'U2A.idUser = U.id')
+        $answers = $this->answers->query('lf_answer.*, U.id AS answerUserId, U.acronym, U.gravatar')
+            ->join('question2answer AS Q2A', 'Q2A.idAnswer = lf_answer.id')
+            ->join('question AS Q', 'Q2A.idQuestion = Q.id')
+            ->join('user2answer AS U2A', 'lf_answer.id = U2A.idAnswer')
+            ->join('user AS U', 'U2A.idUser = U.id')
             ->orderBy($orderBy)
             ->where('Q.id = ?')
             ->execute([$questionId]);
@@ -99,11 +99,11 @@ class AnswersController implements \Anax\DI\IInjectionAware
     private function getUserIdForParentQuestion($answerId)
     {
         $questionUserId = $this->answers->query('U.id')
-            ->join('Question2Answer AS Q2A', 'Q2A.idAnswer = Lf_Answer.id')
-            ->join('Question AS Q', 'Q2A.idQuestion = Q.id')
-            ->join('User2Question AS U2Q', 'U2Q.idQuestion = Q.id')
-            ->join('User AS U', 'U2Q.idUser = U.id')
-            ->where('Lf_Answer.id = ?')
+            ->join('question2answer AS Q2A', 'Q2A.idAnswer = lf_answer.id')
+            ->join('question AS Q', 'Q2A.idQuestion = Q.id')
+            ->join('user2question AS U2Q', 'U2Q.idQuestion = Q.id')
+            ->join('user AS U', 'U2Q.idUser = U.id')
+            ->where('lf_answer.id = ?')
             ->execute([$answerId]);
 
         return isset($questionUserId->id) ? $questionUserId->id : false;
@@ -147,11 +147,11 @@ class AnswersController implements \Anax\DI\IInjectionAware
     private function getAllCommentsForSpecificAnswer($answerId)
     {
         $comments = $this->answers->query('C.*, U.id AS userId, U.acronym')
-            ->join('Answer2Comment AS A2C', 'A2C.idAnswer = Lf_Answer.id')
-            ->join('Comment AS C', 'A2C.idComment = C.id')
-            ->join('User2Comment AS U2C', 'C.id = U2C.idComment')
-            ->join('User AS U', 'U2C.idUser = U.id')
-            ->where('Lf_Answer.id = ?')
+            ->join('answer2comment AS A2C', 'A2C.idAnswer = lf_answer.id')
+            ->join('comment AS C', 'A2C.idComment = C.id')
+            ->join('user2comment AS U2C', 'C.id = U2C.idComment')
+            ->join('user AS U', 'U2C.idUser = U.id')
+            ->where('lf_answer.id = ?')
             ->orderBy('C.created asc')
             ->execute([$answerId]);
 
@@ -460,9 +460,9 @@ class AnswersController implements \Anax\DI\IInjectionAware
     private function getAnswerAuthorId($answerId)
     {
         $authorId = $this->answers->query('U.id')
-            ->join('User2Answer AS U2A', 'U2A.idAnswer = Lf_Answer.id')
-            ->join('User AS U', 'U2A.idUser = U.id')
-            ->where('Lf_Answer.id = ?')
+            ->join('user2answer AS U2A', 'U2A.idAnswer = lf_answer.id')
+            ->join('user AS U', 'U2A.idUser = U.id')
+            ->where('lf_answer.id = ?')
             ->execute([$answerId]);
 
         $authorId = empty($authorId) ? false : $authorId[0]->id;
@@ -572,9 +572,9 @@ class AnswersController implements \Anax\DI\IInjectionAware
     private function getQuestionInfoFromAnswerId($answerId)
     {
         $questionInfo = $this->answers->query('Q.id, Q.title')
-            ->join('Question2Answer AS Q2A', 'Q2A.idAnswer = Lf_Answer.id')
-            ->join('Question AS Q', 'Q2A.idQuestion = Q.id')
-            ->where('Lf_Answer.id = ?')
+            ->join('question2answer AS Q2A', 'Q2A.idAnswer = lf_answer.id')
+            ->join('question AS Q', 'Q2A.idQuestion = Q.id')
+            ->where('lf_answer.id = ?')
             ->execute([$answerId]);
 
         $questionInfo = empty($questionInfo) ? false : $questionInfo[0];
@@ -704,11 +704,11 @@ class AnswersController implements \Anax\DI\IInjectionAware
     private function getQuestionInfoForAnswer($answerId)
     {
         $questionInfo = $this->answers->query('Q.id AS questionId, U.id AS userId')
-            ->join('Question2Answer AS Q2A', 'Q2A.idAnswer = Lf_Answer.id')
-            ->join('Question AS Q', 'Q2A.idQuestion = Q.id')
-            ->join('User2Question AS U2Q', 'Q.id = U2Q.idQuestion')
-            ->join('User AS U', 'U2Q.idUser = U.id')
-            ->where('Lf_Answer.id = ?')
+            ->join('question2answer AS Q2A', 'Q2A.idAnswer = lf_answer.id')
+            ->join('question AS Q', 'Q2A.idQuestion = Q.id')
+            ->join('user2question AS U2Q', 'Q.id = U2Q.idQuestion')
+            ->join('user AS U', 'U2Q.idUser = U.id')
+            ->where('lf_answer.id = ?')
             ->execute([$answerId]);
 
         $questionInfo = empty($questionInfo) ? false : $questionInfo[0];
@@ -786,11 +786,11 @@ class AnswersController implements \Anax\DI\IInjectionAware
      */
     private function getAcceptedAnswerIdForQuestion($questionId)
     {
-        $answerId = $this->answers->query('Lf_Answer.id')
-            ->join('Question2Answer AS Q2A', 'Q2A.idAnswer = Lf_Answer.id')
-            ->join('Question AS Q', 'Q2A.idQuestion = Q.id')
+        $answerId = $this->answers->query('lf_answer.id')
+            ->join('question2answer AS Q2A', 'Q2A.idAnswer = lf_answer.id')
+            ->join('question AS Q', 'Q2A.idQuestion = Q.id')
             ->where('Q.id = ?')
-            ->andWhere('Lf_Answer.accepted=1')
+            ->andWhere('lf_answer.accepted=1')
             ->execute([$questionId]);
 
         $answerId = empty($answerId) ? false : $answerId[0]->id;
@@ -916,11 +916,11 @@ class AnswersController implements \Anax\DI\IInjectionAware
      */
     private function getAllAnswersForUser($userId)
     {
-        $answerData = $this->answers->query('Lf_Answer.*, Q.id AS questionId, Q.title AS questionTitle, U.id AS userId, U.acronym')
-            ->join('User2Answer AS U2A', 'U2A.idAnswer = Lf_Answer.id')
-            ->join('User AS U', 'U2A.idUser = U.id')
-            ->join('Question2Answer AS Q2A', 'Q2A.idAnswer = Lf_Answer.id')
-            ->join('Question AS Q', 'Q2A.idQuestion = Q.id')
+        $answerData = $this->answers->query('lf_answer.*, Q.id AS questionId, Q.title AS questionTitle, U.id AS userId, U.acronym')
+            ->join('user2answer AS U2A', 'U2A.idAnswer = lf_answer.id')
+            ->join('user AS U', 'U2A.idUser = U.id')
+            ->join('question2answer AS Q2A', 'Q2A.idAnswer = lf_answer.id')
+            ->join('question AS Q', 'Q2A.idQuestion = Q.id')
             ->where('U.id = ?')
             ->execute([$userId]);
 

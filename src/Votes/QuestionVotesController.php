@@ -42,9 +42,9 @@ class QuestionVotesController extends Vote
     protected function getUserId($id)
     {
         $userId = $this->questions->query('U.id')
-            ->join('User2Question AS U2Q', 'U2Q.idQuestion = Lf_Question.id')
+            ->join('user2question AS U2Q', 'U2Q.idQuestion = lf_question.id')
             ->join('User AS U', 'U2Q.idUser = U.id')
-            ->where('Lf_Question.id = ?')
+            ->where('lf_question.id = ?')
             ->execute([$id]);
 
         $userId = empty($userId) ? false : $userId[0]->id;
@@ -65,8 +65,8 @@ class QuestionVotesController extends Vote
      */
     protected function hasUserVoted($id, $userId)
     {
-        $id = $this->questionVotes->query('Lf_QuestionVote.id')
-            ->where('Lf_QuestionVote.idQuestion = ? AND Lf_QuestionVote.idUser = ?')
+        $id = $this->questionVotes->query('lf_questionvote.id')
+            ->where('lf_questionvote.idQuestion = ? AND lf_questionvote.idUser = ?')
             ->execute([$id, $userId]);
 
         $hasVoted = empty($id) ? false : true;

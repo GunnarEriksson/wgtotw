@@ -10,8 +10,9 @@ using the module CDatabase for database connection and CForm for form generation
 Install Package
 ---------------
 * Clone the project by following this link: https://github.com/GunnarEriksson/wgtotw.git
-* Run composer and use the composer update command to install the dependencies. The
-composer could be installed from https://getcomposer.org/
+* Run composer and use the composer update command to install the dependencies,
+'cd Anax-MVC' and 'composer install --no-dev'. The composer could be installed
+from https://getcomposer.org/
 * Go to the file app/config/database_mysql.php and enter your database connection details.
 * Go to the file webroot/.htaccess and enter the base url in Rewrite to your own base URL.
 

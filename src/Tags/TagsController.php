@@ -99,7 +99,7 @@ class TagsController implements \Anax\DI\IInjectionAware
 
     private function getMostPopularTags($num)
     {
-        $tags = $this->tags->query('Lf_Tag.id, Lf_Tag.label, Lf_Tag.numQuestions')
+        $tags = $this->tags->query('lf_tag.id, lf_tag.label, lf_tag.numQuestions')
             ->orderBy('numQuestions desc')
             ->where('numQuestions > 0')
             ->limit($num)
