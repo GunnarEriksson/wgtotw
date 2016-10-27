@@ -44,14 +44,14 @@ class CFormUpdateQuestion extends \Mos\HTMLForm\CForm
                 'label'       => 'Rubrik',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => htmlentities($questionData['title'], null, 'UTF-8'),
+                'value'       => $questionData['title'],
             ],
             'content' => [
                 'type'        => 'textarea',
                 'label'       => 'Kommentar',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => htmlentities($questionData['content'], null, 'UTF-8'),
+                'value'       => $questionData['content'],
                 'description' => 'Du kan använda <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a> för att formatera texten'
             ],
             "tags" => [

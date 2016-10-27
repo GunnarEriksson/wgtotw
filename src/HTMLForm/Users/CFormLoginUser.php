@@ -87,7 +87,7 @@ class CFormLoginUser extends \Mos\HTMLForm\CForm
     private function isUserVerified($acronym, $password)
     {
         $user = $this->getUserFromDb($acronym);
-        if (isset($user[0])) {
+        if (isset($user[0]) && (strcmp($user[0]->acronym, $acronym) === 0)) {
             return $this->isPasswordValid($user[0], $password);
         } else {
             $this->loginMessage = "Kunde ej hitta användare med akronym: " . $acronym . "!";

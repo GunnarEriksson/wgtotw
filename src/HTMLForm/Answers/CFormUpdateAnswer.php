@@ -41,7 +41,7 @@ class CFormUpdateAnswer extends \Mos\HTMLForm\CForm
                 'label'       => 'Kommentar',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => htmlentities($answerData['content'], null, 'UTF-8'),
+                'value'       => $answerData['content'],
                 'description' => 'Du kan använda <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a> för att formatera texten'
             ],
             'submit' => [

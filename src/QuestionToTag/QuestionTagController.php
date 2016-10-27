@@ -153,15 +153,23 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
     /**
      * Helper method to add a default tag to the question.
      *
-     * Adds the last tag in the array (default tag) to the question.
+     * Adds the last tag in the array (default tag) to the question and
+     * increase the counter that counts number of tag connections.
      *
      * @param int $questionId   the question id.
      */
     private function addDefaultTagToQuestion($questionId)
     {
+        $isAdded = true;
         $tagId = end($this->tagIDs);
 
-        return $this->addTagToQuestion($questionId, $tagId);
+        if ($this->addTagToQuestion($questionId, $tagId)) {
+            $this->increaseQuestionConnectionCounter($tagId);
+        } else {
+            $isAdded = false;
+        }
+
+        return $isAdded;
     }
 
     /**

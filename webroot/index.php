@@ -115,10 +115,27 @@ $app->router->add('about', function () use ($app) {
 $app->router->add('login', function () use ($app) {
     $app->theme->setTitle("Logga in");
 
-    $app->dispatcher->forward([
-        'controller' => 'user-login',
-        'action'     => 'login',
-    ]);
+    if ($app->LoggedIn->isLoggedin()) {
+
+        $acronym = $app->LoggedIn->getAcronym() !== false ? $app->LoggedIn->getAcronym() : "";
+
+        $content = [
+            'title'         => 'Meddelande!',
+            'subtitle'      => 'Du är redan inloggad',
+            'message'       => 'Du är inloggad som ' . $acronym,
+        ];
+
+        $app->dispatcher->forward([
+            'controller' => 'errors',
+            'action'     => 'view',
+            'params'     => [$content]
+        ]);
+    } else {
+        $app->dispatcher->forward([
+            'controller' => 'user-login',
+            'action'     => 'login',
+        ]);
+    }
 });
 
 /**

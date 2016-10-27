@@ -41,7 +41,7 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
                 'label'       => 'Akronym (kan ej ändras)',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => htmlentities($userData['acronym'], null, 'UTF-8'),
+                'value'       => $userData['acronym'],
                 'readonly'    => true,
             ],
             'firstName' => [
@@ -49,28 +49,28 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
                 'label'       => 'Förnamn',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => htmlentities($userData['firstName'], null, 'UTF-8'),
+                'value'       => $userData['firstName'],
             ],
             'lastName' => [
                 'type'        => 'text',
                 'label'       => 'Efternamn',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => htmlentities($userData['lastName'], null, 'UTF-8'),
+                'value'       => $userData['lastName'],
             ],
             'town' => [
                 'type'        => 'text',
                 'label'       => 'Ort',
                 'required'    => true,
                 'validation'  => ['not_empty'],
-                'value'       => htmlentities($userData['town'], null, 'UTF-8'),
+                'value'       => $userData['town'],
             ],
             'email' => [
                 'type'        => 'text',
                 'label'       => 'E-post',
                 'required'    => true,
                 'validation'  => ['not_empty', 'email_adress'],
-                'value'       => htmlentities($userData['email'], null, 'UTF-8'),
+                'value'       => $userData['email'],
             ],
             'password' => [
                 'type'        => 'password',
@@ -106,7 +106,7 @@ class CFormUpdateUser extends \Mos\HTMLForm\CForm
      */
     public function callbackSubmit()
     {
-        $password = empty($this->Value('password')) ? $this->password : $this->Value('password');
+        $password = empty($this->Value('password')) ? $this->password : password_hash($this->Value('password'), PASSWORD_DEFAULT);
 
         $this->updateUser = new \Anax\Users\User();
         $this->updateUser->setDI($this->di);
