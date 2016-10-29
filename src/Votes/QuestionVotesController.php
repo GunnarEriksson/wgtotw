@@ -43,7 +43,7 @@ class QuestionVotesController extends Vote
     {
         $userId = $this->questions->query('U.id')
             ->join('user2question AS U2Q', 'U2Q.idQuestion = lf_question.id')
-            ->join('User AS U', 'U2Q.idUser = U.id')
+            ->join('user AS U', 'U2Q.idUser = U.id')
             ->where('lf_question.id = ?')
             ->execute([$id]);
 

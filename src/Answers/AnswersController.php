@@ -106,7 +106,7 @@ class AnswersController implements \Anax\DI\IInjectionAware
             ->where('lf_answer.id = ?')
             ->execute([$answerId]);
 
-        return isset($questionUserId->id) ? $questionUserId->id : false;
+        return isset($questionUserId[0]->id) ? $questionUserId[0]->id : false;
     }
 
     /**

@@ -7,7 +7,7 @@
                         <p><a href='<?=$this->url->create('answers/up-vote/' . $answer->id)?>'><i class="fa fa-caret-up fa-2x" aria-hidden="true"></i></a></p>
                         <p><span class='score'><?= $answer->score ?></span></p>
                         <p><a href='<?=$this->url->create('answers/down-vote/' . $answer->id)?>'><i class="fa fa-caret-down fa-2x" aria-hidden="true"></i></a></p>
-                        <?= $accepted = ($answer->accepted === 1) ? '<p><i class="fa fa-check fa-2x" aria-hidden="true"></i></p>' : null ?>
+                        <?= $accepted = ($answer->accepted == 1) ? '<p><i class="fa fa-check fa-2x" aria-hidden="true"></i></p>' : null ?>
                     </div>
                 </td>
                 <td class=content-cell>

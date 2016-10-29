@@ -10,7 +10,11 @@
                         <img src='<?= $user->gravatar ?>?s=20' alt='Gravatar'>
                     </td>
                     <td>
-                        <a href='<?=$this->url->create('users/id/' . $user->id)?>'><?= $user->acronym ?></a>
+                        <?php if ($this->LoggedIn->isLoggedin()) : ?>
+                            <a href='<?=$this->url->create('users/id/' . $user->id)?>'><?= $user->acronym ?></a>
+                        <?php else : ?>
+                            <?= $user->acronym ?>
+                        <?php endif; ?>
                     </td>
                 </tr>
             <?php endforeach; ?>

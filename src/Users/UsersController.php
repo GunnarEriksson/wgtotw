@@ -817,7 +817,7 @@ class UsersController implements \Anax\DI\IInjectionAware
      * Helper method to get the most active users.
      *
      * Gets the users gravatar, user id and acronym. List the users in
-     * ascending order based on the activity score.
+     * descending order based on the activity score.
      *
      * @param  int $num     number of users to list.
      *
@@ -826,7 +826,7 @@ class UsersController implements \Anax\DI\IInjectionAware
     private function getMostActiveUsers($num)
     {
         $users = $this->users->query('lf_user.gravatar, lf_user.id, lf_user.acronym')
-            ->orderBy('activityScore asc')
+            ->orderBy('activityScore desc')
             ->limit($num)
             ->execute();
 
