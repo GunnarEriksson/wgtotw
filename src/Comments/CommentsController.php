@@ -646,38 +646,63 @@ class CommentsController implements \Anax\DI\IInjectionAware
     /**
      * Increases the votes counter at an up vote action.
      *
-     * Redirects to the comment vote controller to increase the vote counter
-     * with one when a user push the up vote arrow for a comment.
+     * If comment id is present, redirects to the comment vote controller to increase the vote counter
+     * with one when a user push the up vote arrow for a comment. Otherwise an
+     * error message is shown.
      *
-     * @param  int $commentId   the id of the comment.
+     * @param  int $commentId   the id of the comment. Default null.
      *
      * @return void
      */
-    public function upVoteAction($commentId)
+    public function upVoteAction($commentId = null)
     {
-        $this->dispatcher->forward([
-            'controller' => 'comment-votes',
-            'action'     => 'increase',
-            'params'     => [$commentId]
-        ]);
+        if (isset($commentId)) {
+            $this->dispatcher->forward([
+                'controller' => 'comment-votes',
+                'action'     => 'increase',
+                'params'     => [$commentId]
+            ]);
+        } else {
+            $this->voteIsNotAllowed();
+        }
+    }
+
+    /**
+     * Helper method to handle when voting is not allowed.
+     *
+     * Sets subtitle and message and shows an error message when voting
+     * is not allowed because of the id number of the comment is missing
+     *
+     * @return void.
+     */
+    private function voteIsNotAllowed()
+    {
+        $subtitle = "Id nummer saknas";
+        $message = "Id nummer för kommentar saknas. Röstning inte tillåten!";
+        $this->showErrorMessage($subtitle, $message);
     }
 
     /**
      * Decreases the votes counter at a down vote action.
      *
-     * Redirects to the comment vote controller to decrease the vote counter
-     * with one when a user push the down vote arrow for a comment.
+     * If comment id is present, redirects to the comment vote controller to '
+     * decrease the vote counter with one when a user push the down vote arrow
+     * for a comment. Otherwise an error message is shown.
      *
-     * @param  int $commentId   the id of the comment.
+     * @param  int $commentId   the id of the comment. Default null.
      *
      * @return void
      */
-    public function downVoteAction($commentId)
+    public function downVoteAction($commentId = null)
     {
-        $this->dispatcher->forward([
-            'controller' => 'comment-votes',
-            'action'     => 'decrease',
-            'params'     => [$commentId]
-        ]);
+        if (isset($commentId)) {
+            $this->dispatcher->forward([
+                'controller' => 'comment-votes',
+                'action'     => 'decrease',
+                'params'     => [$commentId]
+            ]);
+        } else {
+            $this->voteIsNotAllowed();
+        }
     }
 }

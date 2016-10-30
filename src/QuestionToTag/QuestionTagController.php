@@ -298,6 +298,10 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
      */
     private function updateTagsForQuestion($questionId, $newTags, $oldTags)
     {
+        if ($newTags === false) {
+            $newTags = $this->setDefaultTagInArray($newTags);
+        }
+
         $tagsToRemove = array_diff($oldTags, $newTags);
         if ($this->removeTagsFromQuestion($questionId, $tagsToRemove) === false) {
             $warningMessage = "Gamla taggar för frågan kunde inte tas bort i DB!";
@@ -309,6 +313,23 @@ class QuestionTagController implements \Anax\DI\IInjectionAware
             $warningMessage = "Nya taggar kunde inte läggas till frågan i DB!";
             $this->flash->warningMessage($warningMessage);
         }
+    }
+
+    /**
+     * Helper method set new tags to the last tag in tag list.
+     *
+     * Sets tags to the last tag in the tag list.
+     *
+     * @param string[] $newTags the tags.
+     *
+     * @return string[] the tag list with the last tag in the tag list.
+     */
+    private function setDefaultTagInArray($tags)
+    {
+        $tagId = end($this->tagIDs);
+        $tags[0] = key($this->tagIDs);
+
+        return $tags;
     }
 
     /**

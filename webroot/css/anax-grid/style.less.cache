@@ -1,4 +1,4 @@
-a:4:{s:4:"root";s:10:"style.less";s:8:"compiled";s:59995:"html {
+a:4:{s:4:"root";s:10:"style.less";s:8:"compiled";s:60116:"html {
   font-family: sans-serif;
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
@@ -2992,8 +2992,8 @@ body {
   padding: 5.5px 0;
   vertical-align: top;
 }
-.comment #comment-author,
-.comment #comment-time {
+.comment .comment-author,
+.comment .comment-time {
   color: #396a2f;
   font-size: 0.875em;
 }
@@ -3002,7 +3002,7 @@ body {
   font-size: 0.875em;
 }
 .comment .comment-text > p {
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 .comment #edit {
   color: #848d95;
@@ -3012,16 +3012,16 @@ body {
 .comment #edit:hover {
   color: #f5a06e;
 }
-#comment-add {
+.comment-add {
   margin-left: 5.5px;
   margin-top: 5.5px;
 }
-#comment-add a {
+.comment-add a {
   color: #848d95;
   font-size: 0.875em;
   text-decoration: none;
 }
-#comment-add a:hover {
+.comment-add a:hover {
   color: #f5a06e;
 }
 figure {
@@ -3259,46 +3259,46 @@ th {
   color: #fff;
   font-size: 0.875em;
 }
-#questions #question-wrapper {
+#questions .question-wrapper {
   border: 1px solid #eee;
   margin-bottom: 10px;
   overflow: auto;
 }
-#question-wrapper p {
+#questions .question-wrapper p {
   margin-bottom: 5.5px;
 }
-#question-wrapper #statistics {
+#questions .question-wrapper .statistics {
   float: left;
   text-align: center;
   width: 7%;
 }
-#question-wrapper #statistics p {
+#questions .question-wrapper .statistics p {
   margin: 22px 0;
 }
-#question-wrapper #question {
+#questions .question-wrapper .question {
   float: left;
   width: 92%;
 }
-#question-wrapper #author-wrapper {
+#questions .question-wrapper .author-wrapper {
   border-top: 1px dashed #ddd;
   padding: .4em;
 }
-#question #heading,
-#question #content {
+#questions .question .heading,
+#questions .question .content {
   padding: .4em;
 }
-#question #heading h4 {
+#questions .question .heading h4 {
   margin-bottom: 5.5px;
 }
-#question #heading a {
+#questions .question .heading a {
   color: #396a2f;
   text-decoration: none;
 }
-#author-wrapper #author {
+#questions .author-wrapper .author {
   color: #396a2f;
   font-size: 0.875em;
 }
-#author-wrapper #time {
+#questions .author-wrapper .time {
   color: #999;
   font-size: 0.875em;
 }
@@ -3339,7 +3339,7 @@ th {
   clear: both;
   margin-bottom: 10px;
 }
-#question #post-tag {
+#question .post-tag {
   background-color: #396a2f;
   color: #fff;
   font-size: 0.875em;
@@ -3746,4 +3746,4 @@ img {
     background: #003780;
   }
 }
-";s:5:"files";a:35:{s:88:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\style.less";i:1477471236;s:92:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\normalize.less";i:1467295277;s:92:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\variables.less";i:1474650710;s:89:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\mixins.less";i:1467963438;s:93:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\css3mixins.less";i:1467962977;s:87:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\grid.less";i:1468011777;s:119:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\font-awesome.less";i:1463132666;s:116:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\variables.less";i:1467976066;s:113:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\mixins.less";i:1463132666;s:111:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\path.less";i:1463132666;s:111:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\core.less";i:1463132666;s:113:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\larger.less";i:1463132666;s:118:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\fixed-width.less";i:1463132666;s:111:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\list.less";i:1463132666;s:122:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\bordered-pulled.less";i:1463132666;s:115:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\animated.less";i:1463132666;s:122:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\rotated-flipped.less";i:1463132666;s:114:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\stacked.less";i:1463132666;s:112:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\icons.less";i:1463132666;s:120:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\screen-reader.less";i:1463132666;s:93:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\typography.less";i:1474650536;s:92:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\structure.less";i:1476380629;s:89:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\navbar.less";i:1472577609;s:87:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\home.less";i:1474791346;s:90:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\comment.less";i:1474476094;s:89:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\figure.less";i:1474620749;s:87:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\form.less";i:1473697965;s:88:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\users.less";i:1476640917;s:88:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\table.less";i:1470986713;s:92:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\questions.less";i:1476377416;s:87:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\tags.less";i:1476376944;s:90:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\answers.less";i:1476377853;s:88:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\flash.less";i:1474570780;s:93:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\responsive.less";i:1472630110;s:94:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\theme_style.less";i:1468944299;}s:7:"updated";i:1477471262;}
+";s:5:"files";a:35:{s:88:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\style.less";i:1477471236;s:92:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\normalize.less";i:1467295277;s:92:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\variables.less";i:1474650710;s:89:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\mixins.less";i:1467963438;s:93:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\css3mixins.less";i:1467962977;s:87:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\grid.less";i:1468011777;s:119:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\font-awesome.less";i:1463132666;s:116:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\variables.less";i:1467976066;s:113:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\mixins.less";i:1463132666;s:111:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\path.less";i:1463132666;s:111:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\core.less";i:1463132666;s:113:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\larger.less";i:1463132666;s:118:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\fixed-width.less";i:1463132666;s:111:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\list.less";i:1463132666;s:122:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\bordered-pulled.less";i:1463132666;s:115:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\animated.less";i:1463132666;s:122:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\rotated-flipped.less";i:1463132666;s:114:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\stacked.less";i:1463132666;s:112:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\icons.less";i:1463132666;s:120:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\font-awesome-4.6.3\less\screen-reader.less";i:1463132666;s:93:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\typography.less";i:1474650536;s:92:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\structure.less";i:1476380629;s:89:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\navbar.less";i:1472577609;s:87:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\home.less";i:1474791346;s:90:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\comment.less";i:1477837911;s:89:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\figure.less";i:1474620749;s:87:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\form.less";i:1473697965;s:88:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\users.less";i:1476640917;s:88:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\table.less";i:1470986713;s:92:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\questions.less";i:1477837456;s:87:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\tags.less";i:1476376944;s:90:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\answers.less";i:1476377853;s:88:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\flash.less";i:1474570780;s:93:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\responsive.less";i:1472630110;s:94:"C:\Users\Gunnar\dbwebb-kurser\phpmvc\me\kmom10\Anax-MVC\webroot\css\anax-grid\theme_style.less";i:1468944299;}s:7:"updated";i:1477837918;}

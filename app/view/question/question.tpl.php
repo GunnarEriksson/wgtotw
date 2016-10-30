@@ -18,7 +18,7 @@
                         </div>
                         <div id="question-tags">
                             <?php foreach ($tags as $tag) : ?>
-                                <a id="post-tag" href='<?=$this->url->create('questions/tag-id/' . $tag->id)?>'><?= $tag->label ?></a>
+                                <a class="post-tag" href='<?=$this->url->create('questions/tag-id/' . $tag->id)?>'><?= $tag->label ?></a>
                             <?php endforeach; ?>
                         </div>
                         <table id="question-requester">
@@ -74,8 +74,8 @@
                                                 <?php if ($this->LoggedIn->isAllowed($comment->userId)) : ?>
                                                     <p><a id="edit" href='<?=$this->url->create('comments/update/' . $comment->id)?>'>Uppdatera</a></p>
                                                 <?php endif; ?>
-                                                <span id='comment-author'> - <?= htmlentities($comment->acronym, null, 'UTF-8') ?></span>
-                                                <span id='comment-time'> &#0149; <?= $comment->created ?></span>
+                                                <span class='comment-author'> - <?= htmlentities($comment->acronym, null, 'UTF-8') ?></span>
+                                                <span class='comment-time'> &#8226; <?= $comment->created ?></span>
                                             </div>
                                         </td>
                                     </tr>
@@ -83,7 +83,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div id="comment-add">
+                    <div class="comment-add">
                         <a href='<?=$this->url->create('questions/add-comment/' . $question->id)?>'>Lägg till en kommentar</a>
                     </div>
                 </td>

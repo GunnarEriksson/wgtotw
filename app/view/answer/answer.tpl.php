@@ -68,8 +68,8 @@
                                                 <?php if ($this->LoggedIn->isAllowed($comment->userId)) : ?>
                                                     <p><a id="edit" href='<?=$this->url->create('comments/update/' . $comment->id)?>'>Uppdatera</a></p>
                                                 <?php endif; ?>
-                                                <span id='comment-author'> - <?= htmlentities($comment->acronym, null, 'UTF-8') ?></span>
-                                                <span id='comment-time'> &#0149; <?= $comment->created ?></span>
+                                                <span class='comment-author'> - <?= htmlentities($comment->acronym, null, 'UTF-8') ?></span>
+                                                <span class='comment-time'> &#8226; <?= $comment->created ?></span>
                                             </div>
                                         </td>
                                     </tr>
@@ -77,7 +77,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div id="comment-add">
+                    <div class="comment-add">
                         <a href='<?=$this->url->create('answers/add-comment/' . $answer->id)?>'>Lägg till en kommentar</a>
                     </div>
                 </td>

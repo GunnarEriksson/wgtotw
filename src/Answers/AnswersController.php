@@ -323,22 +323,45 @@ class AnswersController implements \Anax\DI\IInjectionAware
      * a flag that the comment is releated to an anwser to the comment controller.
      * The comment controller will create an form to add a comment.
      *
+     * If the answer id is missing, an error message is shown.
+     *
      * @param int $answerId     the id of the answer to create a comment to.
+     *                          Default null.
      *
      * @return void
      */
-    public function addCommentAction($answerId)
+    public function addCommentAction($answerId = null)
     {
-        $content = $this->getAnswerContentFromId($answerId);
-        $content = $this->getSubstring($content, 30);
-        $questionInfo = $this->getQuestionInfoForAnswer($answerId);
-        $questionId = isset($questionInfo->questionId) ? $questionInfo->questionId : null;
+        if (isset($answerId)) {
+            $content = $this->getAnswerContentFromId($answerId);
+            $content = $this->getSubstring($content, 30);
+            $questionInfo = $this->getQuestionInfoForAnswer($answerId);
+            $questionId = isset($questionInfo->questionId) ? $questionInfo->questionId : null;
 
-        $this->dispatcher->forward([
-            'controller' => 'comments',
-            'action'     => 'add',
-            'params'     => [$answerId, $questionId, $content, 'answer-comment']
-        ]);
+            $this->dispatcher->forward([
+                'controller' => 'comments',
+                'action'     => 'add',
+                'params'     => [$answerId, $questionId, $content, 'answer-comment']
+            ]);
+        } else {
+            $this->handleAddCommentNotAllowed();
+        }
+    }
+
+    /**
+     * Helper method to handle when add comment is not allowed.
+     *
+     * Sets subtitle and message and shows an error message when adding a comment
+     * to a question is not allowed because of the id number of the question is
+     * missing
+     *
+     * @return void.
+     */
+    private function handleAddCommentNotAllowed()
+    {
+        $subtitle = "Id nummer saknas";
+        $message = "Id nummer för svar saknas. Kan inte koppla kommentar till svar!";
+        $this->showErrorMessage($subtitle, $message);
     }
 
     /**
@@ -620,41 +643,68 @@ class AnswersController implements \Anax\DI\IInjectionAware
     /**
      * Increases the vote counter with one.
      *
-     * Redirects to the Vote controller to increase the vote counter, for the
-     * answer, with one.
+     * If answer id is present redirects to the Vote controller to increase
+     * the vote counter, for the answer, with one. Otherwise shows an error
+     * message.
      *
      * @param  int $answerId the answer id, which vote counter should be increased
-     *                       with one.
+     *                       with one. Default null.
      *
      * @return void.
      */
-    public function upVoteAction($answerId)
+    public function upVoteAction($answerId = null)
     {
-        $this->dispatcher->forward([
-            'controller' => 'answer-votes',
-            'action'     => 'increase',
-            'params'     => [$answerId]
-        ]);
+        if (isset($answerId)) {
+            $this->dispatcher->forward([
+                'controller' => 'answer-votes',
+                'action'     => 'increase',
+                'params'     => [$answerId]
+            ]);
+        } else {
+            $this->voteIsNotAllowed();
+        }
     }
 
     /**
      * Decreases the vote counter with one.
      *
-     * Redirects to the Vote controller to decrease the vote counter, for the
-     * answer, with one.
+     * If answer id is present redirects to the Vote controller to decrease
+     * the vote counter, for the answer, with one. Otherwise shows an error
+     * message.
+     *
+     *
      *
      * @param  int $answerId the answer id, which vote counter should be decreased
-     *                       with one.
+     *                       with one. Default null.
      *
      * @return void.
      */
-    public function downVoteAction($answerId)
+    public function downVoteAction($answerId = null)
     {
-        $this->dispatcher->forward([
-            'controller' => 'answer-votes',
-            'action'     => 'decrease',
-            'params'     => [$answerId]
-        ]);
+        if (isset($answerId)) {
+            $this->dispatcher->forward([
+                'controller' => 'answer-votes',
+                'action'     => 'decrease',
+                'params'     => [$answerId]
+            ]);
+        } else {
+            $this->voteIsNotAllowed();
+        }
+    }
+
+    /**
+     * Helper method to handle when voting is not allowed.
+     *
+     * Sets subtitle and message and shows an error message when voting
+     * is not allowed because of the id number of the answer is missing
+     *
+     * @return void.
+     */
+    private function voteIsNotAllowed()
+    {
+        $subtitle = "Id nummer saknas";
+        $message = "Id nummer för svar saknas. Röstning inte tillåten!";
+        $this->showErrorMessage($subtitle, $message);
     }
 
     /**
@@ -669,26 +719,34 @@ class AnswersController implements \Anax\DI\IInjectionAware
      * Redirects to the question controller to show the question and the
      * related answers and comments.
      *
-     * @param  int $answerId the id of the answer.
+     * If answer id is missing, an error message is shown.
+     *
+     * @param  int $answerId the id of the answer. Default null
      *
      * @return void
      */
-    public function acceptAction($answerId)
+    public function acceptAction($answerId = null)
     {
-        $questionInfo = $this->getQuestionInfoForAnswer($answerId);
-        if ($this->LoggedIn->isLoggedin()) {
-            if ($this->isUserAllowedToAccept($questionInfo->userId)) {
-                $this->updateAccept($answerId, $questionInfo);
+        if (isset($answerId)) {
+            $questionInfo = $this->getQuestionInfoForAnswer($answerId);
+            if ($this->LoggedIn->isLoggedin()) {
+                if ($this->LoggedIn->isAllowed($questionInfo->userId)) {
+                    $this->updateAccept($answerId, $questionInfo);
+                } else {
+                    $noticeMessage = "Svar kan endast accepteras för egna frågor!";
+                    $this->flash->noticeMessage($noticeMessage);
+                }
             } else {
-                $noticeMessage = "Svar kan endast accepteras för egna frågor!";
+                $noticeMessage = "Du måste vara inloggad för att kunna acceptera svar på egna frågor!";
                 $this->flash->noticeMessage($noticeMessage);
             }
-        } else {
-            $noticeMessage = "Du måste vara inloggad för att kunna acceptera svar på egna frågor!";
-            $this->flash->noticeMessage($noticeMessage);
-        }
 
-        $this->redirectToQuestion($questionInfo->questionId);
+            $this->redirectToQuestion($questionInfo->questionId);
+        } else {
+            $subtitle = "Id nummer saknas";
+            $message = "Id nummer för svar saknas. Kan inte acceptera svar!";
+            $this->showErrorMessage($subtitle, $message);
+        }
     }
 
     /**
@@ -714,27 +772,6 @@ class AnswersController implements \Anax\DI\IInjectionAware
         $questionInfo = empty($questionInfo) ? false : $questionInfo[0];
 
         return $questionInfo;
-    }
-
-    /**
-     * Helper method to check if a user could accept an answer.
-     *
-     * Checks if an user could accepts an answer. Only users who has logged in
-     * as admin or the author of the related question could accept an answer.
-     *
-     * @param  int      the user id of the author who wrote the question.
-     *
-     * @return boolean true if user is allowed to accept, false otherwise.
-     */
-    private function isUserAllowedToAccept($userId)
-    {
-        $isAllowedToAccept = false;
-        $userIdInSession = $this->LoggedIn->getUserId();
-        if ($userId === $userIdInSession) {
-            $isAllowedToAccept = true;
-        }
-
-        return $isAllowedToAccept;
     }
 
     /**

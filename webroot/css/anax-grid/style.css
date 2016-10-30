@@ -2992,8 +2992,8 @@ body {
   padding: 5.5px 0;
   vertical-align: top;
 }
-.comment #comment-author,
-.comment #comment-time {
+.comment .comment-author,
+.comment .comment-time {
   color: #396a2f;
   font-size: 0.875em;
 }
@@ -3002,7 +3002,7 @@ body {
   font-size: 0.875em;
 }
 .comment .comment-text > p {
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 .comment #edit {
   color: #848d95;
@@ -3012,16 +3012,16 @@ body {
 .comment #edit:hover {
   color: #f5a06e;
 }
-#comment-add {
+.comment-add {
   margin-left: 5.5px;
   margin-top: 5.5px;
 }
-#comment-add a {
+.comment-add a {
   color: #848d95;
   font-size: 0.875em;
   text-decoration: none;
 }
-#comment-add a:hover {
+.comment-add a:hover {
   color: #f5a06e;
 }
 figure {
@@ -3259,46 +3259,46 @@ th {
   color: #fff;
   font-size: 0.875em;
 }
-#questions #question-wrapper {
+#questions .question-wrapper {
   border: 1px solid #eee;
   margin-bottom: 10px;
   overflow: auto;
 }
-#question-wrapper p {
+#questions .question-wrapper p {
   margin-bottom: 5.5px;
 }
-#question-wrapper #statistics {
+#questions .question-wrapper .statistics {
   float: left;
   text-align: center;
   width: 7%;
 }
-#question-wrapper #statistics p {
+#questions .question-wrapper .statistics p {
   margin: 22px 0;
 }
-#question-wrapper #question {
+#questions .question-wrapper .question {
   float: left;
   width: 92%;
 }
-#question-wrapper #author-wrapper {
+#questions .question-wrapper .author-wrapper {
   border-top: 1px dashed #ddd;
   padding: .4em;
 }
-#question #heading,
-#question #content {
+#questions .question .heading,
+#questions .question .content {
   padding: .4em;
 }
-#question #heading h4 {
+#questions .question .heading h4 {
   margin-bottom: 5.5px;
 }
-#question #heading a {
+#questions .question .heading a {
   color: #396a2f;
   text-decoration: none;
 }
-#author-wrapper #author {
+#questions .author-wrapper .author {
   color: #396a2f;
   font-size: 0.875em;
 }
-#author-wrapper #time {
+#questions .author-wrapper .time {
   color: #999;
   font-size: 0.875em;
 }
@@ -3339,7 +3339,7 @@ th {
   clear: both;
   margin-bottom: 10px;
 }
-#question #post-tag {
+#question .post-tag {
   background-color: #396a2f;
   color: #fff;
   font-size: 0.875em;

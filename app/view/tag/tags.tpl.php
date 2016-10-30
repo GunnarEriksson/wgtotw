@@ -6,7 +6,7 @@
     <div class="tag small">
         <p class="tag-info">
             <a href='<?=$this->url->create('questions/tag-id/' . $tag->id)?>'><?= $tag->label ?></a>
-            <span id='num-questions'>x <?= $tag->numQuestions ?></span>
+            <span>x <?= $tag->numQuestions ?></span>
         </p>
         <p class="tag-content">
             <?= $tag->description ?>

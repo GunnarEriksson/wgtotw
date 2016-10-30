@@ -414,11 +414,11 @@ class QuestionsController implements \Anax\DI\IInjectionAware
      * Updates the question if the user is allowed to update. To be able to
      * update, the user must be admin or the author of the question.
      *
-     * @param  int $questionId the question id.
+     * @param  int $questionId the question id. Default null.
      *
      * @return void.
      */
-    public function updateAction($questionId)
+    public function updateAction($questionId = null)
     {
         if ($this->isUpdateAllowed($questionId)) {
             $this->updateQuestion($questionId);
@@ -694,22 +694,43 @@ class QuestionsController implements \Anax\DI\IInjectionAware
     /**
      * Adds comment to the question.
      *
-     * Redirects to the Comments controller to add a comment to the question.
+     * Redirects to the Comments controller to add a comment to the question if
+     * question id is present. Otherwise an error message is shown.
      *
      * @param int $questionId   the question id of the question to add a
-     *                          comment to.
+     *                          comment to. Default null.
      *
      * @return void.
      */
-    public function addCommentAction($questionId)
+    public function addCommentAction($questionId = null)
     {
-        $title = $this->getTitleFromId($questionId);
+        if (isset($questionId)) {
+            $title = $this->getTitleFromId($questionId);
 
-        $this->dispatcher->forward([
-            'controller' => 'comments',
-            'action'     => 'add',
-            'params'     => [$questionId, $questionId, $title, 'question-comment']
-        ]);
+            $this->dispatcher->forward([
+                'controller' => 'comments',
+                'action'     => 'add',
+                'params'     => [$questionId, $questionId, $title, 'question-comment']
+            ]);
+        } else {
+            $this->handleAddCommentNotAllowed();
+        }
+    }
+
+    /**
+     * Helper method to handle when add comment is not allowed.
+     *
+     * Sets subtitle and message and shows an error message when adding a comment
+     * to a question is not allowed because of the id number of the question is
+     * missing
+     *
+     * @return void.
+     */
+    private function handleAddCommentNotAllowed()
+    {
+        $subtitle = "Id nummer saknas";
+        $message = "Id nummer för fråga saknas. Kan inte koppla kommentar till fråga!";
+        $this->showErrorMessage($subtitle, $message);
     }
 
     /**
@@ -733,39 +754,62 @@ class QuestionsController implements \Anax\DI\IInjectionAware
     /**
      * Increases the counter for an up vote action.
      *
-     * Redirects to the QuestionVotes controller to increase the vote score
-     * with one.
+     * If question id is present, redirects to the QuestionVotes controller
+     * to increase the vote score with one. Otherwise an error message is shown.
      *
-     * @param  int $questionId  the question id.
+     * @param  int $questionId  the question id. Default null.
      *
      * @return void.
      */
-    public function upVoteAction($questionId)
+    public function upVoteAction($questionId = null)
     {
-        $this->dispatcher->forward([
-            'controller' => 'question-votes',
-            'action'     => 'increase',
-            'params'     => [$questionId]
-        ]);
+        if (isset($questionId)) {
+            $this->dispatcher->forward([
+                'controller' => 'question-votes',
+                'action'     => 'increase',
+                'params'     => [$questionId]
+            ]);
+        } else {
+            $this->voteIsNotAllowed();
+        }
+    }
+
+    /**
+     * Helper method to handle when voting is not allowed.
+     *
+     * Sets subtitle and message and shows an error message when voting
+     * is not allowed because of the id number of the question is missing
+     *
+     * @return void.
+     */
+    private function voteIsNotAllowed()
+    {
+        $subtitle = "Id nummer saknas";
+        $message = "Id nummer för fråga saknas. Röstning inte tillåten!";
+        $this->showErrorMessage($subtitle, $message);
     }
 
     /**
      * Decreases the counter for an down vote action.
      *
-     * Redirects to the QuestionVotes controller to decrease the vote score
-     * with one.
+     * If question id is present, redirects to the QuestionVotes controller to
+     * decrease the vote score with one. Otherwise an error message is shown.
      *
      * @param  int $questionId  the question id.
      *
      * @return void.
      */
-    public function downVoteAction($questionId)
+    public function downVoteAction($questionId = null)
     {
-        $this->dispatcher->forward([
-            'controller' => 'question-votes',
-            'action'     => 'decrease',
-            'params'     => [$questionId]
-        ]);
+        if (isset($questionId)) {
+            $this->dispatcher->forward([
+                'controller' => 'question-votes',
+                'action'     => 'decrease',
+                'params'     => [$questionId]
+            ]);
+        } else {
+            $this->voteIsNotAllowed();
+        }
     }
 
     /**
