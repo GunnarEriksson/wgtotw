@@ -15,10 +15,10 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
             //'debug_connect' => 'true',
         ];
     } else {
-        define('DB_PASSWORD', 'uiJ7A6:g');
+        define('DB_PASSWORD', '<Your password for DB>');
         return [
-            'dsn'             => "mysql:host=blu-ray.student.bth.se;dbname=guer16;",
-            'username'        => "guer16",
+            'dsn'             => "mysql:host=<Your path and db name>;",
+            'username'        => "<Your user name>",
             'password'        => DB_PASSWORD,
             'driver_options'  => [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'"],
             'table_prefix'    => "lf_",
