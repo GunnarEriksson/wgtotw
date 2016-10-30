@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: blu-ray.student.bth.se
--- Generation Time: Oct 26, 2016 at 01:09 PM
+-- Generation Time: Oct 30, 2016 at 04:18 PM
 -- Server version: 5.5.52-0+deb8u1-log
 -- PHP Version: 5.6.27-0+deb8u1
 
@@ -28,7 +28,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE IF NOT EXISTS `lf_answer` (
 `id` int(11) NOT NULL,
-  `content` varchar(255) DEFAULT NULL,
+  `content` text,
   `score` int(11) NOT NULL,
   `accepted` tinyint(4) NOT NULL,
   `created` datetime DEFAULT NULL
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `lf_answervote` (
 
 CREATE TABLE IF NOT EXISTS `lf_comment` (
 `id` int(11) NOT NULL,
-  `content` varchar(255) DEFAULT NULL,
+  `content` text,
   `score` int(11) DEFAULT NULL,
   `created` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `lf_commentvote` (
 CREATE TABLE IF NOT EXISTS `lf_question` (
 `id` int(11) NOT NULL,
   `title` varchar(80) DEFAULT NULL,
-  `content` varchar(255) DEFAULT NULL,
+  `content` text,
   `score` int(11) DEFAULT NULL,
   `answers` int(11) DEFAULT NULL,
   `created` datetime DEFAULT NULL
@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS `lf_questionvote` (
 CREATE TABLE IF NOT EXISTS `lf_tag` (
 `id` int(11) NOT NULL,
   `label` char(20) NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
+  `description` text,
   `numQuestions` int(11) DEFAULT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 
@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS `lf_user` (
 --
 
 INSERT INTO `lf_user` (`id`, `acronym`, `firstName`, `lastName`, `town`, `email`, `gravatar`, `password`, `activityScore`, `numVotes`, `created`) VALUES
-(1, 'admin', 'Administrator', 'Administrator', 'Staden', 'wgtotw@mail.se', 'http://www.gravatar.com/avatar/4af1d7ebcf0b456d6b4e85ae64523539.jpg', '$2y$10$pbDZHhkpHhlHdzfrfBfleOSZAPsbhSQGRtRpZkmyqeke8iiT5Wa2K', 0, 0, '2016-10-26 12:41:04');
+(1, 'admin', 'Administrator', 'Administrator', 'Staden', 'wgtotw@mail.se', 'http://www.gravatar.com/avatar/4af1d7ebcf0b456d6b4e85ae64523539.jpg', '$2y$10$pbDZHhkpHhlHdzfrfBfleOSZAPsbhSQGRtRpZkmyqeke8iiT5Wa2K', 0, 0, '2016-10-30 16:08:34');
 
 -- --------------------------------------------------------
 

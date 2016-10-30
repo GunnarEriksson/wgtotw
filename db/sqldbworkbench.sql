@@ -1,4 +1,8 @@
 --
+-- Create all tables in DB for WGTOTW. Initate admin user and tags.
+--
+
+--
 -- Create User Table
 --
 CREATE TABLE lf_user
@@ -30,7 +34,7 @@ CREATE TABLE lf_question
 (
   id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
   title VARCHAR(80),
-  content VARCHAR(255),
+  content TEXT,
   score INT,
   answers INT,
   created DATETIME
@@ -46,7 +50,7 @@ CREATE TABLE lf_tag
 (
   id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
   label CHAR(20) NOT NULL,
-  description VARCHAR(255),
+  description TEXT,
   numQuestions INT
 ) ENGINE INNODB CHARACTER SET utf8;
 
@@ -69,7 +73,7 @@ INSERT INTO lf_tag (label, description, numQuestions) VALUES
 CREATE TABLE lf_answer
 (
   id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-  content VARCHAR(255),
+  content TEXT,
   score INT NOT NULL,
   accepted TINYINT NOT NULL,
   created DATETIME
@@ -82,7 +86,7 @@ CREATE TABLE lf_answer
 CREATE TABLE lf_comment
 (
   id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-  content VARCHAR(255),
+  content TEXT,
   score INT,
   created DATETIME
 ) ENGINE INNODB CHARACTER SET utf8;
